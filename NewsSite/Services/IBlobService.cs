@@ -1,4 +1,6 @@
-﻿namespace NewsSite.JLTEmp
+﻿using NewsSite.Models.Entities;
+
+namespace NewsSite.Services
 {
     public interface IBlobService
     {
