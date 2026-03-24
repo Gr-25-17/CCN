@@ -1,0 +1,17 @@
+﻿@model NewsSite.JLTEmp.FileUpLoadModel
+
+
+
+<form asp-action="Upload" asp-controller="BlobDemo" method="post" enctype="multipart/form-data">
+
+    <div>
+
+        <label for="file">Select file to upload:</label>
+
+        <input type="file" asp-for="File" />
+
+    </div>
+
+    <button type="submit">Upload</button>
+
+</form> 

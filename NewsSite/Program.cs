@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using NewsSite.Data;
+using NewsSite.JLTEmp;
 using NewsSite.Models.Entities;
 
 namespace NewsSite
@@ -32,6 +33,8 @@ namespace NewsSite
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             builder.Services.AddControllersWithViews();
+
+            builder.Services.AddScoped<IBlobService, BlobService>();
 
             var app = builder.Build();
 
