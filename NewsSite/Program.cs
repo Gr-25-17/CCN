@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using NewsSite.Data;
+using NewsSite.JLTEmp;
 
 namespace NewsSite
 {
@@ -19,6 +20,8 @@ namespace NewsSite
             builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             builder.Services.AddControllersWithViews();
+
+            builder.Services.AddScoped<IBlobService, BlobService>();
 
             var app = builder.Build();
 
