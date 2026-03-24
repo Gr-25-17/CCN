@@ -12,9 +12,19 @@ namespace NewsSite
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(connectionString));
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+                ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+            if (builder.Environment.IsDevelopment())
+            {
+                builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                    options.UseSqlite(connectionString));
+            }
+            else
+            {
+                builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                    options.UseSqlServer(builder.Configuration.GetConnectionString("AzureSqlConnection")));
+            }
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 
@@ -49,6 +59,15 @@ namespace NewsSite
                 .WithStaticAssets();
             app.MapRazorPages()
                .WithStaticAssets();
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                var context = services.GetRequiredService<ApplicationDbContext>();
+                if (context.Database.IsSqlServer())
+                {
+                    context.Database.Migrate();
+                }
+            }
 
             app.Run();
         }
