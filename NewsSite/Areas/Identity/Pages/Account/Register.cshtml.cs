@@ -82,6 +82,10 @@ namespace NewsSite.Areas.Identity.Pages.Account
             [Required]
             public string LastName { get; set; }
 
+            [Required]
+            [DataType(DataType.Date)]
+            public DateTime DateOfBirth { get; set; }
+
 
             [Required]
             [EmailAddress]
@@ -125,6 +129,7 @@ namespace NewsSite.Areas.Identity.Pages.Account
 
                 user.FirstName = Input.FirstName;
                 user.LastName = Input.LastName;
+                user.DateOfBirth = Input.DateOfBirth;
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
