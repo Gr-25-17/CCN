@@ -1,0 +1,53 @@
+﻿@model IEnumerable<NewsSite.Models.Entities.Article>
+
+@{
+    var category = ViewBag.Category as NewsSite.Models.Entities.Category;
+    ViewData["Title"] = $"{category?.Name} News";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <h1 class="mb-4">@category?.Name</h1>
+
+            @if (!Model.Any())
+            {
+                <p>No articles found in this category.</p>
+            }
+            else
+            {
+                @foreach (var article in Model)
+                {
+                    <div class="card mb-3">
+                        <div class="row g-0">
+                            <div class="col-md-12">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug">
+                                            @article.Title
+                                        </a>
+                                    </h5>
+                                    <p class="card-text">@article.Summary</p>
+                                    <small class="text-muted">
+                                        @article.CreatedAt.ToString("MMMM dd, yyyy")
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <strong>About @category?.Name</strong>
+                </div>
+                <div class="card-body">
+                    <p>Stay updated with the latest news from @category?.Name.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

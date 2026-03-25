@@ -1,8 +1,123 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model NewsSite.Models.ViewModels.HomeViewModel
+
+@{
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <h2 class="mb-4">Latest News</h2>
+
+            @if (!Model.LatestArticles.Any())
+            {
+                <div class="alert alert-info">No articles yet. Check back soon!</div>
+            }
+            else
+            {
+                <div class="row">
+                    @foreach (var article in Model.LatestArticles)
+                    {
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100 shadow-sm">
+                                @if (!string.IsNullOrEmpty(article.ImageUrl))
+                                {
+                                    <img src="@article.ImageUrl" class="card-img-top" alt="@article.Title" style="height: 180px; object-fit: cover;">
+                                }
+                                <div class="card-body">
+                                    <span class="badge bg-primary mb-2">@article.Category?.Name</span>
+                                    <h5 class="card-title">
+                                        <a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug" class="text-decoration-none">
+                                            @article.Title
+                                        </a>
+                                    </h5>
+                                    <p class="card-text text-muted">@article.Summary</p>
+                                    <small class="text-muted">
+                                        @article.CreatedAt.ToString("MMMM dd, yyyy")
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        
+        <div class="col-md-4">
+           
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-warning">
+                    <strong>⭐ Editor's Choice</strong>
+                </div>
+                <div class="card-body">
+                    @if (!Model.EditorChoiceArticles.Any())
+                    {
+                        <p class="text-muted">No featured articles yet.</p>
+                    }
+                    else
+                    {
+                        @foreach (var article in Model.EditorChoiceArticles)
+                        {
+                            <div class="mb-3">
+                                <h6>
+                                    <a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug" class="text-decoration-none">
+                                        @article.Title
+                                    </a>
+                                </h6>
+                                <small class="text-muted">@article.Category?.Name</small>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+
+          
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <strong>🔥 Most Popular</strong>
+                </div>
+                <div class="card-body">
+                    @if (!Model.MostPopularArticles.Any())
+                    {
+                        <p class="text-muted">No popular articles yet.</p>
+                    }
+                    else
+                    {
+                        <ul class="list-unstyled">
+                            @foreach (var article in Model.MostPopularArticles.Take(5))
+                            {
+                                <li class="mb-2">
+                                    <a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug" class="text-decoration-none">
+                                        @article.Title
+                                    </a>
+                                    <small class="text-muted d-block">@article.Category?.Name</small>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </div>
+            </div>
+
+           
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <strong>📂 Categories</strong>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        @foreach (var category in Model.Categories)
+                        {
+                            <div class="col-6 mb-2">
+                                <a asp-controller="Category" asp-action="Index" asp-route-slug="@category.Name"
+                                   class="btn btn-outline-secondary btn-sm w-100">
+                                    @category.Name
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
