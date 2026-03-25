@@ -7,7 +7,6 @@ using NewsSite.Repositories.Interfaces;
 using NewsSite.Services.Implementations;
 using NewsSite.Services.Interfaces;
 
-
 namespace NewsSite
 {
     public class Program
@@ -94,6 +93,10 @@ namespace NewsSite
             {
                 var services = scope.ServiceProvider;
                 await DbInitializer.SeedRolesAndAdminAsync(services);
+            }
+            using (var scope = app.Services.CreateScope())
+            {
+                await SeedData.InitializeAsync(scope.ServiceProvider);
             }
 
             await app.RunAsync();
