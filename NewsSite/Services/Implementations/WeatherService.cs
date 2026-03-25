@@ -3,7 +3,7 @@ using NewsSite.Models.APIs;
 using NewsSite.Models.ViewModels;
 using static System.Net.WebRequestMethods;
 
-namespace NewsSite.Services
+namespace NewsSite.Services.Implementations
 {
     public class WeatherService
     {
