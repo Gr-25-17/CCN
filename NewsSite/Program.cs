@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using NewsSite.Data;
 using NewsSite.Models.Entities;
@@ -36,6 +37,8 @@ namespace NewsSite
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             builder.Services.AddControllersWithViews();
+
+            builder.Services.AddTransient<IEmailSender, EmailSender>();
 
             builder.Services.AddScoped<IArticleService, ArticleService>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
