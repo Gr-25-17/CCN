@@ -1,6 +1,6 @@
 ﻿using NewsSite.Models.Entities;
 
-namespace NewsSite.Services
+namespace NewsSite.Services.Interfaces
 {
     public interface IBlobService
     {
