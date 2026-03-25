@@ -8,6 +8,8 @@ namespace NewsSite.Repositories.Interfaces
         Task<IEnumerable<ApplicationUser>> GetAllUsersAsync();
         Task<IEnumerable<IdentityRole>> GetAllRolesAsync();
         Task<IList<string>> GetUserRolesAsync(ApplicationUser user);
+        Task<ApplicationUser?> GetUserByIdAsync(string id);
         Task<bool> UpdateUserRoleAsync(string userId, string newRole);
+        Task<bool> UpdateUserDetailsAsync(ApplicationUser user);
     }
 }

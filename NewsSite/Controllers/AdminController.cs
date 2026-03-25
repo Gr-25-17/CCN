@@ -24,11 +24,24 @@ namespace NewsSite.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var success = await userService.UpdateUserRoleAsync(userId, newRole);
+            await userService.UpdateUserRoleAsync(userId, newRole);
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SoftDelete(string userId)
+        {
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            var success = await userService.SoftDeleteUserAsync(userId);
 
             if (!success)
             {
-                TempData["Error"] = "Kunde inte uppdatera rollen.";
+                TempData["Error"] = "Kunde inte radera användaren.";
             }
 
             return RedirectToAction(nameof(Index));

@@ -13,6 +13,11 @@ namespace NewsSite.Repositories.Implementations
         public async Task<IEnumerable<IdentityRole>> GetAllRolesAsync() => await roleManager.Roles.ToListAsync();
         public async Task<IList<string>> GetUserRolesAsync(ApplicationUser user) => await userManager.GetRolesAsync(user);
 
+        public async Task<ApplicationUser?> GetUserByIdAsync(string id)
+        {
+            return await userManager.FindByIdAsync(id);
+        }
+
         public async Task<bool> UpdateUserRoleAsync(string userId, string newRole)
         {
             var user = await userManager.FindByIdAsync(userId);
@@ -21,6 +26,12 @@ namespace NewsSite.Repositories.Implementations
             var currentRoles = await userManager.GetRolesAsync(user);
             await userManager.RemoveFromRolesAsync(user, currentRoles);
             var result = await userManager.AddToRoleAsync(user, newRole);
+            return result.Succeeded;
+        }
+
+        public async Task<bool> UpdateUserDetailsAsync(ApplicationUser user)
+        {
+            var result = await userManager.UpdateAsync(user);
             return result.Succeeded;
         }
     }

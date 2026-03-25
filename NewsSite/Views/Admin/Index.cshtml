@@ -1,45 +1,38 @@
 ﻿@model NewsSite.Models.ViewModels.UserAdminViewModel
 
 <div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Administrationspanel: Användarhantering</h2>
-    </div>
+    <h2>Användaradministration</h2>
+    <hr />
 
     @if (TempData["Error"] != null)
     {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            @TempData["Error"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+        <div class="alert alert-danger">@TempData["Error"]</div>
     }
 
     <div class="card shadow-sm">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
+            <table class="table table-hover align-middle">
                 <thead class="table-light">
                     <tr>
-                        <th style="width: 25%">Namn</th>
-                        <th style="width: 25%">E-post</th>
-                        <th style="width: 15%">Nuvarande roll</th>
-                        <th style="width: 20%">Ändra roll</th>
-                        <th style="width: 15%" class="text-end">Åtgärd</th>
+                        <th>Namn</th>
+                        <th>Födelsedatum</th>
+                        <th>E-post</th>
+                        <th>Roll</th>
+                        <th>Status</th>
+                        <th class="text-end">Åtgärder</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var user in Model.Users)
                     {
-                        <tr>
+                        <tr class="@(user.IsDeleted ? "table-light text-muted" : "")">
                             <td>@user.FullName</td>
+                            <td>@user.DateOfBirth.ToShortDateString()</td>
                             <td>@user.Email</td>
                             <td>
-                                <span class="badge bg-secondary">@user.CurrentRole</span>
-                            </td>
-                            <form asp-action="UpdateRole" method="post">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="userId" value="@user.Id" />
-                                <td>
-                                    <select name="newRole" class="form-select form-select-sm">
-                                        <option value="">-- Välj roll --</option>
+                                <form asp-action="UpdateRole" method="post" class="d-flex gap-2">
+                                    <input type="hidden" name="userId" value="@user.Id" />
+                                    <select name="newRole" class="form-select form-select-sm" disabled="@user.IsDeleted">
                                         @foreach (var role in Model.AvailableRoles)
                                         {
                                             <option value="@role.Value" selected="@(role.Value == user.CurrentRole)">
@@ -47,13 +40,28 @@
                                             </option>
                                         }
                                     </select>
-                                </td>
-                                <td class="text-end">
-                                    <button type="submit" class="btn btn-sm btn-primary">
-                                        Spara
-                                    </button>
-                                </td>
-                            </form>
+                                    <button type="submit" class="btn btn-sm btn-outline-primary" disabled="@user.IsDeleted">Spara</button>
+                                </form>
+                            </td>
+                            <td>
+                                @if (user.IsDeleted)
+                                {
+                                    <span class="badge bg-danger">Borttagen</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">Aktiv</span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                @if (!user.IsDeleted)
+                                {
+                                    <form asp-action="SoftDelete" method="post" onsubmit="return confirm('Är du säker på att du vill ta bort användaren?');">
+                                        <input type="hidden" name="userId" value="@user.Id" />
+                                        <button type="submit" class="btn btn-sm btn-danger">Ta bort</button>
+                                    </form>
+                                }
+                            </td>
                         </tr>
                     }
                 </tbody>
