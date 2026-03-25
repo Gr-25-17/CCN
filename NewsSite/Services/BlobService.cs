@@ -1,7 +1,7 @@
 ﻿using Azure.Storage.Blobs;
+using NewsSite.Models.Entities;
 
-
-namespace NewsSite.JLTEmp
+namespace NewsSite.Services
 {
     public class BlobService : IBlobService
     {

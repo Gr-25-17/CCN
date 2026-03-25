@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using NewsSite.Data;
-using NewsSite.JLTEmp;
 using NewsSite.Models.Entities;
+using NewsSite.Services;
 
 namespace NewsSite
 {
