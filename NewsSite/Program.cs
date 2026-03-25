@@ -35,6 +35,8 @@ namespace NewsSite
             builder.Services.AddControllersWithViews();
 
             builder.Services.AddScoped<IBlobService, BlobService>();
+            builder.Services.AddHttpClient();       
+            builder.Services.AddScoped<WeatherService>();
 
             var app = builder.Build();
 
