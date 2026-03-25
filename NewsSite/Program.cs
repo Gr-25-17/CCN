@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using NewsSite.Data;
 using NewsSite.Models.Entities;
 using NewsSite.Services;
+using NewsSite.Services.Interfaces;
+using NewsSite.Services.Implementations;
+
 
 namespace NewsSite
 {
@@ -33,6 +36,9 @@ namespace NewsSite
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             builder.Services.AddControllersWithViews();
+
+            builder.Services.AddScoped<IArticleService, ArticleService>();
+            builder.Services.AddScoped<ICategoryService, CategoryService>();
 
             builder.Services.AddScoped<IBlobService, BlobService>();
 
