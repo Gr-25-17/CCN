@@ -2,8 +2,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using NewsSite.Data;
 using NewsSite.Models.Entities;
-using NewsSite.Services.Interfaces;
+using NewsSite.Repositories.Implementations;
+using NewsSite.Repositories.Interfaces;
 using NewsSite.Services.Implementations;
+using NewsSite.Services.Interfaces;
 
 
 namespace NewsSite
@@ -38,6 +40,8 @@ namespace NewsSite
 
             builder.Services.AddScoped<IArticleService, ArticleService>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IUserService, UserService>();
 
             builder.Services.AddScoped<IBlobService, BlobService>();
 

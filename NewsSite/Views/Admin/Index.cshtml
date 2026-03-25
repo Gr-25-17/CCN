@@ -1,0 +1,63 @@
+﻿@model NewsSite.Models.ViewModels.UserAdminViewModel
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Administrationspanel: Användarhantering</h2>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 25%">Namn</th>
+                        <th style="width: 25%">E-post</th>
+                        <th style="width: 15%">Nuvarande roll</th>
+                        <th style="width: 20%">Ändra roll</th>
+                        <th style="width: 15%" class="text-end">Åtgärd</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model.Users)
+                    {
+                        <tr>
+                            <td>@user.FullName</td>
+                            <td>@user.Email</td>
+                            <td>
+                                <span class="badge bg-secondary">@user.CurrentRole</span>
+                            </td>
+                            <form asp-action="UpdateRole" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="userId" value="@user.Id" />
+                                <td>
+                                    <select name="newRole" class="form-select form-select-sm">
+                                        <option value="">-- Välj roll --</option>
+                                        @foreach (var role in Model.AvailableRoles)
+                                        {
+                                            <option value="@role.Value" selected="@(role.Value == user.CurrentRole)">
+                                                @role.Text
+                                            </option>
+                                        }
+                                    </select>
+                                </td>
+                                <td class="text-end">
+                                    <button type="submit" class="btn btn-sm btn-primary">
+                                        Spara
+                                    </button>
+                                </td>
+                            </form>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
