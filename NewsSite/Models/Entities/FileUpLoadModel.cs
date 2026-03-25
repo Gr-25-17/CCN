@@ -1,4 +1,4 @@
-﻿namespace NewsSite.JLTEmp
+﻿namespace NewsSite.Models.Entities
 {
     public class FileUpLoadModel
     {

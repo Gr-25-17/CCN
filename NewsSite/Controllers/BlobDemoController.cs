@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using NewsSite.JLTEmp;
+using NewsSite.Models.Entities;
+using NewsSite.Services;
 
 
 namespace NewsSite.Controllers
