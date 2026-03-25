@@ -125,7 +125,7 @@ namespace NewsSite.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
-                var user = CreateUser();
+                var user = new ApplicationUser();
 
                 user.FirstName = Input.FirstName;
                 user.LastName = Input.LastName;
