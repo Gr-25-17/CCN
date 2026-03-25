@@ -1,7 +1,8 @@
 ﻿using Azure.Storage.Blobs;
 using NewsSite.Models.Entities;
+using NewsSite.Services.Interfaces;
 
-namespace NewsSite.Services
+namespace NewsSite.Services.Implementations
 {
     public class BlobService : IBlobService
     {

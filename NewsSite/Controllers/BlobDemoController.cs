@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NewsSite.Models.Entities;
-using NewsSite.Services;
+using NewsSite.Services.Interfaces;
 
 
 namespace NewsSite.Controllers

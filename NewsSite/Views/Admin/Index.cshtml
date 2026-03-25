@@ -1,0 +1,71 @@
+﻿@model NewsSite.Models.ViewModels.UserAdminViewModel
+
+<div class="container mt-4">
+    <h2>Användaradministration</h2>
+    <hr />
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Namn</th>
+                        <th>Födelsedatum</th>
+                        <th>E-post</th>
+                        <th>Roll</th>
+                        <th>Status</th>
+                        <th class="text-end">Åtgärder</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model.Users)
+                    {
+                        <tr class="@(user.IsDeleted ? "table-light text-muted" : "")">
+                            <td>@user.FullName</td>
+                            <td>@user.DateOfBirth.ToShortDateString()</td>
+                            <td>@user.Email</td>
+                            <td>
+                                <form asp-action="UpdateRole" method="post" class="d-flex gap-2">
+                                    <input type="hidden" name="userId" value="@user.Id" />
+                                    <select name="newRole" class="form-select form-select-sm" disabled="@user.IsDeleted">
+                                        @foreach (var role in Model.AvailableRoles)
+                                        {
+                                            <option value="@role.Value" selected="@(role.Value == user.CurrentRole)">
+                                                @role.Text
+                                            </option>
+                                        }
+                                    </select>
+                                    <button type="submit" class="btn btn-sm btn-outline-primary" disabled="@user.IsDeleted">Spara</button>
+                                </form>
+                            </td>
+                            <td>
+                                @if (user.IsDeleted)
+                                {
+                                    <span class="badge bg-danger">Borttagen</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">Aktiv</span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                @if (!user.IsDeleted)
+                                {
+                                    <form asp-action="SoftDelete" method="post" onsubmit="return confirm('Är du säker på att du vill ta bort användaren?');">
+                                        <input type="hidden" name="userId" value="@user.Id" />
+                                        <button type="submit" class="btn btn-sm btn-danger">Ta bort</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
