@@ -8,7 +8,7 @@ namespace NewsSite
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +35,15 @@ namespace NewsSite
             builder.Services.AddControllersWithViews();
 
             builder.Services.AddScoped<IBlobService, BlobService>();
+
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("PremiumContent", policy =>
+                    policy.RequireRole("Admin", "Editor", "Writer", "Subscriber"));
+
+                options.AddPolicy("ManagementOnly", policy =>
+                    policy.RequireRole("Admin", "Editor", "Writer"));
+            });
 
             var app = builder.Build();
 
@@ -72,7 +81,13 @@ namespace NewsSite
                 }
             }
 
-            app.Run();
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                await DbInitializer.SeedRolesAndAdminAsync(services);
+            }
+
+            await app.RunAsync();
         }
     }
 }
