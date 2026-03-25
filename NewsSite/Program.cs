@@ -43,6 +43,8 @@ namespace NewsSite
             builder.Services.AddScoped<IUserService, UserService>();
 
             builder.Services.AddScoped<IBlobService, BlobService>();
+            builder.Services.AddHttpClient();       
+            builder.Services.AddScoped<WeatherService>();
 
             builder.Services.AddAuthorization(options =>
             {
