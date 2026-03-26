@@ -1,0 +1,36 @@
+﻿@model NewsSite.Models.Entities.Article
+
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <!-- Category badge -->
+            <div class="mb-3">
+                <span class="badge bg-primary">@Model.Category?.Name</span>
+            </div>
+
+            <!-- Title -->
+            <h1 class="display-5 fw-bold mb-3">@Model.Title</h1>
+
+            <!-- Meta info -->
+            <div class="text-muted mb-4">
+                <small>Published: @Model.CreatedAt.ToString("MMMM dd, yyyy")</small>
+            </div>
+
+            <!-- Image (enstaka, med enhetlig storlek) -->
+            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                <img src="@Model.ImageUrl" class="img-fluid rounded mb-4" alt="@Model.Title"
+                     style="width: 100%; max-height: 400px; object-fit: cover;">
+            }
+
+            <!-- Content -->
+            <div class="article-content fs-5 lh-lg">
+                @Html.Raw(Model.Content.Replace("\n", "<br />"))
+            </div>
+        </div>
+    </div>
+</div>

@@ -49,6 +49,7 @@ namespace NewsSite.Services.Implementations
             var sanitizedContent = sanitizer.Sanitize(model.Content);
             var generatedSlug = GenerateSlug(model.Title);
 
+<<<<<<< Bellos/JournalistFunctions
             var article = new Article
             {
                 Title = model.Title,
@@ -67,6 +68,26 @@ namespace NewsSite.Services.Implementations
 
             await articleRepository.AddAsync(article);
         }
+=======
+        var skip = (page - 1) * pageSize;
+        return await _context.Articles
+            .Where(a => a.CategoryId == categoryId && a.IsReadyForPublish && !a.IsArchived && !a.IsDeleted)
+            .Include(a => a.Category)
+            .OrderByDescending(a => a.CreatedAt)
+            .Skip(skip)
+            .Take(pageSize)
+            .ToListAsync();
+            
+    }
+
+    public async Task<Article?> GetBySlugAsync(string slug)
+    {
+        return await _context.Articles
+            .Include(a => a.Category)
+            .Include(a => a.Author)
+            .FirstOrDefaultAsync(a => a.Slug == slug);
+    }
+>>>>>>> Dev
 
         public async Task<ArticleViewModel?> GetForEditAsync(int id, string userId, bool canSeeAll)
         {
