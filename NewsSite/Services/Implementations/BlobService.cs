@@ -1,43 +1,36 @@
 ﻿using Azure.Storage.Blobs;
 using NewsSite.Models.Entities;
 using NewsSite.Services.Interfaces;
+using Microsoft.Extensions.Configuration;
+using System.IO;
 
 namespace NewsSite.Services.Implementations
 {
-    public class BlobService : IBlobService
+    public class BlobService(IConfiguration configuration) : IBlobService
     {
-        public readonly IConfiguration _configuration;
-
-        public BlobService(IConfiguration configuration)
-        {
-            _configuration = configuration;
-        }
-
         public async Task<string> UploadFileToContainer(FileUpLoadModel model)
         {
-            string connectionString = _configuration["AzureWebJobsStorage"]!;
-            string containerName = _configuration["BlobContainerName"]!;
-            BlobServiceClient blobServiceClient = new BlobServiceClient(connectionString);
-            BlobContainerClient containerClient =
-                                                blobServiceClient.GetBlobContainerClient(containerName);
-            // Create the container if it does not exist
-            await containerClient.CreateIfNotExistsAsync();
-            BlobClient blobClient = containerClient.GetBlobClient(model.File.FileName);
             using (var stream = model.File.OpenReadStream())
             {
-                try
-                {
-                    await blobClient.UploadAsync(stream, true);
-                }
-                catch (Exception ex)
-                {
-
-                    var err = ex.Message;
-                    return err;
-                }
+                return await UploadStreamToContainer(stream, model.File.FileName);
             }
-            return blobClient.Uri.ToString();
         }
 
+        public async Task<string> UploadStreamToContainer(Stream stream, string fileName)
+        {
+            string connectionString = configuration["AzureWebJobsStorage"]!;
+            string containerName = configuration["BlobContainerName"]!;
+
+            BlobServiceClient blobServiceClient = new BlobServiceClient(connectionString);
+            BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(containerName);
+
+            await containerClient.CreateIfNotExistsAsync();
+
+            BlobClient blobClient = containerClient.GetBlobClient(fileName);
+
+            await blobClient.UploadAsync(stream, true);
+
+            return blobClient.Uri.ToString();
+        }
     }
 }
