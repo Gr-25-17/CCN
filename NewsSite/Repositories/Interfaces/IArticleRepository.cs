@@ -14,5 +14,6 @@ namespace NewsSite.Repositories.Interfaces
         Task AddAsync(Article article);
         Task UpdateAsync(Article article);
         Task<IEnumerable<Category>> GetAllCategoriesAsync();
+        Task<Article?> GetBySlugAsync(string slug);
     }
 }

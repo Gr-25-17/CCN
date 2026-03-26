@@ -132,9 +132,9 @@ namespace NewsSite.Services.Implementations
             return str;
         }
 
-        Task<Article?> IArticleService.GetBySlugAsync(string slug)
+        public async Task<Article?> GetBySlugAsync(string slug)
         {
-            throw new NotImplementedException();
+            return await articleRepository.GetBySlugAsync(slug);
         }
     }
 }

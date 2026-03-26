@@ -7,6 +7,14 @@ namespace NewsSite.Repositories.Implementations
 {
     public class ArticleRepository(ApplicationDbContext context) : IArticleRepository
     {
+        public async Task<Article?> GetBySlugAsync(string slug)
+        {
+            return await context.Articles
+                .Include(a => a.Category)
+                .Include(a => a.Author)
+                .Include(a => a.Likes)
+                .FirstOrDefaultAsync(a => a.Slug == slug && a.IsReadyForPublish && !a.IsDeleted && !a.IsArchived);
+        }
         public async Task<IEnumerable<Article>> GetLatestAsync(int count)
         {
             return await context.Articles
