@@ -15,5 +15,6 @@ namespace NewsSite.Services.Interfaces
         Task CreateAsync(ArticleViewModel model, string authorId);
         Task<bool> UpdateAsync(ArticleViewModel model, string userId, bool canSeeAll);
         Task<ArticleViewModel> GetEditorModelAsync();
+        Task<Article?> GetBySlugAsync(string slug);
     }
 }
