@@ -131,5 +131,10 @@ namespace NewsSite.Services.Implementations
             str = Regex.Replace(str, @"\s", "-");
             return str;
         }
+
+        Task<Article?> IArticleService.GetBySlugAsync(string slug)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
