@@ -9,6 +9,10 @@
         "css/bootstrap.min.css",
         "js/bootstrap.bundle.min.js"
       ]
+    },
+    {
+      "library": "tinymce@8.1.2",
+      "destination": "wwwroot/lib/tinymce/"
     }
   ]
 }

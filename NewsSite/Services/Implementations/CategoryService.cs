@@ -1,23 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore;
-using NewsSite.Data;
-using NewsSite.Models.Entities;
+﻿using NewsSite.Models.Entities;
+using NewsSite.Repositories.Interfaces;
 using NewsSite.Services.Interfaces;
 
-namespace NewsSite.Services.Implementations;
-
-public class CategoryService : ICategoryService
+namespace NewsSite.Services.Implementations
 {
-    private readonly ApplicationDbContext _context;
-
-    public CategoryService(ApplicationDbContext context)
+    public class CategoryService(ICategoryRepository categoryRepository) : ICategoryService
     {
-        _context = context;
-    }
-
-    public async Task<IEnumerable<Category>> GetAllAsync()
-    {
-        return await _context.Categories
-            .OrderBy(c => c.Id)
-            .ToListAsync();
+        public async Task<IEnumerable<Category>> GetAllAsync()
+        {
+            return await categoryRepository.GetAllAsync();
+        }
     }
 }

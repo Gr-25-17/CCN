@@ -1,4 +1,6 @@
 ﻿using NewsSite.Models.Entities;
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace NewsSite.Models.Entities
 {
     public class Article
@@ -11,18 +13,24 @@ namespace NewsSite.Models.Entities
         public string? ImageUrl { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-        // Status-flaggor
-        public bool IsArchived { get; set; } = false;
-        public bool IsDeleted { get; set; } = false;
-        public bool IsEditorsChoice { get; set; } = false;
-        public bool IsReadyForPublish { get; set; } = false;
-        public bool IsLocked { get; set; } = false;
+        public string MetaTitle { get; set; } = string.Empty;
+        public string MetaDescription { get; set; } = string.Empty;
+        [NotMapped]
+        public int LikesCount => Likes?.Count ?? 0;
+        public int ViewsCount { get; set; }
 
-        // Foreign Keys
+        public bool IsArchived { get; set; }
+        public bool IsDeleted { get; set; }
+        public bool IsEditorsChoice { get; set; }
+        public bool IsReadyForPublish { get; set; }
+        public bool IsLocked { get; set; }
+
         public int CategoryId { get; set; }
         public Category? Category { get; set; }
 
         public string? AuthorId { get; set; }
         public ApplicationUser? Author { get; set; }
+
+        public ICollection<ArticleLike> Likes { get; set; } = new List<ArticleLike>();
     }
 }
