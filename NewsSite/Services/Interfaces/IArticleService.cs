@@ -8,4 +8,5 @@ public interface IArticleService
     Task<IEnumerable<Article>> GetMostPopularAsync(int count);
     Task<IEnumerable<Article>> GetEditorChoiceAsync(int count);
     Task<IEnumerable<Article>> GetByCategoryAsync(int categoryId, int page, int pageSize);
+    Task<Article?> GetBySlugAsync(string slug);
 }
