@@ -49,7 +49,15 @@ public class ArticleService : IArticleService
             .Skip(skip)
             .Take(pageSize)
             .ToListAsync();
+            
+    }
 
+    public async Task<Article?> GetBySlugAsync(string slug)
+    {
+        return await _context.Articles
+            .Include(a => a.Category)
+            .Include(a => a.Author)
+            .FirstOrDefaultAsync(a => a.Slug == slug);
     }
 
     public async Task<IEnumerable<Article>> GetEditorChoiceAsync(int count)

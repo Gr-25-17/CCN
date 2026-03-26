@@ -9,43 +9,25 @@
         <div class="col-md-8">
             <h2 class="mb-4">Latest News</h2>
 
-            @if (!Model.LatestArticles.Any())
-            {
-                <div class="alert alert-info">No articles yet. Check back soon!</div>
-            }
-            else
+            @if (Model.LatestArticles.Any())
             {
                 <div class="row">
                     @foreach (var article in Model.LatestArticles)
                     {
-                        <div class="col-md-6 mb-4">
-                            <div class="card h-100 shadow-sm">
-                                @if (!string.IsNullOrEmpty(article.ImageUrl))
-                                {
-                                    <img src="@article.ImageUrl" class="card-img-top" alt="@article.Title" style="height: 180px; object-fit: cover;">
-                                }
-                                <div class="card-body">
-                                    <span class="badge bg-primary mb-2">@article.Category?.Name</span>
-                                    <h5 class="card-title">
-                                        <a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug" class="text-decoration-none">
-                                            @article.Title
-                                        </a>
-                                    </h5>
-                                    <p class="card-text text-muted">@article.Summary</p>
-                                    <small class="text-muted">
-                                        @article.CreatedAt.ToString("MMMM dd, yyyy")
-                                    </small>
-                                </div>
-                            </div>
+                        <div class="col-12 mb-4">
+                            <partial name="Partials/_ArticleCard" model="article" />
                         </div>
                     }
                 </div>
             }
+            else
+            {
+                <div class="alert alert-info">No articles yet. Check back soon!</div>
+            }
         </div>
 
-        
         <div class="col-md-4">
-           
+            
             <div class="card mb-4 shadow-sm">
                 <div class="card-header bg-warning">
                     <strong>⭐ Editor's Choice</strong>
@@ -72,7 +54,7 @@
                 </div>
             </div>
 
-          
+            
             <div class="card mb-4 shadow-sm">
                 <div class="card-header bg-danger text-white">
                     <strong>🔥 Most Popular</strong>
@@ -99,7 +81,7 @@
                 </div>
             </div>
 
-           
+          
             <div class="card shadow-sm">
                 <div class="card-header bg-info text-white">
                     <strong>📂 Categories</strong>

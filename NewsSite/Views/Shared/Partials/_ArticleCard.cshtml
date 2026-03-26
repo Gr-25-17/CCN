@@ -1,0 +1,21 @@
+﻿@model NewsSite.Models.Entities.Article
+
+<div class="card h-100 shadow-sm">
+    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+    {
+        <img src="@Model.ImageUrl" class="card-img-top" alt="@Model.Title"
+             style="height: 200px; object-fit: cover; width: 100%;">
+    }
+    <div class="card-body">
+        <span class="badge bg-primary mb-2">@Model.Category?.Name</span>
+        <h5 class="card-title">
+            <a asp-controller="Articles" asp-action="Details" asp-route-slug="@Model.Slug" class="text-decoration-none">
+                @Model.Title
+            </a>
+        </h5>
+        <p class="card-text text-muted">@Model.Summary</p>
+        <small class="text-muted">
+            @Model.CreatedAt.ToString("MMMM dd, yyyy")
+        </small>
+    </div>
+</div>
