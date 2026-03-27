@@ -2,35 +2,141 @@
 
 @{
     ViewData["Title"] = Model.Title;
+    bool hasLiked = ViewBag.HasLiked ?? false;
 }
 
-<div class="container">
+<div class="container mt-4">
     <div class="row">
         <div class="col-lg-8 mx-auto">
-            <!-- Category badge -->
             <div class="mb-3">
                 <span class="badge bg-primary">@Model.Category?.Name</span>
             </div>
 
-            <!-- Title -->
             <h1 class="display-5 fw-bold mb-3">@Model.Title</h1>
 
-            <!-- Meta info -->
-            <div class="text-muted mb-4">
+            <div class="d-flex justify-content-between align-items-center text-muted mb-4 border-bottom pb-3">
                 <small>Published: @Model.CreatedAt.ToString("MMMM dd, yyyy")</small>
+                
+                <div class="d-flex align-items-center gap-3">
+                    <span title="Visningar">👁️ @Model.ViewsCount</span>
+                    
+                    <form asp-action="ToggleLike" method="post" class="m-0" id="likeForm">
+                        <input type="hidden" name="articleId" value="@Model.Id" />
+                        <input type="hidden" name="slug" value="@Model.Slug" />
+                        
+                        @if (User.Identity != null && User.Identity.IsAuthenticated)
+                        {
+                            <button type="submit" id="likeBtn" class="btn btn-sm @(hasLiked ? "btn-danger" : "btn-outline-danger")">
+                                ❤️ <span id="likesCountText">@Model.LikesCount</span>
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-sm btn-outline-secondary" disabled>
+                                ❤️ @Model.LikesCount
+                            </button>
+                        }
+                    </form>
+                </div>
             </div>
 
-            <!-- Image (enstaka, med enhetlig storlek) -->
             @if (!string.IsNullOrEmpty(Model.ImageUrl))
             {
-                <img src="@Model.ImageUrl" class="img-fluid rounded mb-4" alt="@Model.Title"
+                <img src="@Model.ImageUrl" class="img-fluid rounded mb-4 shadow-sm" alt="@Model.Title"
                      style="width: 100%; max-height: 400px; object-fit: cover;">
             }
 
-            <!-- Content -->
-            <div class="article-content fs-5 lh-lg">
-                @Html.Raw(Model.Content.Replace("\n", "<br />"))
+            <div class="article-content fs-5 lh-lg mb-5">
+                @if (ViewBag.IsLocked)
+                {
+                    <div class="premium-teaser p-4 bg-light rounded border-start border-warning border-5">
+                        <p class="fst-italic">@Model.Summary</p>
+                        <div class="text-center py-5">
+                            <div class="mb-4">
+                                <i class="bi bi-lock-fill display-1 text-warning"></i>
+                            </div>
+                            <h3 class="fw-bold">Det här är en Premiumartikel</h3>
+                            <p class="text-muted">Som prenumerant får du tillgång till alla våra djupgående reportage och exklusiva nyheter.</p>
+                            <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-warning btn-lg fw-bold px-5 shadow">
+                                Bli Prenumerant – 99 kr/mån
+                            </a>
+                            <div class="mt-3">
+                                <a asp-area="Identity" asp-page="/Account/Login" class="text-decoration-none">Redan prenumerant? Logga in här.</a>
+                            </div>
+                        </div>
+                    </div>
+        
+                    <style>
+                                        .premium-teaser {
+                                            background: linear-gradient(180deg, rgba(248,249,250,1) 0%, rgba(248,249,250,0.8) 100%);
+                                            position: relative;
+                                        }
+                    </style>
+                }
+                else
+                {
+                    @Html.Raw(Model.Content)
+                }
+            </div>
+            
+            <hr />
+            <div class="mb-5 mt-4">
+                <button type="button" onclick="navigateBack()" class="btn btn-outline-secondary">← Tillbaka</button>
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        function navigateBack() {
+            const referrer = document.referrer;
+            const currentHost = window.location.hostname;
+
+            if (referrer && referrer.includes(currentHost)) {
+                window.history.back();
+            } else {
+                window.location.href = '/';
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const likeForm = document.getElementById("likeForm");
+            
+            if (likeForm) {
+                likeForm.addEventListener("submit", async function (e) {
+                    e.preventDefault();
+                    
+                    const btn = document.getElementById("likeBtn");
+                    const countText = document.getElementById("likesCountText");
+                    const formData = new FormData(likeForm);
+                    
+                    try {
+                        const response = await fetch(likeForm.action, {
+                            method: "POST",
+                            body: formData
+                        });
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            
+                            if (data.success) {
+                                countText.innerText = data.likesCount;
+                                
+                                if (data.isLiked) {
+                                    btn.classList.remove("btn-outline-danger");
+                                    btn.classList.add("btn-danger");
+                                } else {
+                                    btn.classList.remove("btn-danger");
+                                    btn.classList.add("btn-outline-danger");
+                                }
+                            }
+                        }
+                    } catch (error) {
+                        console.error(error);
+                    }
+                });
+            }
+        });
+    </script>
+}

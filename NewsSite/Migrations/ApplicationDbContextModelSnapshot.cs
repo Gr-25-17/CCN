@@ -261,6 +261,9 @@ namespace NewsSite.Migrations
                     b.Property<bool>("IsLocked")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("IsPremium")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("IsReadyForPublish")
                         .HasColumnType("INTEGER");
 
