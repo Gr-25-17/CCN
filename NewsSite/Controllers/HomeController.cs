@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using NewsSite.Models;
+using NewsSite.Models.Entities;
 using NewsSite.Models.ViewModels;
 using NewsSite.Services.Interfaces;
 using System.Diagnostics;
@@ -11,14 +13,27 @@ namespace NewsSite.Controllers
         private readonly IArticleService _articleService;
         private readonly ICategoryService _categoryService;
 
-        public HomeController(IArticleService articleService, ICategoryService categoryService)
+        private readonly ISubscriptionService _subscriptionService;
+        private readonly UserManager<ApplicationUser> _userManager;
+
+        public HomeController(IArticleService articleService, ICategoryService categoryService,
+            ISubscriptionService subscriptionService, UserManager<ApplicationUser> userManager)
         {
             _articleService = articleService;
             _categoryService = categoryService;
+
+            _subscriptionService = subscriptionService;
+            _userManager = userManager;
         }
 
         public async Task<IActionResult> Index()
         {
+            var hasSubscription = false;
+            if (User.Identity.IsAuthenticated)
+            {
+                var userId = _userManager.GetUserId(User);
+                hasSubscription = await _subscriptionService.HasActiveSubscriptionAsync(userId);
+            }
             var viewModel = new HomeViewModel
             {
                 LatestArticles = await _articleService.GetLatestAsync(6),
