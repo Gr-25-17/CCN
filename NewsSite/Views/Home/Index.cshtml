@@ -103,3 +103,52 @@
         </div>
     </div>
 </div>
+
+
+@if (!User.Identity.IsAuthenticated || !Model.HasActiveSubscription)
+{
+    <div class="modal fade" id="subscribeModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Subscribe Now!!!</h5>
+
+                </div>
+                <div class="modal-body">
+                    <p>BUY SUBSCRIPTION NOW OR LATER!?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="maybeLaterBtn">Later</button>
+                    <a href="#" class="btn btn-primary">Subscribe</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    // kan ta bort delar eller hela
+<script>
+    window.onload = function () {
+    var modal = new bootstrap.Modal(document.getElementById('subscribeModal'));
+    modal.show();
+
+    var clicks = 0;
+    var btn = document.getElementById('maybeLaterBtn');
+
+        btn.addEventListener('click', function () {
+        clicks++;
+        if (clicks == 1) {
+            btn.textContent = "Click here if you're sure you don't to buy subscription.";
+            } else if (clicks == 2) {
+                btn.textContent = "No subscription?!!!";
+            } else if (clicks == 3) {
+                btn.textContent = "NO SUBSCRIPTION!=!?!!!!!!!!!!!!!";
+            } else if (clicks == 4) {
+                btn.textContent = "Fine.... I wouldn't sell you a subscription anyway...'";
+            } else {
+                modal.hide();
+            }
+        });
+        }
+    </script>
+}
