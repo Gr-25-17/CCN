@@ -10,20 +10,22 @@
         <div class="col-lg-8 mx-auto">
             <div class="mb-3">
                 <span class="badge bg-primary">@Model.Category?.Name</span>
+                @if (Model.IsPremium)
+                {
+                    <span class="badge bg-warning text-dark">⭐ Premium</span>
+                }
             </div>
 
             <h1 class="display-5 fw-bold mb-3">@Model.Title</h1>
 
             <div class="d-flex justify-content-between align-items-center text-muted mb-4 border-bottom pb-3">
-                <small>Published: @Model.CreatedAt.ToString("MMMM dd, yyyy")</small>
+                <small>Publicerad: @Model.CreatedAt.ToString("dd MMMM yyyy")</small>
                 
                 <div class="d-flex align-items-center gap-3">
                     <span title="Visningar">👁️ @Model.ViewsCount</span>
                     
                     <form asp-action="ToggleLike" method="post" class="m-0" id="likeForm">
                         <input type="hidden" name="articleId" value="@Model.Id" />
-                        <input type="hidden" name="slug" value="@Model.Slug" />
-                        
                         @if (User.Identity != null && User.Identity.IsAuthenticated)
                         {
                             <button type="submit" id="likeBtn" class="btn btn-sm @(hasLiked ? "btn-danger" : "btn-outline-danger")">
@@ -44,47 +46,59 @@
             {
                 <div class="mb-4">
                     <img src="@Model.ImageUrl" class="img-fluid rounded shadow-sm" alt="@Model.Title"
-                         style="width: 100%; max-height: 400px; object-fit: cover;">
+                         style="width: 100%; max-height: 450px; object-fit: cover;">
                 </div>
             }
 
-            <div class="article-content fs-5 lh-lg mb-5">
+            <div class="article-body fs-5 lh-lg mb-5">
                 @if (ViewBag.IsLocked)
                 {
-                    <div class="mb-4 text-muted fst-italic">
+                    <div class="mb-4 text-muted fst-italic border-start border-4 border-warning ps-3">
                         <p>@Model.Summary</p>
                     </div>
                     
-                    <div class="card border-warning shadow-lg text-center p-4 mx-auto mb-5 paywall-card" style="max-width: 500px; background-color: #fffdf5;">
-                        <h4 class="text-warning fw-bold mb-3">
-                            ⭐ Lås upp artikeln
-                        </h4>
-                        <p class="text-muted mb-4">
-                            Den här artikeln är exklusiv för prenumeranter. Bli medlem idag för att läsa vidare och få tillgång till allt premiuminnehåll!
-                        </p>
+                    <div class="position-relative mb-5" style="max-height: 300px; overflow: hidden;">
                         
-                        <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-warning btn-lg fw-bold w-100 mb-3 shadow-sm px-5">
-                            Bli Prenumerant – 99 kr/mån
-                        </a>
+                        @Html.Raw(Model.Content)
                         
-                        @if (User.Identity != null && User.Identity.IsAuthenticated)
-                        {
-                            <div class="border-top pt-3 mt-1">
-                                <small class="text-muted">Du är inloggad, men saknar en aktiv prenumeration.</small>
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="border-top pt-3 mt-1">
-                                <small class="text-muted">
-                                    Redan prenumerant? <a asp-area="Identity" asp-page="/Account/Login" class="text-primary fw-bold text-decoration-none">Logga in här</a>
-                                </small>
-                            </div>
-                        }
+                        <div class="position-absolute bottom-0 start-0 w-100"
+                             style="height: 150px; background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%); pointer-events: none;">
+                        </div>
+                    </div>
+                    
+                    <div class="card border-warning shadow-lg text-center p-4 mx-auto" style="max-width: 550px; background-color: #fffdf5;">
+                        <div class="card-body">
+                            <h3 class="card-title text-warning fw-bold mb-3">⭐ Lås upp hela artikeln</h3>
+                            <p class="card-text text-muted mb-4">
+                                Du har läst ditt gratis smakprov. Som prenumerant får du obegränsad tillgång till all vår journalistik och exklusiva reportage.
+                            </p>
+                            
+                            <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-warning btn-lg fw-bold w-100 mb-3 shadow-sm px-5">
+                                Bli Prenumerant – 99 kr/mån
+                            </a>
+                            
+                            @if (User.Identity != null && User.Identity.IsAuthenticated)
+                            {
+                                <div class="border-top pt-3 mt-2">
+                                    <small class="text-muted">Inloggad som @User.Identity.Name. Saknar aktiv prenumeration.</small>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="border-top pt-3 mt-2">
+                                    <p class="mb-0 text-muted">
+                                        Redan prenumerant? <a asp-area="Identity" asp-page="/Account/Login" class="text-primary fw-bold text-decoration-none">Logga in här</a>
+                                    </p>
+                                </div>
+                            }
+                        </div>
                     </div>
                 }
                 else
                 {
+                    <div class="mb-4 fw-bold">
+                        <p>@Model.Summary</p>
+                    </div>
                     @Html.Raw(Model.Content)
                 }
             </div>
@@ -100,10 +114,7 @@
 @section Scripts {
     <script>
         function navigateBack() {
-            const referrer = document.referrer;
-            const currentHost = window.location.hostname;
-
-            if (referrer && referrer.includes(currentHost)) {
+            if (document.referrer && document.referrer.includes(window.location.hostname)) {
                 window.history.back();
             } else {
                 window.location.href = '/';
@@ -112,11 +123,9 @@
 
         document.addEventListener("DOMContentLoaded", function () {
             const likeForm = document.getElementById("likeForm");
-            
             if (likeForm) {
                 likeForm.addEventListener("submit", async function (e) {
                     e.preventDefault();
-                    
                     const btn = document.getElementById("likeBtn");
                     const countText = document.getElementById("likesCountText");
                     const formData = new FormData(likeForm);
@@ -129,21 +138,17 @@
                         
                         if (response.ok) {
                             const data = await response.json();
-                            
                             if (data.success) {
                                 countText.innerText = data.likesCount;
-                                
                                 if (data.isLiked) {
-                                    btn.classList.remove("btn-outline-danger");
-                                    btn.classList.add("btn-danger");
+                                    btn.classList.replace("btn-outline-danger", "btn-danger");
                                 } else {
-                                    btn.classList.remove("btn-danger");
-                                    btn.classList.add("btn-outline-danger");
+                                    btn.classList.replace("btn-danger", "btn-outline-danger");
                                 }
                             }
                         }
                     } catch (error) {
-                        console.error(error);
+                        console.error("Gick inte att gilla:", error);
                     }
                 });
             }

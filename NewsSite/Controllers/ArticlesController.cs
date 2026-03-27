@@ -17,12 +17,32 @@ namespace NewsSite.Controllers
             await articleService.IncrementViewCountAsync(article.Id);
             article.ViewsCount++;
 
+            // Kontrollera om användaren har en roll som ger tillgång till premium
             bool isAuthorized = User.IsInRole("Admin") ||
                                 User.IsInRole("Editor") ||
                                 User.IsInRole("Writer") ||
                                 User.IsInRole("Subscriber");
 
             ViewBag.IsLocked = article.IsPremium && !isAuthorized;
+
+            // --- SÄKERHETSSPÄRR: Klipp texten på servern om den är låst ---
+            if (ViewBag.IsLocked && !string.IsNullOrEmpty(article.Content))
+            {
+                // Vi delar upp texten vid varje styckeslut
+                var paragraphs = article.Content.Split("</p>", StringSplitOptions.RemoveEmptyEntries);
+
+                // Vi behåller bara de 2 första styckena som smakprov
+                int paragraphsToKeep = Math.Min(2, paragraphs.Length);
+
+                string truncatedContent = "";
+                for (int i = 0; i < paragraphsToKeep; i++)
+                {
+                    truncatedContent += paragraphs[i] + "</p>";
+                }
+
+                // Ersätt originalinnehållet med den korta versionen
+                article.Content = truncatedContent;
+            }
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             ViewBag.HasLiked = userId != null && await articleService.HasUserLikedArticleAsync(article.Id, userId);
@@ -36,14 +56,9 @@ namespace NewsSite.Controllers
         public async Task<IActionResult> ToggleLike(int articleId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (userId == null)
-            {
-                return Unauthorized();
-            }
+            if (userId == null) return Unauthorized();
 
             var result = await articleService.ToggleLikeAsync(articleId, userId);
-
             return Json(new { success = true, isLiked = result.IsLiked, likesCount = result.LikesCount });
         }
     }
