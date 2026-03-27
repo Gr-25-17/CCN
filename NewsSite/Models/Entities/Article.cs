@@ -24,6 +24,7 @@ namespace NewsSite.Models.Entities
         public bool IsEditorsChoice { get; set; }
         public bool IsReadyForPublish { get; set; }
         public bool IsLocked { get; set; }
+        public bool IsPremium { get; set; }
 
         public int CategoryId { get; set; }
         public Category? Category { get; set; }

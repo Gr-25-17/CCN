@@ -4,8 +4,10 @@
     <h2>Redigera artikel</h2>
     <hr />
 
-    <form asp-action="Edit" method="post">
+    <form asp-action="Edit" method="post" enctype="multipart/form-data">
         <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="ImageUrl" />
+        
         <div class="row">
             <div class="col-md-8">
                 <div class="mb-3">
@@ -16,7 +18,7 @@
 
                 <div class="mb-3">
                     <label class="form-label">Slug (genereras automatiskt)</label>
-                    <input type="text" class="form-control bg-light" id="articleSlug" readonly tabindex="-1" value="@Model.Slug" />
+                    <input type="text" class="form-control bg-light" name="Slug" id="articleSlug" readonly tabindex="-1" value="@Model.Slug" />
                 </div>
 
                 <div class="mb-3">
@@ -97,6 +99,17 @@
                                 <input asp-for="IsEditorsChoice" class="form-check-input" />
                                 <label asp-for="IsEditorsChoice" class="form-check-label">Editor's Choice</label>
                             </div>
+                            <div class="form-check mb-3">
+                                <input asp-for="IsPremium" class="form-check-input" id="premiumCheck" />
+                                <label asp-for="IsPremium" class="form-check-label text-primary fw-bold">
+                                    ⭐ Premiumartikel (Endast prenumeranter)
+                                </label>
+                            </div>
+                        }
+                        else
+                        {
+                            <input type="hidden" asp-for="IsEditorsChoice" />
+                            <input type="hidden" asp-for="IsPremium" />
                         }
 
                         <button type="submit" class="btn btn-primary w-100">Spara ändringar</button>

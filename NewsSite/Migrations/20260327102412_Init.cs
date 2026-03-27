@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace NewsSite.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class Init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -199,11 +199,15 @@ namespace NewsSite.Migrations
                     Slug = table.Column<string>(type: "TEXT", nullable: false),
                     ImageUrl = table.Column<string>(type: "TEXT", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    MetaTitle = table.Column<string>(type: "TEXT", nullable: false),
+                    MetaDescription = table.Column<string>(type: "TEXT", nullable: false),
+                    ViewsCount = table.Column<int>(type: "INTEGER", nullable: false),
                     IsArchived = table.Column<bool>(type: "INTEGER", nullable: false),
                     IsDeleted = table.Column<bool>(type: "INTEGER", nullable: false),
                     IsEditorsChoice = table.Column<bool>(type: "INTEGER", nullable: false),
                     IsReadyForPublish = table.Column<bool>(type: "INTEGER", nullable: false),
                     IsLocked = table.Column<bool>(type: "INTEGER", nullable: false),
+                    IsPremium = table.Column<bool>(type: "INTEGER", nullable: false),
                     CategoryId = table.Column<int>(type: "INTEGER", nullable: false),
                     AuthorId = table.Column<string>(type: "TEXT", nullable: true)
                 },
@@ -251,6 +255,42 @@ namespace NewsSite.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateTable(
+                name: "ArticleLikes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ArticleId = table.Column<int>(type: "INTEGER", nullable: false),
+                    UserId = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ArticleLikes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ArticleLikes_Articles_ArticleId",
+                        column: x => x.ArticleId,
+                        principalTable: "Articles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ArticleLikes_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ArticleLikes_ArticleId",
+                table: "ArticleLikes",
+                column: "ArticleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ArticleLikes_UserId",
+                table: "ArticleLikes",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Articles_AuthorId",
@@ -314,7 +354,7 @@ namespace NewsSite.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Articles");
+                name: "ArticleLikes");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
@@ -335,16 +375,19 @@ namespace NewsSite.Migrations
                 name: "Subscriptions");
 
             migrationBuilder.DropTable(
-                name: "Categories");
+                name: "Articles");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
+                name: "SubscriptionTypes");
+
+            migrationBuilder.DropTable(
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
-                name: "SubscriptionTypes");
+                name: "Categories");
         }
     }
 }

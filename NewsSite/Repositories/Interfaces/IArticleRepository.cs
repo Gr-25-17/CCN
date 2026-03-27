@@ -14,6 +14,10 @@ namespace NewsSite.Repositories.Interfaces
         Task AddAsync(Article article);
         Task UpdateAsync(Article article);
         Task<IEnumerable<Category>> GetAllCategoriesAsync();
+
         Task<Article?> GetBySlugAsync(string slug);
+        Task IncrementViewCountAsync(int articleId);
+        Task<bool> HasUserLikedArticleAsync(int articleId, string userId);
+        Task<(bool IsLiked, int LikesCount)> ToggleLikeAsync(int articleId, string userId);
     }
 }

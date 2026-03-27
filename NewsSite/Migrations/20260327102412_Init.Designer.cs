@@ -11,8 +11,8 @@ using NewsSite.Data;
 namespace NewsSite.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260325095054_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260327102412_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -264,8 +264,19 @@ namespace NewsSite.Migrations
                     b.Property<bool>("IsLocked")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("IsPremium")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("IsReadyForPublish")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("MetaDescription")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MetaTitle")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Slug")
                         .IsRequired()
@@ -279,6 +290,9 @@ namespace NewsSite.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("ViewsCount")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AuthorId");
@@ -286,6 +300,28 @@ namespace NewsSite.Migrations
                     b.HasIndex("CategoryId");
 
                     b.ToTable("Articles");
+                });
+
+            modelBuilder.Entity("NewsSite.Models.Entities.ArticleLike", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ArticleId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ArticleId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ArticleLikes");
                 });
 
             modelBuilder.Entity("NewsSite.Models.Entities.Category", b =>
@@ -420,6 +456,25 @@ namespace NewsSite.Migrations
                     b.Navigation("Category");
                 });
 
+            modelBuilder.Entity("NewsSite.Models.Entities.ArticleLike", b =>
+                {
+                    b.HasOne("NewsSite.Models.Entities.Article", "Article")
+                        .WithMany("Likes")
+                        .HasForeignKey("ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NewsSite.Models.Entities.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Article");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("NewsSite.Models.Entities.Subscription", b =>
                 {
                     b.HasOne("NewsSite.Models.Entities.SubscriptionType", "Type")
@@ -437,6 +492,11 @@ namespace NewsSite.Migrations
                     b.Navigation("Type");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("NewsSite.Models.Entities.Article", b =>
+                {
+                    b.Navigation("Likes");
                 });
 
             modelBuilder.Entity("NewsSite.Models.Entities.Category", b =>

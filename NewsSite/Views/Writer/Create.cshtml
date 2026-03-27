@@ -15,7 +15,7 @@
 
                 <div class="mb-3">
                     <label class="form-label">Slug (genereras automatiskt)</label>
-                    <input type="text" class="form-control bg-light" id="articleSlug" readonly tabindex="-1" value="@Model.Slug" />
+                    <input type="text" class="form-control bg-light" name="Slug" id="articleSlug" readonly tabindex="-1" value="@Model.Slug" />
                 </div>
 
                 <div class="mb-3">
@@ -70,7 +70,6 @@
                                         <div class="mb-2">
                                             <input asp-for="ImageExternalUrl" type="url" class="form-control" placeholder="https://exempel.se/bild.jpg" id="imageUrlInput" />
                                             <span asp-validation-for="ImageExternalUrl" class="text-danger"></span>
-                                            <small class="text-muted">Bilden laddas ner och sparas på vår server automatiskt.</small>
                                         </div>
                                     </div>
                                 </div>
@@ -78,7 +77,6 @@
                                 @if (Model.Id != 0 && !string.IsNullOrEmpty(Model.ImageUrl))
                                 {
                                     <div class="mt-3 pt-3 border-top">
-                                        <small class="text-muted d-block mb-1">Nuvarande bild:</small>
                                         <img src="@Model.ImageUrl" alt="Current Image" class="img-thumbnail" style="max-height: 120px;" />
                                     </div>
                                 }
@@ -96,6 +94,17 @@
                                 <input asp-for="IsEditorsChoice" class="form-check-input" />
                                 <label asp-for="IsEditorsChoice" class="form-check-label">Editor's Choice</label>
                             </div>
+                            <div class="form-check mb-3">
+                                <input asp-for="IsPremium" class="form-check-input" id="premiumCheck" />
+                                <label asp-for="IsPremium" class="form-check-label text-primary fw-bold">
+                                    ⭐ Premiumartikel (Endast prenumeranter)
+                                </label>
+                            </div>
+                        }
+                        else
+                        {
+                            <input type="hidden" asp-for="IsEditorsChoice" />
+                            <input type="hidden" asp-for="IsPremium" />
                         }
 
                         <button type="submit" class="btn btn-primary w-100">Spara Artikel</button>

@@ -106,5 +106,48 @@ namespace NewsSite.Repositories.Implementations
         {
             return await context.Categories.ToListAsync();
         }
+        public async Task IncrementViewCountAsync(int articleId)
+        {
+            var article = await context.Articles.FindAsync(articleId);
+            if (article != null)
+            {
+                article.ViewsCount++;
+                await context.SaveChangesAsync();
+            }
+        }
+
+        public async Task<bool> HasUserLikedArticleAsync(int articleId, string userId)
+        {
+            return await context.ArticleLikes
+                .AnyAsync(al => al.ArticleId == articleId && al.UserId == userId);
+        }
+
+        public async Task<(bool IsLiked, int LikesCount)> ToggleLikeAsync(int articleId, string userId)
+        {
+            bool isLiked;
+            var existingLike = await context.ArticleLikes
+                .FirstOrDefaultAsync(al => al.ArticleId == articleId && al.UserId == userId);
+
+            if (existingLike != null)
+            {
+                context.ArticleLikes.Remove(existingLike);
+                isLiked = false;
+            }
+            else
+            {
+                context.ArticleLikes.Add(new ArticleLike
+                {
+                    ArticleId = articleId,
+                    UserId = userId
+                });
+                isLiked = true;
+            }
+
+            await context.SaveChangesAsync();
+
+            var likesCount = await context.ArticleLikes.CountAsync(al => al.ArticleId == articleId);
+
+            return (isLiked, likesCount);
+        }
     }
 }

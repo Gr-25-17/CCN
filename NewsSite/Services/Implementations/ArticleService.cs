@@ -62,12 +62,42 @@ namespace NewsSite.Services.Implementations
                 MetaTitle = string.IsNullOrWhiteSpace(model.MetaTitle) ? model.Title : model.MetaTitle,
                 MetaDescription = string.IsNullOrWhiteSpace(model.MetaDescription) ? model.Summary : model.MetaDescription,
                 Slug = generatedSlug,
+                IsPremium = model.IsPremium,
                 ViewsCount = 0
             };
 
             await articleRepository.AddAsync(article);
         }
 
+        private string GenerateSlug(string phrase)
+        {
+            string str = phrase.ToLower();
+            str = str.Replace("å", "a").Replace("ä", "a").Replace("ö", "o");
+            str = Regex.Replace(str, @"[^a-z0-9\s-]", "");
+            str = Regex.Replace(str, @"\s+", " ").Trim();
+            str = str.Substring(0, str.Length <= 45 ? str.Length : 45).Trim();
+            str = Regex.Replace(str, @"\s", "-");
+            return str;
+        }
+
+        public async Task<Article?> GetBySlugAsync(string slug)
+        {
+            return await articleRepository.GetBySlugAsync(slug);
+        }
+        public async Task IncrementViewCountAsync(int articleId)
+        {
+            await articleRepository.IncrementViewCountAsync(articleId);
+        }
+
+        public async Task<bool> HasUserLikedArticleAsync(int articleId, string userId)
+        {
+            return await articleRepository.HasUserLikedArticleAsync(articleId, userId);
+        }
+
+        public async Task<(bool IsLiked, int LikesCount)> ToggleLikeAsync(int articleId, string userId)
+        {
+            return await articleRepository.ToggleLikeAsync(articleId, userId);
+        }
         public async Task<ArticleViewModel?> GetForEditAsync(int id, string userId, bool canSeeAll)
         {
             var article = await articleRepository.GetByIdAsync(id);
@@ -88,6 +118,7 @@ namespace NewsSite.Services.Implementations
                 CategoryId = article.CategoryId,
                 IsReadyForPublish = article.IsReadyForPublish,
                 IsEditorsChoice = article.IsEditorsChoice,
+                IsPremium = article.IsPremium,
                 MetaTitle = article.MetaTitle,
                 MetaDescription = article.MetaDescription,
                 Slug = article.Slug,
@@ -113,28 +144,13 @@ namespace NewsSite.Services.Implementations
             article.CategoryId = model.CategoryId;
             article.IsReadyForPublish = model.IsReadyForPublish;
             article.IsEditorsChoice = model.IsEditorsChoice;
+            article.IsPremium = model.IsPremium;
             article.MetaTitle = string.IsNullOrWhiteSpace(model.MetaTitle) ? model.Title : model.MetaTitle;
             article.MetaDescription = string.IsNullOrWhiteSpace(model.MetaDescription) ? model.Summary : model.MetaDescription;
             article.Slug = GenerateSlug(model.Title);
 
             await articleRepository.UpdateAsync(article);
             return true;
-        }
-
-        private string GenerateSlug(string phrase)
-        {
-            string str = phrase.ToLower();
-            str = str.Replace("å", "a").Replace("ä", "a").Replace("ö", "o");
-            str = Regex.Replace(str, @"[^a-z0-9\s-]", "");
-            str = Regex.Replace(str, @"\s+", " ").Trim();
-            str = str.Substring(0, str.Length <= 45 ? str.Length : 45).Trim();
-            str = Regex.Replace(str, @"\s", "-");
-            return str;
-        }
-
-        public async Task<Article?> GetBySlugAsync(string slug)
-        {
-            return await articleRepository.GetBySlugAsync(slug);
         }
     }
 }

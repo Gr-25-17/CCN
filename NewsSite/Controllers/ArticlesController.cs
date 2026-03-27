@@ -1,31 +1,65 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NewsSite.Services.Interfaces;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
-namespace NewsSite.Controllers;
-
-public class ArticlesController : Controller
+namespace NewsSite.Controllers
 {
-    private readonly IArticleService _articleService;
-
-    public ArticlesController(IArticleService articleService)
+    public class ArticlesController(IArticleService articleService) : Controller
     {
-        _articleService = articleService;
-    }
-
-    public async Task<IActionResult> Details(string slug)
-    {
-        if (string.IsNullOrEmpty(slug))
+        public async Task<IActionResult> Details(string slug)
         {
-            return NotFound();
+            if (string.IsNullOrEmpty(slug)) return NotFound();
+
+            var article = await articleService.GetBySlugAsync(slug);
+            if (article == null) return NotFound();
+
+            await articleService.IncrementViewCountAsync(article.Id);
+            article.ViewsCount++;
+
+            // Kontrollera om användaren har en roll som ger tillgång till premium
+            bool isAuthorized = User.IsInRole("Admin") ||
+                                User.IsInRole("Editor") ||
+                                User.IsInRole("Writer") ||
+                                User.IsInRole("Subscriber");
+
+            ViewBag.IsLocked = article.IsPremium && !isAuthorized;
+
+            // --- SÄKERHETSSPÄRR: Klipp texten på servern om den är låst ---
+            if (ViewBag.IsLocked && !string.IsNullOrEmpty(article.Content))
+            {
+                // Vi delar upp texten vid varje styckeslut
+                var paragraphs = article.Content.Split("</p>", StringSplitOptions.RemoveEmptyEntries);
+
+                // Vi behåller bara de 2 första styckena som smakprov
+                int paragraphsToKeep = Math.Min(2, paragraphs.Length);
+
+                string truncatedContent = "";
+                for (int i = 0; i < paragraphsToKeep; i++)
+                {
+                    truncatedContent += paragraphs[i] + "</p>";
+                }
+
+                // Ersätt originalinnehållet med den korta versionen
+                article.Content = truncatedContent;
+            }
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            ViewBag.HasLiked = userId != null && await articleService.HasUserLikedArticleAsync(article.Id, userId);
+
+            return View(article);
         }
 
-        var article = await _articleService.GetBySlugAsync(slug);
-
-        if (article == null)
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleLike(int articleId)
         {
-            return NotFound();
-        }
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
 
-        return View(article);
+            var result = await articleService.ToggleLikeAsync(articleId, userId);
+            return Json(new { success = true, isLiked = result.IsLiked, likesCount = result.LikesCount });
+        }
     }
 }
