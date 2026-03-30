@@ -8,6 +8,10 @@ env:
 on:
   push:
     branches: [ "Dev" ]
+
+  pull_request:
+    branches: [ "Dev" ]
+
   workflow_dispatch:
 
 jobs:
