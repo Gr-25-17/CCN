@@ -119,7 +119,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" id="maybeLaterBtn">Later</button>
-                    <a href="#" class="btn btn-primary">Subscribe</a>
+                    <a asp-controller="Subscription" asp-action="Index" class="btn btn-primary">Subscribe</a>
                 </div>
             </div>
         </div>
@@ -144,7 +144,7 @@
             } else if (clicks == 3) {
                 btn.textContent = "NO SUBSCRIPTION!=!?!!!!!!!!!!!!!";
             } else if (clicks == 4) {
-                btn.textContent = "Fine.... I wouldn't sell you a subscription anyway...'";
+                btn.textContent = "Fine.... I wouldn't sell you a subscription anyway...";
             } else {
                 modal.hide();
             }
