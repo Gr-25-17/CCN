@@ -2,7 +2,7 @@
 using NewsSite.Models.Entities;
 using NewsSite.Services.Interfaces;
 
-
+//test for azure
 namespace NewsSite.Controllers
 {
     public class BlobDemoController : Controller
