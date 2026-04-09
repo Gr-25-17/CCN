@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using NewsSite.Services.Interfaces;
 using NewsSite.Models.ViewModels;
+using NewsSite.Services.Implementations;
+using NewsSite.Services.Interfaces;
 
 namespace NewsSite.Controllers
 {
@@ -24,7 +25,11 @@ namespace NewsSite.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            await userService.UpdateUserRoleAsync(userId, newRole);
+            var success = await userService.UpdateUserRoleAsync(userId, newRole);
+            if (!success)
+            {
+                TempData["Error"] = "Gick inte att uppdatera rollen.";
+            }
             return RedirectToAction(nameof(Index));
         }
 

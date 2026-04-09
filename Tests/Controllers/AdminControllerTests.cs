@@ -25,33 +25,35 @@ public class AdminControllerTests
     }
 
     [Fact]
-    public async Task UpdateRole_ShouldRedirectToPage_WhenSuccessful()
+    public async Task Index_ShouldReturnViewWithUsers()
     {
-        _userServiceMock.Setup(s => s.UpdateUserRoleAsync("user1", "Admin")).ReturnsAsync(true);
+        _userServiceMock.Setup(s => s.GetUsersForAdminAsync()).ReturnsAsync(new UserAdminViewModel());
 
-        var result = await _controller.UpdateRole("user1", "Admin");
+        var result = await _controller.Index();
 
-        var redirect = result.Should().BeOfType<RedirectToActionResult>().Subject;
-        redirect.ActionName.Should().Be("Index");
+        var viewResult = result.Should().BeOfType<ViewResult>().Subject;
+        viewResult.Model.Should().BeOfType<UserAdminViewModel>();
     }
 
     [Fact]
-    public async Task UpdateRole_ShouldSetErrorMessage_WhenServiceFails()
+    public async Task UpdateRole_ShouldSetError_WhenUpdateFails()
     {
-        _userServiceMock.Setup(s => s.UpdateUserRoleAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(false);
+        _userServiceMock.Setup(s => s.UpdateUserRoleAsync(It.IsAny<string>(), It.IsAny<string>()))
+            .ReturnsAsync(false);
 
-        await _controller.UpdateRole("bad-id", "Admin");
+        await _controller.UpdateRole("invalid-id", "Admin");
 
         _controller.TempData["Error"].Should().Be("Gick inte att uppdatera rollen.");
     }
 
     [Fact]
-    public async Task SoftDelete_ShouldCallServiceWithCorrectId()
+    public async Task SoftDelete_ShouldRedirectWithErrorMessage_IfFails()
     {
-        _userServiceMock.Setup(s => s.SoftDeleteUserAsync("user-to-delete")).ReturnsAsync(true);
+        _userServiceMock.Setup(s => s.SoftDeleteUserAsync(It.IsAny<string>())).ReturnsAsync(false);
 
-        await _controller.SoftDelete("user-to-delete");
+        var result = await _controller.SoftDelete("bad-id");
 
-        _userServiceMock.Verify(s => s.SoftDeleteUserAsync("user-to-delete"), Times.Once);
+        result.Should().BeOfType<RedirectToActionResult>();
+        _controller.TempData["Error"].Should().Be("Kunde inte radera användaren.");
     }
 }
