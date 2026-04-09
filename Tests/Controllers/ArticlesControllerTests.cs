@@ -5,7 +5,7 @@ using NewsSite.Controllers;
 using NewsSite.Models.Entities;
 using NewsSite.Services.Interfaces;
 
-namespace Tests.Services
+namespace Tests.Controllers
 {
     public class ArticlesControllerTests
     {
