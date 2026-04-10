@@ -4,6 +4,8 @@ using NewsSite.Data;
 using NewsSite.Models.Entities;
 using NewsSite.Repositories.Implementations;
 
+namespace Tests.Repositories;
+
 public class RepositoryTests
 {
     private ApplicationDbContext GetContext()

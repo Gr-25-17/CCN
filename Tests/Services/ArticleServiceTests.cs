@@ -1,9 +1,17 @@
 ﻿using FluentAssertions;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Moq;
+using NewsSite.Controllers;
 using NewsSite.Models.Entities;
 using NewsSite.Models.ViewModels;
 using NewsSite.Repositories.Interfaces;
 using NewsSite.Services.Implementations;
+using NewsSite.Services.Interfaces;
+using System.Security.Claims;
+using Xunit;
+
+namespace Tests.Services;
 
 public class ArticleServiceTests
 {

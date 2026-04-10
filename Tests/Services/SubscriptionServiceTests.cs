@@ -4,7 +4,7 @@ using NewsSite.Services.Implementations;
 using FluentAssertions;
 using Xunit;
 
-namespace NewsSite.Tests.Services;
+namespace Tests.Services;
 
 public class SubscriptionServiceTests
 {

@@ -5,7 +5,7 @@ using NewsSite.Repositories.Implementations;
 using FluentAssertions;
 using Xunit;
 
-namespace NewsSite.Tests.Repositories;
+namespace Tests.Repositories;
 
 public class CategoryRepositoryTests
 {

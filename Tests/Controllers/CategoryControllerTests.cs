@@ -6,7 +6,7 @@ using NewsSite.Services.Interfaces;
 using FluentAssertions;
 using Xunit;
 
-namespace NewsSite.Tests.Controllers;
+namespace Tests.Controllers;
 
 public class CategoryControllerTests
 {

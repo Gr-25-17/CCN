@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Moq;
 using NewsSite.Areas.Identity.Pages.Account.Manage;
 using NewsSite.Models.Entities;
-using NewsSite.Tests.Helpers;
+using Tests.Helpers;
 using FluentAssertions;
 using Xunit;
 using System.Security.Claims;
