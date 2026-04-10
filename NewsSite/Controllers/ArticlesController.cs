@@ -7,6 +7,7 @@ namespace NewsSite.Controllers
 {
     public class ArticlesController(IArticleService articleService) : Controller
     {
+        // Accept slug from query string (or route) by using default binding without a [FromRoute] attribute
         public async Task<IActionResult> Details(string slug)
         {
             if (string.IsNullOrEmpty(slug)) return NotFound();

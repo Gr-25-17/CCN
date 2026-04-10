@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include=".github\workflows\deploy.yml" />
+    <None Include="Properties\.github\workflows\deploy.yml" />
     <None Include="Properties\serviceDependencies.local.json.user" />
   </ItemGroup>
 

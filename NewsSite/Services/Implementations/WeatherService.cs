@@ -16,13 +16,17 @@ namespace NewsSite.Services.Implementations
 
         public async Task<WeatherForecast> GetWeatherAsync()
         {
-        
-            var basicUrl = "http://weatherapi.dreammaker-it.se/forecast?";
-            var url = $"{basicUrl}City=Stockholm&Language=Eng"; //later add loaction from user to add to the basicurl.
-            
-            var weather = await _httpClient.GetFromJsonAsync<WeatherForecast>(url);
+            var url = "http://weatherapi.dreammaker-it.se/forecast?City=Stockholm&Language=Eng";
+            try
+            {
+                
+                var weather = await _httpClient.GetFromJsonAsync<WeatherForecast>(url);
+                if (weather != null) return weather;
+            }
+            catch {}
 
-            return weather ?? new WeatherForecast();
+            return new WeatherForecast();
         }
     }
 }
+

@@ -15,6 +15,25 @@ namespace NewsSite.Services.Implementations
                 return await UploadStreamToContainer(stream, model.File.FileName);
             }
         }
+        public async Task<string> UploadImageAsync(IFormFile file)
+        {
+            var connectionString = configuration["AzureWebJobsStorage"];
+            if (string.IsNullOrEmpty(connectionString) || file == null || file.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            var containerName = configuration["BlobContainerName"];
+            var blobServiceClient = new BlobServiceClient(connectionString);
+            var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
+
+            var blobClient = containerClient.GetBlobClient(Guid.NewGuid().ToString() + Path.GetExtension(file.FileName));
+
+            using var stream = file.OpenReadStream();
+            await blobClient.UploadAsync(stream, true);
+
+            return blobClient.Uri.ToString();
+        }
 
         public async Task<string> UploadStreamToContainer(Stream stream, string fileName)
         {
