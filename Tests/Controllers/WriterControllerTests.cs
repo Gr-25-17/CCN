@@ -8,7 +8,7 @@ using FluentAssertions;
 using Xunit;
 using System.Security.Claims;
 
-namespace Tests.Controllers;
+namespace NewsSite.Tests.Controllers;
 
 public class WriterControllerTests
 {

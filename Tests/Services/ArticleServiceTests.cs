@@ -11,7 +11,7 @@ using NewsSite.Services.Interfaces;
 using System.Security.Claims;
 using Xunit;
 
-namespace Tests.Services;
+namespace NewsSite.Tests.Services;
 
 public class ArticleServiceTests
 {

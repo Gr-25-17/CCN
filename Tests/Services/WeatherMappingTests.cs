@@ -4,7 +4,7 @@ using NewsSite.Models.APIs;
 using NewsSite.Models.ViewModels;
 using Xunit;
 
-namespace Tests.Services;
+namespace NewsSite.Tests.Services;
 
 public class WeatherMappingTests
 {

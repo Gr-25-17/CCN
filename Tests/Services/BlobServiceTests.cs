@@ -5,7 +5,7 @@ using FluentAssertions;
 using Xunit;
 using Microsoft.AspNetCore.Http;
 
-namespace Tests.Services;
+namespace NewsSite.Tests.Services;
 
 public class BlobServiceTests
 {

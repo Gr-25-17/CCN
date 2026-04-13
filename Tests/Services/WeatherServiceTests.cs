@@ -5,7 +5,7 @@ using NewsSite.Services.Implementations;
 using FluentAssertions;
 using Xunit;
 
-namespace Tests.Services;
+namespace NewsSite.Tests.Services;
 
 public class WeatherServiceTests
 {

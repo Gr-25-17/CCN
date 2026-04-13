@@ -4,7 +4,7 @@ using NewsSite.Data;
 using NewsSite.Models.Entities;
 using NewsSite.Repositories.Implementations;
 
-namespace Tests.Repositories;
+namespace NewsSite.Tests.Repositories;
 
 public class RepositoryTests
 {

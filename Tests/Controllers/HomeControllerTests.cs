@@ -11,7 +11,7 @@ using System.Security.Claims;
 using Tests.Helpers;
 using Xunit;
 
-namespace Tests.Controllers;
+namespace NewsSite.Tests.Controllers;
 
 public class HomeControllerTests
 {

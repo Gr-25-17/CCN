@@ -8,7 +8,7 @@ using NewsSite.Services.Interfaces;
 using System.Security.Claims;
 using Xunit;
 
-namespace Tests.Controllers;
+namespace NewsSite.Tests.Controllers;
 
 public class ArticlesControllerTests
 {
