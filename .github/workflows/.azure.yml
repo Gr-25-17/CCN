@@ -7,10 +7,10 @@ env:
 
 on:
   push:
-    branches: [ "Dev" ]
+    branches: [ "master" ]
 
   pull_request:
-    branches: [ "Dev" ]
+    branches: [ "master" ]
 
   workflow_dispatch:
 
