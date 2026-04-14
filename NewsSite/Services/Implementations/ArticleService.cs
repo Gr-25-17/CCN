@@ -32,7 +32,15 @@ namespace NewsSite.Services.Implementations
                 IsReadyForPublish = a.IsReadyForPublish,
                 CreatedAt = a.CreatedAt,
                 CategoryName = a.Category?.Name ?? string.Empty,
-                AuthorName = a.AuthorName,
+
+                // UPPDATERAD LOGIK: 
+                // 1. Kolla om vi har ett sparat namn (från nya systemet)
+                // 2. Fallback till att bygga namnet från Author-objektet (för gamla artiklar)
+                // 3. Annars "Okänd"
+                AuthorName = !string.IsNullOrWhiteSpace(a.AuthorName)
+                    ? a.AuthorName
+                    : (a.Author != null ? $"{a.Author.FirstName} {a.Author.LastName}" : "Okänd skribent"),
+
                 ViewsCount = a.ViewsCount,
                 LikesCount = a.Likes?.Count ?? 0
             });
