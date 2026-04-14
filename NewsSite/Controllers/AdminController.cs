@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using NewsSite.Models.ViewModels;
-using NewsSite.Services.Implementations;
 using NewsSite.Services.Interfaces;
 
 namespace NewsSite.Controllers
@@ -16,8 +14,7 @@ namespace NewsSite.Controllers
             return View(model);
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateRole(string userId, string newRole)
         {
             if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(newRole))
@@ -33,8 +30,7 @@ namespace NewsSite.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> SoftDelete(string userId)
         {
             if (string.IsNullOrEmpty(userId))
@@ -48,6 +44,16 @@ namespace NewsSite.Controllers
             {
                 TempData["Error"] = "Kunde inte radera användaren.";
             }
+
+            return RedirectToAction(nameof(Index));
+        }
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> Restore(string userId)
+        {
+            if (string.IsNullOrEmpty(userId)) return RedirectToAction(nameof(Index));
+
+            var success = await userService.RestoreUserAsync(userId);
+            if (!success) TempData["Error"] = "Kunde inte återställa användaren.";
 
             return RedirectToAction(nameof(Index));
         }

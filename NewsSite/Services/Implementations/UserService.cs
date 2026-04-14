@@ -2,7 +2,6 @@
 using NewsSite.Models.ViewModels;
 using NewsSite.Repositories.Interfaces;
 using NewsSite.Services.Interfaces;
-using NewsSite.Models.Entities;
 
 namespace NewsSite.Services.Implementations
 {
@@ -35,10 +34,8 @@ namespace NewsSite.Services.Implementations
             return model;
         }
 
-        public async Task<bool> UpdateUserRoleAsync(string userId, string newRole)
-        {
-            return await userRepository.UpdateUserRoleAsync(userId, newRole);
-        }
+        public async Task<bool> UpdateUserRoleAsync(string userId, string newRole) => await userRepository.UpdateUserRoleAsync(userId, newRole);
+        
 
         public async Task<bool> SoftDeleteUserAsync(string userId)
         {
@@ -46,6 +43,33 @@ namespace NewsSite.Services.Implementations
             if (user == null) return false;
 
             user.IsDeleted = true;
+            return await userRepository.UpdateUserDetailsAsync(user);
+        }
+
+        public async Task<bool> RestoreUserAsync(string userId)
+        {
+            var user = await userRepository.GetUserByIdAsync(userId);
+            if (user == null) return false;
+
+            user.IsDeleted = false;
+            return await userRepository.UpdateUserDetailsAsync(user);
+        }
+
+        public async Task<bool> AnonymizeUserAsync(string userId)
+        {
+            var user = await userRepository.GetUserByIdAsync(userId);
+            if (user == null) return false;
+
+            user.FirstName = "Anonymous";
+            user.LastName = "User";
+            user.Email = $"deleted_{user.Id.Substring(0, 8)}@anonymized.com";
+            user.NormalizedEmail = user.Email.ToUpper();
+            user.UserName = user.Email;
+            user.NormalizedUserName = user.UserName.ToUpper();
+            user.PhoneNumber = null;
+            user.PasswordHash = null;
+            user.IsDeleted = true;
+
             return await userRepository.UpdateUserDetailsAsync(user);
         }
     }

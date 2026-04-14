@@ -1,76 +1,93 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using NewsSite.Data;
 using NewsSite.Models.Entities;
-using System.Data.Common; // LÄGG TILL DENNA FÖR ATT KUNNA TA BORT SQLITE-ANSLUTNINGEN
+using System.Data.Common;
 
-namespace NewsSite.Tests.Integration;
-
-public class NewsIntegrationFactory : WebApplicationFactory<Program>
+namespace NewsSite.Tests.Integration
 {
-    private readonly string _dbName = "IntegrationTestDb_" + Guid.NewGuid().ToString();
-
-    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    public class NewsIntegrationFactory : WebApplicationFactory<Program>
     {
-        builder.UseEnvironment("Development");
+        private SqliteConnection? _connection;
 
-        builder.ConfigureServices(services =>
+        protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
-            // 1. Ta bort DbContext konfigurationen
-            var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<ApplicationDbContext>));
-            if (descriptor != null) services.Remove(descriptor);
+            // Use the Development environment so the app config registers the Sqlite provider
+            // This prevents SqlServer from being registered alongside the in-memory Sqlite used by tests.
+            builder.UseEnvironment("Development");
 
-            // 2. DENNA ÄR NY: Ta bort SQLite:s databas-anslutning helt från systemet
-            var dbConnectionDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbConnection));
-            if (dbConnectionDescriptor != null) services.Remove(dbConnectionDescriptor);
-
-            // Ta bort alla återstående service-registreringar som kan komma från SQLite-provider
-            // (det förekommer ibland registeringar där ServiceType/ImplementationType innehåller "Sqlite")
-            var sqliteDescriptors = services.Where(d =>
-                (d.ServiceType?.FullName?.Contains("Sqlite") ?? false) ||
-                (d.ImplementationType?.FullName?.Contains("Sqlite") ?? false) ||
-                (d.ImplementationInstance?.GetType().FullName?.Contains("Sqlite") ?? false)
-            ).ToList();
-            foreach (var d in sqliteDescriptors) services.Remove(d);
-
-            // 3. Nu är fältet helt tomt, vi kan säkert lägga till InMemory!
-            // Use a dedicated internal service provider for the InMemory provider to avoid conflicts
-            // when the original service collection still contains registrations from Sqlite.
-            var inMemoryServiceProvider = new ServiceCollection()
-                .AddEntityFrameworkInMemoryDatabase()
-                .BuildServiceProvider();
-
-            services.AddDbContext<ApplicationDbContext>(options =>
+            builder.ConfigureServices(services =>
             {
-                options.UseInMemoryDatabase(_dbName);
-                options.UseInternalServiceProvider(inMemoryServiceProvider);
-            });
+                // Ta bort befintliga DB-registreringar och eventuella provider-specifika registreringar
+                // (kan ha registrerats i Program.cs). Vi tar bort alla DbContextOptions och DbConnection
+                // plus tjänster som refererar till SqlServer/Sqlite för att undvika flera providers i samma provider.
+                services.RemoveAll(typeof(DbContextOptions<ApplicationDbContext>));
+                services.RemoveAll(typeof(DbConnection));
 
-            var sp = services.BuildServiceProvider();
-            using var scope = sp.CreateScope();
+                var providerDescriptors = services.Where(d =>
+                    (d.ServiceType != null && (d.ServiceType.FullName?.Contains("SqlServer") == true || d.ServiceType.FullName?.Contains("Sqlite") == true)) ||
+                    (d.ImplementationType != null && (d.ImplementationType.FullName?.Contains("SqlServer") == true || d.ImplementationType.FullName?.Contains("Sqlite") == true))
+                ).ToList();
+                foreach (var pd in providerDescriptors)
+                {
+                    services.Remove(pd);
+                }
+
+                // Skapa och öppna anslutningen manuellt
+                _connection = new SqliteConnection("DataSource=:memory:");
+                _connection.Open();
+
+                services.AddDbContext<ApplicationDbContext>(options =>
+                {
+                    options.UseSqlite(_connection);
+                });
+
+                // VIKTIGT: Skapa tabellerna NU, innan resten av appen startar
+                var sp = services.BuildServiceProvider();
+                using var scope = sp.CreateScope();
+                var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                db.Database.EnsureCreated();
+            });
+        }
+
+        public void SeedArticle(string slug, bool isPremium)
+        {
+            using var scope = Services.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-            // Säkerställ ren databas
-            context.Database.EnsureDeleted();
-            context.Database.EnsureCreated();
-
-            // Seeda in data för testet
-            var cat = new Category { Name = "Tech", Id = 1 };
-            context.Categories.Add(cat);
+            // Vi lägger till en kategori först
+            var category = new Category { Name = "TestCategory" };
+            context.Categories.Add(category);
+            context.SaveChanges();
 
             context.Articles.Add(new Article
             {
-                Title = "Premium Story",
-                Slug = "premium-story",
-                Content = "<p>Första stycket.</p><p>Andra stycket.</p><p>Tredje stycket.</p>",
-                IsPremium = true,
+                Title = "Integration Test Article",
+                Slug = slug,
+                Summary = "Summary content",
+                Content = "<p>Stycke 1.</p><p>Stycke 2.</p><p>Stycke 3.</p>",
+                IsPremium = isPremium,
                 IsReadyForPublish = true,
-                CategoryId = 1,
+                CategoryId = category.Id,
+                AuthorName = "Test Author",
+                CreatedAt = DateTime.UtcNow,
                 ViewsCount = 10
             });
             context.SaveChanges();
-        });
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _connection?.Close();
+                _connection?.Dispose();
+            }
+            base.Dispose(disposing);
+        }
     }
 }
