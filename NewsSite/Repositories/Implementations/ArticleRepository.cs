@@ -149,5 +149,39 @@ namespace NewsSite.Repositories.Implementations
 
             return (isLiked, likesCount);
         }
+
+        public async Task<IEnumerable<Article>> GetLatestByCategoryIdsAsync(List<int> categoryIds, int count)
+        {
+            return await context.Articles
+                .Where(a => categoryIds.Contains(a.CategoryId) &&
+                            a.IsReadyForPublish && !a.IsArchived && !a.IsDeleted)
+                .Include(a => a.Category)
+                .OrderByDescending(a => a.CreatedAt)
+                .Take(count)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Article>> GetMostPopularByCategoryIdsAsync(List<int> categoryIds, int count)
+        {
+            return await context.Articles
+                .Where(a => categoryIds.Contains(a.CategoryId) &&
+                            a.IsReadyForPublish && !a.IsArchived && !a.IsDeleted)
+                .Include(a => a.Category)
+                .OrderByDescending(a => a.ViewsCount)
+                .Take(count)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Article>> GetEditorChoiceByCategoryIdsAsync(List<int> categoryIds, int count)
+        {
+            return await context.Articles
+                .Where(a => categoryIds.Contains(a.CategoryId) &&
+                            a.IsReadyForPublish && !a.IsArchived && !a.IsDeleted &&
+                            a.IsEditorsChoice)
+                .Include(a => a.Category)
+                .OrderByDescending(a => a.CreatedAt)
+                .Take(count)
+                .ToListAsync();
+        }
     }
 }

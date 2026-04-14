@@ -19,5 +19,9 @@ namespace NewsSite.Repositories.Interfaces
         Task IncrementViewCountAsync(int articleId);
         Task<bool> HasUserLikedArticleAsync(int articleId, string userId);
         Task<(bool IsLiked, int LikesCount)> ToggleLikeAsync(int articleId, string userId);
+
+        Task<IEnumerable<Article>> GetLatestByCategoryIdsAsync(List<int> categoryIds, int count);
+        Task<IEnumerable<Article>> GetMostPopularByCategoryIdsAsync(List<int> categoryIds, int count);
+        Task<IEnumerable<Article>> GetEditorChoiceByCategoryIdsAsync(List<int> categoryIds, int count);
     }
 }

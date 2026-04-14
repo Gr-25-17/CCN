@@ -119,5 +119,7 @@ namespace  NewsSite.Areas.Identity.Pages.Account.Manage
                 ?? System.IO.Path.GetFileNameWithoutExtension(viewContext.ActionDescriptor.DisplayName);
             return string.Equals(activePage, page, StringComparison.OrdinalIgnoreCase) ? "active" : null;
         }
+        public static string Preferences => "Preferences";
+        public static string PreferencesNavClass(ViewContext viewContext) => PageNavClass(viewContext, Preferences);
     }
 }
