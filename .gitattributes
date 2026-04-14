@@ -63,4 +63,4 @@
 #*.RTF   diff=astextplain
 
 # Exclude vendor libraries from language statistics
-wwwroot/lib/** linguist-vendored
+NewsSite/wwwroot/lib/** linguist-vendored
