@@ -1,5 +1,4 @@
-﻿using NewsSite.Models.Entities;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NewsSite.Models.Entities
 {
@@ -11,7 +10,7 @@ namespace NewsSite.Models.Entities
         public string Summary { get; set; } = string.Empty;
         public string Slug { get; set; } = string.Empty;
         public string? ImageUrl { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public string MetaTitle { get; set; } = string.Empty;
         public string MetaDescription { get; set; } = string.Empty;
@@ -29,6 +28,7 @@ namespace NewsSite.Models.Entities
         public int CategoryId { get; set; }
         public Category? Category { get; set; }
 
+        public string AuthorName { get; set; } = string.Empty;
         public string? AuthorId { get; set; }
         public ApplicationUser? Author { get; set; }
 
