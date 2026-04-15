@@ -61,3 +61,6 @@
 #*.PDF   diff=astextplain
 #*.rtf   diff=astextplain
 #*.RTF   diff=astextplain
+
+# Exclude vendor libraries from language statistics
+NewsSite/wwwroot/lib/** linguist-vendored

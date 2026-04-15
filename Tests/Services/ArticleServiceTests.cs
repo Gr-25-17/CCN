@@ -16,12 +16,14 @@ namespace NewsSite.Tests.Services;
 public class ArticleServiceTests
 {
     private readonly Mock<IArticleRepository> _repoMock;
+    private readonly Mock<IUserRepository> _userRepoMock;
     private readonly ArticleService _service;
 
     public ArticleServiceTests()
     {
         _repoMock = new Mock<IArticleRepository>();
-        _service = new ArticleService(_repoMock.Object);
+        _userRepoMock = new Mock<IUserRepository>();
+        _service = new ArticleService(_repoMock.Object, _userRepoMock.Object);
     }
 
     [Theory]
@@ -48,5 +50,44 @@ public class ArticleServiceTests
 
         article.Content.Should().NotContain("<script>");
         article.Content.Should().Contain("<p>Good</p>");
+    }
+    [Fact]
+    public async Task ToggleLikeAsync_ShouldAddLike_WhenUserHasNotLiked()
+    {
+        // Arrange
+        var articleId = 1;
+        var userId = "user1";
+
+        _repoMock.Setup(r => r.HasUserLikedArticleAsync(articleId, userId)).ReturnsAsync(false);
+        _repoMock.Setup(r => r.GetLikesCountAsync(articleId)).ReturnsAsync(1);
+
+        // Act
+        var result = await _service.ToggleLikeAsync(articleId, userId);
+
+        // Assert
+        _repoMock.Verify(r => r.AddLikeAsync(articleId, userId), Times.Once);
+        _repoMock.Verify(r => r.RemoveLikeAsync(articleId, userId), Times.Never);
+        result.IsLiked.Should().BeTrue();
+        result.LikesCount.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task ToggleLikeAsync_ShouldRemoveLike_WhenUserHasAlreadyLiked()
+    {
+        // Arrange
+        var articleId = 1;
+        var userId = "user1";
+
+        _repoMock.Setup(r => r.HasUserLikedArticleAsync(articleId, userId)).ReturnsAsync(true);
+        _repoMock.Setup(r => r.GetLikesCountAsync(articleId)).ReturnsAsync(0);
+
+        // Act
+        var result = await _service.ToggleLikeAsync(articleId, userId);
+
+        // Assert
+        _repoMock.Verify(r => r.RemoveLikeAsync(articleId, userId), Times.Once);
+        _repoMock.Verify(r => r.AddLikeAsync(articleId, userId), Times.Never);
+        result.IsLiked.Should().BeFalse();
+        result.LikesCount.Should().Be(0);
     }
 }

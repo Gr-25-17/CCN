@@ -3,38 +3,44 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NewsSite.Data;
 using System.Net;
-using Xunit;
 
-namespace NewsSite.Tests.Integration;
-
-public class PremiumWallAndPersistenceTests(NewsIntegrationFactory factory) : IClassFixture<NewsIntegrationFactory>
+namespace NewsSite.Tests.Integration
 {
-    [Fact]
-    public async Task Get_PremiumArticle_AsGuest_ShouldTruncateContentAndIncrementViews()
+    public class PremiumWallAndPersistenceTests(NewsIntegrationFactory factory) : IClassFixture<NewsIntegrationFactory>
     {
-        var client = factory.CreateClient();
+        [Fact]
+        public async Task Get_PremiumArticle_AsGuest_ShouldTruncateContentAndIncrementViews()
+        {
+            // Arrange
+            string slug = "premium-test-slug";
+            factory.SeedArticle(slug, isPremium: true);
+            var client = factory.CreateClient();
 
-        // LÖSNING 2: Använd query-string för att 100% garantera att controllern hittar ordet "premium-story" oavsett routing
-        var url = "/Articles/Details?slug=premium-story";
+            // Act
+            // Vi skickar slug som query-parameter eftersom din controller accepterar det
+            var response = await client.GetAsync($"/Articles/Details?slug={slug}");
+            var html = await response.Content.ReadAsStringAsync();
 
-        var response = await client.GetAsync(url);
-        var html = await response.Content.ReadAsStringAsync();
+            // Assert
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        // LÖSNING 3: Bättre felhantering. Om denna fallerar nu, får du en tydlig text om varför (t.ex. 404 eller 500)
-        response.StatusCode.Should().Be(HttpStatusCode.OK, "Sidan borde ladda korrekt. Kolla HTML-felet: " + html);
+            // Verifiera Truncation (Premium-logik i ArticlesController.cs)
+            // Din kod kör: paragraphs.Take(2)
+            html.Should().Contain("<p>Stycke 1.</p>");
+            html.Should().Contain("<p>Stycke 2.</p>");
+            html.Should().NotContain("<p>Stycke 3.</p>");
 
-        // Verifiera att texten är klippt
-        html.Should().Contain("<p>Första stycket.</p>");
-        html.Should().Contain("<p>Andra stycket.</p>");
-        html.Should().NotContain("<p>Tredje stycket.</p>");
+            // Verifiera Databaspersistens (ViewsCount)
+            // Din ArticleRepository använder ExecuteUpdateAsync för detta
+            using var scope = factory.Services.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        // Verifiera att ViewsCount har uppdaterats i databasen
-        using var scope = factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var articleInDb = await db.Articles
+                .AsNoTracking()
+                .SingleAsync(a => a.Slug == slug);
 
-        // LÖSNING 4: AsNoTracking tvingar Entity Framework att läsa från databasen istället för ett gammalt sparat minne
-        var article = db.Articles.AsNoTracking().Single(a => a.Slug == "premium-story");
-
-        article.ViewsCount.Should().Be(11);
+            // Den startade på 10, IncrementViewCountAsync körs i Details-metoden
+            articleInDb.ViewsCount.Should().Be(11);
+        }
     }
 }

@@ -56,16 +56,29 @@ public class ArticleRepositoryTests
     }
 
     [Fact]
-    public async Task ToggleLikeAsync_ShouldIncrementCount_OnNewLike()
+    public async Task LikeMethods_ShouldModifyDatabaseCorrectly()
     {
         using var context = CreateContext();
         var repo = new ArticleRepository(context);
+        var articleId = 1;
+        var userId = "user1";
 
-        var result = await repo.ToggleLikeAsync(1, "user1");
+        // Testar Add
+        await repo.AddLikeAsync(articleId, userId);
+        var exists = await repo.HasUserLikedArticleAsync(articleId, userId);
+        var count = await repo.GetLikesCountAsync(articleId);
 
-        result.IsLiked.Should().BeTrue();
-        result.LikesCount.Should().Be(1);
+        exists.Should().BeTrue();
+        count.Should().Be(1);
+
+        // Testar Remove
+        await repo.RemoveLikeAsync(articleId, userId);
+        var existsAfter = await repo.HasUserLikedArticleAsync(articleId, userId);
+        var countAfter = await repo.GetLikesCountAsync(articleId);
+
+        existsAfter.Should().BeFalse();
+        countAfter.Should().Be(0);
     }
 
-   
+
 }
