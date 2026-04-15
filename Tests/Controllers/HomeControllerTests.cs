@@ -2,8 +2,10 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 using NewsSite.Controllers;
+using NewsSite.Data;
 using NewsSite.Models.Entities;
 using NewsSite.Models.ViewModels;
 using NewsSite.Services.Interfaces;
@@ -18,6 +20,7 @@ public class HomeControllerTests
     private readonly Mock<ICategoryService> _categoryServiceMock;
     private readonly Mock<ISubscriptionService> _subscriptionServiceMock;
     private readonly Mock<UserManager<ApplicationUser>> _userManagerMock;
+    private readonly Mock<INewsletterService> _newsletterServiceMock;
     private readonly HomeController _controller;
 
     public HomeControllerTests()
@@ -26,12 +29,16 @@ public class HomeControllerTests
         _categoryServiceMock = new Mock<ICategoryService>();
         _subscriptionServiceMock = new Mock<ISubscriptionService>();
         _userManagerMock = IdentityMockHelper.MockUserManager<ApplicationUser>();
+        _newsletterServiceMock = new Mock<INewsletterService>();
+
 
         _controller = new HomeController(
             _articleServiceMock.Object,
             _categoryServiceMock.Object,
             _subscriptionServiceMock.Object,
-            _userManagerMock.Object);
+            _userManagerMock.Object,
+            _newsletterServiceMock.Object);
+            
 
         var user = new ClaimsPrincipal(new ClaimsIdentity());
         _controller.ControllerContext = new ControllerContext
@@ -43,13 +50,12 @@ public class HomeControllerTests
     [Fact]
     public async Task Index_ShouldReturnViewWithModel()
     {
-        // Mocka alla anrop som görs i Index-metoden
         _articleServiceMock.Setup(s => s.GetLatestAsync(It.IsAny<int>())).ReturnsAsync(new List<Article>());
         _articleServiceMock.Setup(s => s.GetMostPopularAsync(It.IsAny<int>())).ReturnsAsync(new List<Article>());
         _articleServiceMock.Setup(s => s.GetEditorChoiceAsync(It.IsAny<int>())).ReturnsAsync(new List<Article>());
-
-        // VIKTIGT: Mocka även kategoritjänsten så att vyn inte får null
         _categoryServiceMock.Setup(s => s.GetAllAsync()).ReturnsAsync(new List<Category>());
+        _newsletterServiceMock.Setup(s => s.GetPreferencesAsync(It.IsAny<string>()))
+            .ReturnsAsync(new NewsletterPreferencesViewModel());
 
         var result = await _controller.Index();
 

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using NewsSite.Data;
 using NewsSite.Models.Entities;
 using NewsSite.Repositories.Interfaces;
@@ -102,5 +102,69 @@ namespace NewsSite.Repositories.Implementations
 
         public async Task<int> GetLikesCountAsync(int articleId) =>
             await context.ArticleLikes.CountAsync(al => al.ArticleId == articleId);
+
+        // ToggleLikeAsync (din version)
+        public async Task<(bool IsLiked, int LikesCount)> ToggleLikeAsync(int articleId, string userId)
+        {
+            bool isLiked;
+            var existingLike = await context.ArticleLikes
+                .FirstOrDefaultAsync(al => al.ArticleId == articleId && al.UserId == userId);
+
+            if (existingLike != null)
+            {
+                context.ArticleLikes.Remove(existingLike);
+                isLiked = false;
+            }
+            else
+            {
+                context.ArticleLikes.Add(new ArticleLike
+                {
+                    ArticleId = articleId,
+                    UserId = userId
+                });
+                isLiked = true;
+            }
+
+            await context.SaveChangesAsync();
+
+            var likesCount = await context.ArticleLikes.CountAsync(al => al.ArticleId == articleId);
+
+            return (isLiked, likesCount);
+        }
+
+        // Dina tre metoder
+        public async Task<IEnumerable<Article>> GetLatestByCategoryIdsAsync(List<int> categoryIds, int count)
+        {
+            return await context.Articles
+                .Where(a => categoryIds.Contains(a.CategoryId) &&
+                            a.IsReadyForPublish && !a.IsArchived && !a.IsDeleted)
+                .Include(a => a.Category)
+                .OrderByDescending(a => a.CreatedAt)
+                .Take(count)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Article>> GetMostPopularByCategoryIdsAsync(List<int> categoryIds, int count)
+        {
+            return await context.Articles
+                .Where(a => categoryIds.Contains(a.CategoryId) &&
+                            a.IsReadyForPublish && !a.IsArchived && !a.IsDeleted)
+                .Include(a => a.Category)
+                .OrderByDescending(a => a.ViewsCount)
+                .Take(count)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Article>> GetEditorChoiceByCategoryIdsAsync(List<int> categoryIds, int count)
+        {
+            return await context.Articles
+                .Where(a => categoryIds.Contains(a.CategoryId) &&
+                            a.IsReadyForPublish && !a.IsArchived && !a.IsDeleted &&
+                            a.IsEditorsChoice)
+                .Include(a => a.Category)
+                .OrderByDescending(a => a.CreatedAt)
+                .Take(count)
+                .ToListAsync();
+        }
     }
 }

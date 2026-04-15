@@ -33,7 +33,7 @@ namespace NewsSite
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 
-            builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             builder.Services.AddControllersWithViews();
@@ -53,6 +53,8 @@ namespace NewsSite
             builder.Services.AddScoped<IBlobService, BlobService>();
             builder.Services.AddHttpClient();       
             builder.Services.AddScoped<WeatherService>();
+            builder.Services.AddScoped<INewsletterService, NewsletterService>();
+            builder.Services.AddScoped<INewsletterPreferenceRepository, NewsletterPreferenceRepository>();
 
             builder.Services.AddAuthorization(options =>
             {

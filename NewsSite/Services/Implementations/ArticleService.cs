@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Ganss.Xss;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using NewsSite.Models.Entities;
 using NewsSite.Models.ViewModels;
 using NewsSite.Repositories.Interfaces;
 using NewsSite.Services.Interfaces;
-using Ganss.Xss;
 using System.Text.RegularExpressions;
 
 namespace NewsSite.Services.Implementations
@@ -164,6 +165,20 @@ namespace NewsSite.Services.Implementations
             }
 
             return finalSlug;
+        }
+        public async Task<IEnumerable<Article>> GetLatestByCategoryIdsAsync(List<int> categoryIds, int count)
+        {
+            return await articleRepository.GetLatestByCategoryIdsAsync(categoryIds, count);
+        }
+
+        public async Task<IEnumerable<Article>> GetMostPopularByCategoryIdsAsync(List<int> categoryIds, int count)
+        {
+            return await articleRepository.GetMostPopularByCategoryIdsAsync(categoryIds, count);
+        }
+
+        public async Task<IEnumerable<Article>> GetEditorChoiceByCategoryIdsAsync(List<int> categoryIds, int count)
+        {
+            return await articleRepository.GetEditorChoiceByCategoryIdsAsync(categoryIds, count);
         }
     }
 }
