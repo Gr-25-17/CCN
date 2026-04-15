@@ -4,7 +4,7 @@ using NewsSite.Models.Entities;
 using Microsoft.AspNetCore.Http;
 
 
-namespace Tests.Helpers
+namespace NewsSite.Tests.Helpers
 {
     public static class IdentityMockHelper
     {

@@ -10,8 +10,7 @@ using NewsSite.Models.Entities;
 using NewsSite.Models.ViewModels;
 using NewsSite.Services.Interfaces;
 using System.Security.Claims;
-using Tests.Helpers;
-using Xunit;
+using NewsSite.Tests.Helpers;
 
 namespace NewsSite.Tests.Controllers;
 

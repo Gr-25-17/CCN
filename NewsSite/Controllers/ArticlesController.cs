@@ -51,9 +51,7 @@ namespace NewsSite.Controllers
             return View(article);
         }
 
-        [HttpPost]
-        [Authorize]
-        [ValidateAntiForgeryToken]
+        [HttpPost, Authorize,ValidateAntiForgeryToken]
         public async Task<IActionResult> ToggleLike(int articleId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

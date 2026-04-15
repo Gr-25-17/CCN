@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NewsSite.Data;
 
@@ -10,9 +11,11 @@ using NewsSite.Data;
 namespace NewsSite.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260414125948_AddSoftDeleteAndAuthorPersistence")]
+    partial class AddSoftDeleteAndAuthorPersistence
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.5");
@@ -340,43 +343,6 @@ namespace NewsSite.Migrations
                     b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("NewsSite.Models.Entities.NewsletterPreference", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Frequency")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime?>("LastSentDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("ReceiveNewsletter")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("SelectedCategoryIds")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("UnsubscribeToken")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("NewsletterPreferences");
-                });
-
             modelBuilder.Entity("NewsSite.Models.Entities.Subscription", b =>
                 {
                     b.Property<int>("Id")
@@ -509,17 +475,6 @@ namespace NewsSite.Migrations
                         .IsRequired();
 
                     b.Navigation("Article");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("NewsSite.Models.Entities.NewsletterPreference", b =>
-                {
-                    b.HasOne("NewsSite.Models.Entities.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
 
                     b.Navigation("User");
                 });

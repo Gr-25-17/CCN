@@ -1,12 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+﻿using Microsoft.AspNetCore.Mvc;
 using Moq;
 using NewsSite.Areas.Identity.Pages.Account.Manage;
 using NewsSite.Models.Entities;
-using Tests.Helpers;
+using NewsSite.Tests.Helpers;
 using FluentAssertions;
-using Xunit;
 using System.Security.Claims;
 
 namespace NewsSite.Tests.Areas.Identity;

@@ -9,12 +9,16 @@ using System.Text.RegularExpressions;
 
 namespace NewsSite.Services.Implementations
 {
-    public class ArticleService(IArticleRepository articleRepository) : IArticleService
+    public class ArticleService(
+        IArticleRepository articleRepository,
+        IUserRepository userRepository) : IArticleService
     {
         public async Task<IEnumerable<Article>> GetLatestAsync(int count) => await articleRepository.GetLatestAsync(count);
         public async Task<IEnumerable<Article>> GetMostPopularAsync(int count) => await articleRepository.GetMostPopularAsync(count);
         public async Task<IEnumerable<Article>> GetEditorChoiceAsync(int count) => await articleRepository.GetEditorChoiceAsync(count);
         public async Task<IEnumerable<Article>> GetByCategoryAsync(int categoryId, int page, int pageSize) => await articleRepository.GetByCategoryAsync(categoryId, page, pageSize);
+        public async Task<Article?> GetBySlugAsync(string slug) => await articleRepository.GetBySlugAsync(slug);
+        public async Task IncrementViewCountAsync(int articleId) => await articleRepository.IncrementViewCountAsync(articleId);
 
         public async Task<IEnumerable<ArticleViewModel>> GetBackendArticlesAsync(string userId, bool canSeeAll)
         {
@@ -29,7 +33,7 @@ namespace NewsSite.Services.Implementations
                 IsReadyForPublish = a.IsReadyForPublish,
                 CreatedAt = a.CreatedAt,
                 CategoryName = a.Category?.Name ?? string.Empty,
-                AuthorName = a.Author != null ? $"{a.Author.FirstName} {a.Author.LastName}" : string.Empty,
+                AuthorName = a.AuthorName,
                 ViewsCount = a.ViewsCount,
                 LikesCount = a.Likes?.Count ?? 0
             });
@@ -46,69 +50,75 @@ namespace NewsSite.Services.Implementations
 
         public async Task CreateAsync(ArticleViewModel model, string authorId)
         {
+            var user = await userRepository.GetUserByIdAsync(authorId);
             var sanitizer = new HtmlSanitizer();
-            var sanitizedContent = sanitizer.Sanitize(model.Content);
-            var generatedSlug = GenerateSlug(model.Title);
 
             var article = new Article
             {
                 Title = model.Title,
                 Summary = model.Summary,
-                Content = sanitizedContent,
+                Content = sanitizer.Sanitize(model.Content),
                 ImageUrl = model.ImageUrl,
                 CategoryId = model.CategoryId,
                 AuthorId = authorId,
+                AuthorName = user != null ? $"{user.FirstName} {user.LastName}" : "Okänd författare",
                 IsReadyForPublish = model.IsReadyForPublish,
                 IsEditorsChoice = model.IsEditorsChoice,
+                IsPremium = model.IsPremium,
                 MetaTitle = string.IsNullOrWhiteSpace(model.MetaTitle) ? model.Title : model.MetaTitle,
                 MetaDescription = string.IsNullOrWhiteSpace(model.MetaDescription) ? model.Summary : model.MetaDescription,
-                Slug = generatedSlug,
-                IsPremium = model.IsPremium,
-                ViewsCount = 0
+                Slug = await GenerateUniqueSlugAsync(model.Title),
+                CreatedAt = DateTime.UtcNow
             };
 
             await articleRepository.AddAsync(article);
         }
 
-        private string GenerateSlug(string phrase)
+        public async Task<bool> UpdateAsync(ArticleViewModel model, string userId, bool canSeeAll)
         {
-            string str = phrase.ToLower();
-            str = str.Replace("å", "a").Replace("ä", "a").Replace("ö", "o");
-            str = Regex.Replace(str, @"[^a-z0-9\s-]", "");
-            str = Regex.Replace(str, @"\s+", " ").Trim();
-            str = str.Substring(0, str.Length <= 45 ? str.Length : 45).Trim();
-            str = Regex.Replace(str, @"\s", "-");
-            return str;
-        }
+            var article = await articleRepository.GetByIdAsync(model.Id);
+            if (article == null || article.IsLocked || (!canSeeAll && article.AuthorId != userId)) return false;
 
-        public async Task<Article?> GetBySlugAsync(string slug)
-        {
-            return await articleRepository.GetBySlugAsync(slug);
-        }
-        public async Task IncrementViewCountAsync(int articleId)
-        {
-            await articleRepository.IncrementViewCountAsync(articleId);
-        }
+            if (article.Title != model.Title)
+            {
+                article.Slug = await GenerateUniqueSlugAsync(model.Title);
+            }
 
-        public async Task<bool> HasUserLikedArticleAsync(int articleId, string userId)
-        {
-            return await articleRepository.HasUserLikedArticleAsync(articleId, userId);
+            var sanitizer = new HtmlSanitizer();
+            article.Title = model.Title;
+            article.Summary = model.Summary;
+            article.Content = sanitizer.Sanitize(model.Content);
+            article.ImageUrl = model.ImageUrl;
+            article.CategoryId = model.CategoryId;
+            article.IsReadyForPublish = model.IsReadyForPublish;
+            article.IsEditorsChoice = model.IsEditorsChoice;
+            article.IsPremium = model.IsPremium;
+            article.MetaTitle = string.IsNullOrWhiteSpace(model.MetaTitle) ? model.Title : model.MetaTitle;
+            article.MetaDescription = string.IsNullOrWhiteSpace(model.MetaDescription) ? model.Summary : model.MetaDescription;
+
+            await articleRepository.UpdateAsync(article);
+            return true;
         }
 
         public async Task<(bool IsLiked, int LikesCount)> ToggleLikeAsync(int articleId, string userId)
         {
-            return await articleRepository.ToggleLikeAsync(articleId, userId);
+            var isLiked = await articleRepository.HasUserLikedArticleAsync(articleId, userId);
+
+            if (isLiked) await articleRepository.RemoveLikeAsync(articleId, userId);
+            else await articleRepository.AddLikeAsync(articleId, userId);
+
+            var count = await articleRepository.GetLikesCountAsync(articleId);
+            return (!isLiked, count);
         }
+
+        public async Task<bool> HasUserLikedArticleAsync(int articleId, string userId) => await articleRepository.HasUserLikedArticleAsync(articleId, userId);
+
         public async Task<ArticleViewModel?> GetForEditAsync(int id, string userId, bool canSeeAll)
         {
             var article = await articleRepository.GetByIdAsync(id);
-            if (article == null || (!canSeeAll && article.AuthorId != userId))
-            {
-                return null;
-            }
+            if (article == null || (!canSeeAll && article.AuthorId != userId)) return null;
 
             var categories = await articleRepository.GetAllCategoriesAsync();
-
             return new ArticleViewModel
             {
                 Id = article.Id,
@@ -127,31 +137,26 @@ namespace NewsSite.Services.Implementations
             };
         }
 
-        public async Task<bool> UpdateAsync(ArticleViewModel model, string userId, bool canSeeAll)
+        public async Task<string> GenerateUniqueSlugAsync(string title)
         {
-            var article = await articleRepository.GetByIdAsync(model.Id);
+            var slug = title.ToLower()
+                .Replace("å", "a").Replace("ä", "a").Replace("ö", "o");
 
-            if (article == null || article.IsLocked || (!canSeeAll && article.AuthorId != userId))
+            slug = Regex.Replace(slug, @"[^a-z0-9\s-]", "");
+            slug = Regex.Replace(slug, @"\s+", "-").Trim('-');
+
+            if (slug.Length > 45) slug = slug.Substring(0, 45).Trim('-');
+
+            var finalSlug = slug;
+            var counter = 1;
+
+            while (await articleRepository.SlugExistsAsync(finalSlug))
             {
-                return false;
+                finalSlug = $"{slug}-{counter}";
+                counter++;
             }
 
-            var sanitizer = new HtmlSanitizer();
-
-            article.Title = model.Title;
-            article.Summary = model.Summary;
-            article.Content = sanitizer.Sanitize(model.Content);
-            article.ImageUrl = model.ImageUrl;
-            article.CategoryId = model.CategoryId;
-            article.IsReadyForPublish = model.IsReadyForPublish;
-            article.IsEditorsChoice = model.IsEditorsChoice;
-            article.IsPremium = model.IsPremium;
-            article.MetaTitle = string.IsNullOrWhiteSpace(model.MetaTitle) ? model.Title : model.MetaTitle;
-            article.MetaDescription = string.IsNullOrWhiteSpace(model.MetaDescription) ? model.Summary : model.MetaDescription;
-            article.Slug = GenerateSlug(model.Title);
-
-            await articleRepository.UpdateAsync(article);
-            return true;
+            return finalSlug;
         }
         public async Task<IEnumerable<Article>> GetLatestByCategoryIdsAsync(List<int> categoryIds, int count)
         {

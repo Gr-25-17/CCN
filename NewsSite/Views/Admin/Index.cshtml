@@ -76,14 +76,22 @@
                                     }
                                 </td>
                                 <td class="text-end px-3">
-                                    @if (!user.IsDeleted)
+                                    @if (user.IsDeleted)
                                     {
-                                        <form asp-action="SoftDelete" method="post" onsubmit="return confirm('Vill du verkligen inaktivera denna användare?');">
+                                        @* Om det är en anonymiserad användare ska vi inte kunna återställa den (GDPR) *@
+                                        @if (!user.Email.Contains("@anonymized.com"))
+                                        {
+                                            <form asp-action="Restore" method="post" class="d-inline">
+                                                <input type="hidden" name="userId" value="@user.Id" />
+                                                <button type="submit" class="btn btn-sm btn-success">Återställ</button>
+                                            </form>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <form asp-action="SoftDelete" method="post" onsubmit="return confirm('Inaktivera?');" class="d-inline">
                                             <input type="hidden" name="userId" value="@user.Id" />
-                                            <button type="submit" class="btn btn-sm btn-outline-danger">
-                                                <span class="d-none d-sm-inline">Ta bort</span>
-                                                <span class="d-sm-none">X</span>
-                                            </button>
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">Inaktivera</button>
                                         </form>
                                     }
                                 </td>
