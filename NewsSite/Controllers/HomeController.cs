@@ -17,22 +17,22 @@ namespace NewsSite.Controllers
         private readonly ISubscriptionService _subscriptionService;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly INewsletterService _newsletterService;
-        private readonly ApplicationDbContext? _context;
+
 
         public HomeController(
             IArticleService articleService,
             ICategoryService categoryService,
             ISubscriptionService subscriptionService,
             UserManager<ApplicationUser> userManager,
-            INewsletterService newsletterService,
-            ApplicationDbContext context)  
+            INewsletterService newsletterService)
+            
         {
             _articleService = articleService;
             _categoryService = categoryService;
             _subscriptionService = subscriptionService;
             _userManager = userManager;
             _newsletterService = newsletterService;
-            _context = context; 
+             
         }
 
         public async Task<IActionResult> Index()
@@ -44,13 +44,11 @@ namespace NewsSite.Controllers
             {
                 var userId = _userManager.GetUserId(User);
 
-             
                 if (!string.IsNullOrEmpty(userId))
                 {
                     hasSubscription = await _subscriptionService.HasActiveSubscriptionAsync(userId);
 
-                    var preferences = await _context.NewsletterPreferences
-                        .FirstOrDefaultAsync(p => p.UserId == userId);
+                    var preferences = await _newsletterService.GetPreferencesAsync(userId);
 
                     if (preferences != null && !string.IsNullOrEmpty(preferences.SelectedCategoryIds))
                     {

@@ -54,7 +54,8 @@ namespace NewsSite
             builder.Services.AddHttpClient();       
             builder.Services.AddScoped<WeatherService>();
             builder.Services.AddScoped<INewsletterService, NewsletterService>();
-            builder.Services.AddScoped<ApplicationDbContext>();
+            builder.Services.AddScoped<INewsletterPreferenceRepository, NewsletterPreferenceRepository>();
+            builder.Services.AddScoped<INewsletterService, NewsletterService>();
 
             builder.Services.AddAuthorization(options =>
             {

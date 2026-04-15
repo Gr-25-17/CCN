@@ -1,19 +1,20 @@
-﻿using Microsoft.EntityFrameworkCore;
-using NewsSite.Data;
-using NewsSite.Models.Entities;
+﻿using NewsSite.Models.Entities;
 using NewsSite.Models.ViewModels;
+using NewsSite.Repositories.Interfaces;
 using NewsSite.Services.Interfaces;
 
 namespace NewsSite.Services.Implementations;
 
 public class NewsletterService : INewsletterService
 {
-    private readonly ApplicationDbContext _context;
+    private readonly INewsletterPreferenceRepository _preferenceRepo;
     private readonly ICategoryService _categoryService;
 
-    public NewsletterService(ApplicationDbContext context, ICategoryService categoryService)
+    public NewsletterService(
+        INewsletterPreferenceRepository preferenceRepo,
+        ICategoryService categoryService)
     {
-        _context = context;
+        _preferenceRepo = preferenceRepo;
         _categoryService = categoryService;
     }
 
@@ -25,8 +26,7 @@ public class NewsletterService : INewsletterService
 
     public async Task<NewsletterPreferencesViewModel> GetPreferencesAsync(string userId)
     {
-        var prefs = await _context.NewsletterPreferences
-            .FirstOrDefaultAsync(n => n.UserId == userId);
+        var prefs = await _preferenceRepo.GetByUserIdAsync(userId);
 
         if (prefs == null)
         {
@@ -50,31 +50,16 @@ public class NewsletterService : INewsletterService
 
     public async Task SavePreferencesAsync(string userId, NewsletterPreferencesViewModel preferences)
     {
-        var existing = await _context.NewsletterPreferences
-            .FirstOrDefaultAsync(n => n.UserId == userId);
-
-        if (existing == null)
+        var prefs = new NewsletterPreference
         {
-            var newPrefs = new NewsletterPreference
-            {
-                UserId = userId,
-                ReceiveNewsletter = preferences.ReceiveNewsletter,
-                Frequency = preferences.Frequency,
-                SelectedCategoryIds = preferences.SelectedCategoryIds,
-                UpdatedAt = DateTime.UtcNow,
-                UnsubscribeToken = Guid.NewGuid().ToString()
-            };
-            _context.NewsletterPreferences.Add(newPrefs);
-        }
-        else
-        {
-            existing.ReceiveNewsletter = preferences.ReceiveNewsletter;
-            existing.Frequency = preferences.Frequency;
-            existing.SelectedCategoryIds = preferences.SelectedCategoryIds;
-            existing.UpdatedAt = DateTime.UtcNow;
-            _context.NewsletterPreferences.Update(existing);
-        }
+            UserId = userId,
+            ReceiveNewsletter = preferences.ReceiveNewsletter,
+            Frequency = preferences.Frequency,
+            SelectedCategoryIds = preferences.SelectedCategoryIds,
+            UpdatedAt = DateTime.UtcNow,
+            UnsubscribeToken = Guid.NewGuid().ToString()
+        };
 
-        await _context.SaveChangesAsync();
+        await _preferenceRepo.SaveAsync(prefs);
     }
 }
