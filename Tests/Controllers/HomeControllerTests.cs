@@ -21,7 +21,6 @@ public class HomeControllerTests
     private readonly Mock<ISubscriptionService> _subscriptionServiceMock;
     private readonly Mock<UserManager<ApplicationUser>> _userManagerMock;
     private readonly Mock<INewsletterService> _newsletterServiceMock;
-    private readonly Mock<ApplicationDbContext> _contextMock;  // ← NY!
     private readonly HomeController _controller;
 
     public HomeControllerTests()
@@ -31,15 +30,15 @@ public class HomeControllerTests
         _subscriptionServiceMock = new Mock<ISubscriptionService>();
         _userManagerMock = IdentityMockHelper.MockUserManager<ApplicationUser>();
         _newsletterServiceMock = new Mock<INewsletterService>();
-        _contextMock = new Mock<ApplicationDbContext>();  // ← NY!
+
 
         _controller = new HomeController(
             _articleServiceMock.Object,
             _categoryServiceMock.Object,
             _subscriptionServiceMock.Object,
             _userManagerMock.Object,
-            _newsletterServiceMock.Object,
-            _contextMock.Object);  // ← NY!
+            _newsletterServiceMock.Object);
+            
 
         var user = new ClaimsPrincipal(new ClaimsIdentity());
         _controller.ControllerContext = new ControllerContext
