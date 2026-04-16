@@ -5,7 +5,7 @@ namespace NewsSite.Models.ViewModels
     public class WeatherBasicVM
     {
 
-        public string UrlIcon { get; set; }
+        public string? UrlIcon { get; set; }
 
         public int TemperatureC { get; set; }
 
