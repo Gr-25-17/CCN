@@ -1,13 +1,13 @@
-﻿using NewsSite.Models.Entities;
+﻿using NewsSite.Models.ViewModels;
 
-namespace NewsSite.Models.ViewModels;
-
-public class HomeViewModel
+namespace NewsSite.Models.ViewModels
 {
-    public IEnumerable<Article> LatestArticles { get; set; } = new List<Article>();
-    public IEnumerable<Article> MostPopularArticles { get; set; } = new List<Article>();
-    public IEnumerable<Article> EditorChoiceArticles { get; set; } = new List<Article>();
-    public IEnumerable<Category> Categories { get; set; } = new List<Category>();
-
-    public bool HasActiveSubscription { get; set; } = false;
+    public class HomeViewModel
+    {
+        public IEnumerable<ArticleSummaryViewModel> LatestArticles { get; set; } = new List<ArticleSummaryViewModel>();
+        public IEnumerable<ArticleSummaryViewModel> MostPopularArticles { get; set; } = new List<ArticleSummaryViewModel>();
+        public IEnumerable<ArticleSummaryViewModel> EditorChoiceArticles { get; set; } = new List<ArticleSummaryViewModel>();
+        public IEnumerable<CategoryViewModel> Categories { get; set; } = new List<CategoryViewModel>();
+        public bool HasActiveSubscription { get; set; } = false;
+    }
 }

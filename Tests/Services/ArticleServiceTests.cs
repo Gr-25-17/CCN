@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using NewsSite.Services.Implementations;
+using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -19,12 +20,12 @@ public class ArticleServiceTests
     private readonly Mock<IUserRepository> _userRepoMock;
     private readonly ArticleService _service;
 
-    public ArticleServiceTests()
-    {
-        _repoMock = new Mock<IArticleRepository>();
-        _userRepoMock = new Mock<IUserRepository>();
-        _service = new ArticleService(_repoMock.Object, _userRepoMock.Object);
-    }
+        public ArticleServiceTests()
+        {
+            _repoMock = new Mock<IArticleRepository>();
+            _userRepoMock = new Mock<IUserRepository>();
+            _service = new ArticleService(_repoMock.Object, _userRepoMock.Object);
+        }
 
     [Theory]
     [InlineData("MMA i Örebro", "mma-i-orebro")]

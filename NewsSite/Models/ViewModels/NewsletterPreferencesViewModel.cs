@@ -1,4 +1,4 @@
-﻿using NewsSite.Models.Entities;
+﻿using NewsSite.Models.ViewModels;
 
 namespace NewsSite.Models.ViewModels;
 
@@ -10,5 +10,5 @@ public class NewsletterPreferencesViewModel
 
     public string? SelectedCategoryIds { get; set; }
 
-    public List<Category> AvailableCategories { get; set; } = new();
+    public List<CategoryViewModel> AvailableCategories { get; set; } = new();
 }

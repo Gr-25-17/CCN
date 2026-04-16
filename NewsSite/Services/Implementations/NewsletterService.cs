@@ -18,7 +18,7 @@ public class NewsletterService : INewsletterService
         _categoryService = categoryService;
     }
 
-    public async Task<List<Category>> GetAllCategoriesAsync()
+    public async Task<List<CategoryViewModel>> GetAllCategoriesAsync()
     {
         var categories = await _categoryService.GetAllAsync();
         return categories.ToList();
