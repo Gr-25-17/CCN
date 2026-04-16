@@ -1,4 +1,5 @@
-﻿using NewsSite.Models.Entities;
+﻿using NewsSite.Mapping;
+using NewsSite.Models.Entities;
 using NewsSite.Models.ViewModels;
 using NewsSite.Repositories.Interfaces;
 using NewsSite.Services.Interfaces;
@@ -19,47 +20,12 @@ public class NewsletterService : INewsletterService
     }
 
     public async Task<List<CategoryViewModel>> GetAllCategoriesAsync()
-    {
-        var categories = await _categoryService.GetAllAsync();
-        return categories.ToList();
-    }
+        => (await _categoryService.GetAllAsync()).ToList();
 
     public async Task<NewsletterPreferencesViewModel> GetPreferencesAsync(string userId)
-    {
-        var prefs = await _preferenceRepo.GetByUserIdAsync(userId);
-
-        if (prefs == null)
-        {
-            return new NewsletterPreferencesViewModel
-            {
-                ReceiveNewsletter = false,
-                Frequency = "Weekly",
-                SelectedCategoryIds = null,
-                AvailableCategories = await GetAllCategoriesAsync()
-            };
-        }
-
-        return new NewsletterPreferencesViewModel
-        {
-            ReceiveNewsletter = prefs.ReceiveNewsletter,
-            Frequency = prefs.Frequency,
-            SelectedCategoryIds = prefs.SelectedCategoryIds,
-            AvailableCategories = await GetAllCategoriesAsync()
-        };
-    }
+        => (await _preferenceRepo.GetByUserIdAsync(userId)).ToNewsletterPreferencesViewModel(await GetAllCategoriesAsync());
+    
 
     public async Task SavePreferencesAsync(string userId, NewsletterPreferencesViewModel preferences)
-    {
-        var prefs = new NewsletterPreference
-        {
-            UserId = userId,
-            ReceiveNewsletter = preferences.ReceiveNewsletter,
-            Frequency = preferences.Frequency,
-            SelectedCategoryIds = preferences.SelectedCategoryIds,
-            UpdatedAt = DateTime.UtcNow,
-            UnsubscribeToken = Guid.NewGuid().ToString()
-        };
-
-        await _preferenceRepo.SaveAsync(prefs);
-    }
+        => await _preferenceRepo.SaveAsync(preferences.ToNewsletterPreferenceEntity(userId));
 }

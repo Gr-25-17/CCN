@@ -34,6 +34,7 @@ public class ArticleServiceTests
     {
         var article = new Article { Id = 1, AuthorId = "u1" };
         _repoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(article);
+        _repoMock.Setup(r => r.SlugExistsAsync(It.IsAny<string>())).ReturnsAsync(false);
 
         await _service.UpdateAsync(new ArticleViewModel { Id = 1, Title = title }, "u1", false);
 
