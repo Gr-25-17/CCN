@@ -50,10 +50,10 @@ public class HomeControllerTests
     [Fact]
     public async Task Index_ShouldReturnViewWithModel()
     {
-        _articleServiceMock.Setup(s => s.GetLatestAsync(It.IsAny<int>())).ReturnsAsync(new List<Article>());
-        _articleServiceMock.Setup(s => s.GetMostPopularAsync(It.IsAny<int>())).ReturnsAsync(new List<Article>());
-        _articleServiceMock.Setup(s => s.GetEditorChoiceAsync(It.IsAny<int>())).ReturnsAsync(new List<Article>());
-        _categoryServiceMock.Setup(s => s.GetAllAsync()).ReturnsAsync(new List<Category>());
+        _articleServiceMock.Setup(s => s.GetLatestAsync(It.IsAny<int>())).ReturnsAsync(new List<ArticleSummaryViewModel>());
+        _articleServiceMock.Setup(s => s.GetMostPopularAsync(It.IsAny<int>())).ReturnsAsync(new List<ArticleSummaryViewModel>());
+        _articleServiceMock.Setup(s => s.GetEditorChoiceAsync(It.IsAny<int>())).ReturnsAsync(new List<ArticleSummaryViewModel>());
+        _categoryServiceMock.Setup(s => s.GetAllAsync()).ReturnsAsync(new List<CategoryViewModel>());
         _newsletterServiceMock.Setup(s => s.GetPreferencesAsync(It.IsAny<string>()))
             .ReturnsAsync(new NewsletterPreferencesViewModel());
 

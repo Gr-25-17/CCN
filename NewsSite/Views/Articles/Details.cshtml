@@ -1,4 +1,4 @@
-﻿@model NewsSite.Models.Entities.Article
+﻿@model NewsSite.Models.ViewModels.ArticleViewModel
 
 @{
     ViewData["Title"] = Model.Title;
@@ -9,7 +9,7 @@
     <div class="row">
         <div class="col-lg-8 mx-auto">
             <div class="mb-3">
-                <span class="badge bg-primary">@Model.Category?.Name</span>
+                <span class="badge bg-primary">@Model.CategoryName</span>
                 @if (Model.IsPremium)
                 {
                     <span class="badge bg-warning text-dark">⭐ Premium</span>

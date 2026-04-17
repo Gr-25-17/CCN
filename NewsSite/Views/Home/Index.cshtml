@@ -47,7 +47,7 @@
                                         @article.Title
                                     </a>
                                 </h6>
-                                <small class="text-muted">@article.Category?.Name</small>
+                                    <small class="text-muted">@article.CategoryName</small>
                             </div>
                         }
                     }
@@ -73,7 +73,7 @@
                                     <a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug" class="text-decoration-none">
                                         @article.Title
                                     </a>
-                                    <small class="text-muted d-block">@article.Category?.Name</small>
+                                    <small class="text-muted d-block">@article.CategoryName</small>
                                 </li>
                             }
                         </ul>

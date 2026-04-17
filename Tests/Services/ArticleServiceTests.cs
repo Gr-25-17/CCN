@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using NewsSite.Services.Implementations;
+using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -19,12 +20,12 @@ public class ArticleServiceTests
     private readonly Mock<IUserRepository> _userRepoMock;
     private readonly ArticleService _service;
 
-    public ArticleServiceTests()
-    {
-        _repoMock = new Mock<IArticleRepository>();
-        _userRepoMock = new Mock<IUserRepository>();
-        _service = new ArticleService(_repoMock.Object, _userRepoMock.Object);
-    }
+        public ArticleServiceTests()
+        {
+            _repoMock = new Mock<IArticleRepository>();
+            _userRepoMock = new Mock<IUserRepository>();
+            _service = new ArticleService(_repoMock.Object, _userRepoMock.Object);
+        }
 
     [Theory]
     [InlineData("MMA i Örebro", "mma-i-orebro")]
@@ -33,6 +34,7 @@ public class ArticleServiceTests
     {
         var article = new Article { Id = 1, AuthorId = "u1" };
         _repoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(article);
+        _repoMock.Setup(r => r.SlugExistsAsync(It.IsAny<string>())).ReturnsAsync(false);
 
         await _service.UpdateAsync(new ArticleViewModel { Id = 1, Title = title }, "u1", false);
 

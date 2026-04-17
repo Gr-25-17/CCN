@@ -14,12 +14,7 @@ namespace NewsSite.Services.Implementations
 
 
         public async Task<bool> HasActiveSubscriptionAsync(string userId)
-        {
-            if (string.IsNullOrWhiteSpace(userId))
-            {
-                return false;
-            }
-            return await _subscriptionRepository.HasActiveSubscriptionAsync(userId);
-        }
+            => !string.IsNullOrWhiteSpace(userId) && await _subscriptionRepository.HasActiveSubscriptionAsync(userId);
+        
     }
 }
