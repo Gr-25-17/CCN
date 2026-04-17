@@ -1,5 +1,5 @@
 <Solution>
-  <Project Path="../NewSite/GoldApIUpdater/GoldApIUpdater/GoldApIUpdater.csproj" />
+  <Project Path="GoldApIUpdater/GoldApIUpdater/GoldApIUpdater.csproj" />
   <Project Path="NewsSite/NewsSite.csproj" />
   <Project Path="Tests/Tests.csproj" Id="0b055612-4ab6-48f6-990c-64f0b4c87c16" />
 </Solution>

@@ -1,20 +1,30 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 
-    public class StockPrice
-    {
-        [JsonPropertyName("top10")]
-        public Top10[] Top10Stock { get; set; }
-    }
+public class StockPrice
+{
+    [JsonPropertyName("top10")]
+    public Top10[] Top10Stock { get; set; } = Array.Empty<Top10>();
+}
 
+public class Top10
+{
+    [Required]
+    public string? Name { get; set; }
 
-    public class Top10
-    {
-        public string Name { get; set; }
-        public string Symbol { get; set; }
-        public float Close { get; set; }
-        public float PrevClose { get; set; }
-        public float PercentChange { get; set; }
-    }
+    [Required]
+    public string? Symbol { get; set; }
+
+ 
+    [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
+    public float Close { get; set; }
+
+    [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
+    public float PrevClose { get; set; }
+
+    [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
+    public float PercentChange { get; set; }
+}
 
 
