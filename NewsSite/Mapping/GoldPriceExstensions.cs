@@ -20,7 +20,7 @@ namespace NewsSite.Mapping
             };
         }
 
-        // Optional: If you ever need to go the other way
+   
         public static GoldPrice ToEntity(this GoldViewModel vm)
         {
             return new GoldPrice
