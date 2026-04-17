@@ -1,8 +1,6 @@
 ﻿using Azure.Storage.Blobs;
 using NewsSite.Models.Entities;
 using NewsSite.Services.Interfaces;
-using Microsoft.Extensions.Configuration;
-using System.IO;
 
 namespace NewsSite.Services.Implementations
 {

@@ -7,7 +7,6 @@ namespace NewsSite.Controllers
 {
     public class ArticlesController(IArticleService articleService) : Controller
     {
-        // Accept slug from query string (or route) by using default binding without a [FromRoute] attribute
         public async Task<IActionResult> Details(string slug)
         {
             if (string.IsNullOrEmpty(slug)) return NotFound();
@@ -18,7 +17,6 @@ namespace NewsSite.Controllers
             await articleService.IncrementViewCountAsync(article.Id);
             article.ViewsCount++;
 
-            // Kontrollera om användaren har en roll som ger tillgång till premium
             bool isAuthorized = User.IsInRole("Admin") ||
                                 User.IsInRole("Editor") ||
                                 User.IsInRole("Writer") ||
@@ -26,13 +24,10 @@ namespace NewsSite.Controllers
 
             ViewBag.IsLocked = article.IsPremium && !isAuthorized;
 
-            // --- SÄKERHETSSPÄRR: Klipp texten på servern om den är låst ---
             if (ViewBag.IsLocked && !string.IsNullOrEmpty(article.Content))
             {
-                // Vi delar upp texten vid varje styckeslut
                 var paragraphs = article.Content.Split("</p>", StringSplitOptions.RemoveEmptyEntries);
 
-                // Vi behåller bara de 2 första styckena som smakprov
                 int paragraphsToKeep = Math.Min(2, paragraphs.Length);
 
                 string truncatedContent = "";
@@ -41,7 +36,6 @@ namespace NewsSite.Controllers
                     truncatedContent += paragraphs[i] + "</p>";
                 }
 
-                // Ersätt originalinnehållet med den korta versionen
                 article.Content = truncatedContent;
             }
 

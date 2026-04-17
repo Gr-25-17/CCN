@@ -1,7 +1,7 @@
-﻿@model IEnumerable<NewsSite.Models.Entities.Article>
+﻿@model IEnumerable<NewsSite.Models.ViewModels.ArticleSummaryViewModel>
 
 @{
-    var category = ViewBag.Category as NewsSite.Models.Entities.Category;
+    var category = ViewBag.Category as NewsSite.Models.ViewModels.CategoryViewModel;
     ViewData["Title"] = $"{category?.Name} News";
 }
 

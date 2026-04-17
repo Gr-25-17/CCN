@@ -1,4 +1,4 @@
-﻿@model NewsSite.Models.Entities.Article
+﻿@model NewsSite.Models.ViewModels.ArticleSummaryViewModel
 
 <div class="card h-100 shadow-sm border-0 position-relative">
     @if (Model.IsPremium)
@@ -20,7 +20,7 @@
     
     <div class="card-body d-flex flex-column">
         <div class="mb-2">
-            <span class="badge bg-primary">@Model.Category?.Name</span>
+            <span class="badge bg-primary">@Model.CategoryName</span>
         </div>
         
         <h5 class="card-title">

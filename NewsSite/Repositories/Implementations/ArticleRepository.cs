@@ -16,6 +16,7 @@ namespace NewsSite.Repositories.Implementations
         public async Task<IEnumerable<Article>> GetLatestAsync(int count) => await context.Articles
             .Where(a => a.IsReadyForPublish && !a.IsArchived && !a.IsDeleted)
             .Include(a => a.Category)
+            .Include(a => a.Author)
             .Include(a => a.Likes)
             .OrderByDescending(a => a.CreatedAt)
             .Take(count).ToListAsync();
@@ -23,6 +24,7 @@ namespace NewsSite.Repositories.Implementations
         public async Task<IEnumerable<Article>> GetMostPopularAsync(int count) => await context.Articles
             .Where(a => a.IsReadyForPublish && !a.IsArchived && !a.IsDeleted)
             .Include(a => a.Category)
+            .Include(a => a.Author)
             .Include(a => a.Likes)
             .OrderByDescending(a => a.ViewsCount)
             .Take(count).ToListAsync();
@@ -30,6 +32,7 @@ namespace NewsSite.Repositories.Implementations
         public async Task<IEnumerable<Article>> GetEditorChoiceAsync(int count) => await context.Articles
             .Where(a => a.IsReadyForPublish && !a.IsArchived && !a.IsDeleted && a.IsEditorsChoice)
             .Include(a => a.Category)
+            .Include(a => a.Author)
             .Include(a => a.Likes)
             .OrderByDescending(a => a.CreatedAt)
             .Take(count).ToListAsync();
@@ -37,6 +40,7 @@ namespace NewsSite.Repositories.Implementations
         public async Task<IEnumerable<Article>> GetByCategoryAsync(int categoryId, int page, int pageSize) => await context.Articles
             .Where(a => a.CategoryId == categoryId && a.IsReadyForPublish && !a.IsArchived && !a.IsDeleted)
             .Include(a => a.Category)
+            .Include(a => a.Author)
             .Include(a => a.Likes)
             .OrderByDescending(a => a.CreatedAt)
             .Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
@@ -44,6 +48,7 @@ namespace NewsSite.Repositories.Implementations
         public async Task<IEnumerable<Article>> GetByAuthorAsync(string authorId) => await context.Articles
             .Where(a => a.AuthorId == authorId && !a.IsDeleted)
             .Include(a => a.Category)
+            .Include(a => a.Author)
             .Include(a => a.Likes)
             .OrderByDescending(a => a.CreatedAt).ToListAsync();
 
@@ -103,42 +108,14 @@ namespace NewsSite.Repositories.Implementations
         public async Task<int> GetLikesCountAsync(int articleId) =>
             await context.ArticleLikes.CountAsync(al => al.ArticleId == articleId);
 
-        // ToggleLikeAsync (din version)
-        public async Task<(bool IsLiked, int LikesCount)> ToggleLikeAsync(int articleId, string userId)
-        {
-            bool isLiked;
-            var existingLike = await context.ArticleLikes
-                .FirstOrDefaultAsync(al => al.ArticleId == articleId && al.UserId == userId);
 
-            if (existingLike != null)
-            {
-                context.ArticleLikes.Remove(existingLike);
-                isLiked = false;
-            }
-            else
-            {
-                context.ArticleLikes.Add(new ArticleLike
-                {
-                    ArticleId = articleId,
-                    UserId = userId
-                });
-                isLiked = true;
-            }
-
-            await context.SaveChangesAsync();
-
-            var likesCount = await context.ArticleLikes.CountAsync(al => al.ArticleId == articleId);
-
-            return (isLiked, likesCount);
-        }
-
-        // Dina tre metoder
         public async Task<IEnumerable<Article>> GetLatestByCategoryIdsAsync(List<int> categoryIds, int count)
         {
             return await context.Articles
                 .Where(a => categoryIds.Contains(a.CategoryId) &&
                             a.IsReadyForPublish && !a.IsArchived && !a.IsDeleted)
                 .Include(a => a.Category)
+                .Include(a => a.Author)
                 .OrderByDescending(a => a.CreatedAt)
                 .Take(count)
                 .ToListAsync();
@@ -150,6 +127,7 @@ namespace NewsSite.Repositories.Implementations
                 .Where(a => categoryIds.Contains(a.CategoryId) &&
                             a.IsReadyForPublish && !a.IsArchived && !a.IsDeleted)
                 .Include(a => a.Category)
+                .Include(a => a.Author)
                 .OrderByDescending(a => a.ViewsCount)
                 .Take(count)
                 .ToListAsync();
@@ -162,6 +140,7 @@ namespace NewsSite.Repositories.Implementations
                             a.IsReadyForPublish && !a.IsArchived && !a.IsDeleted &&
                             a.IsEditorsChoice)
                 .Include(a => a.Category)
+                .Include(a => a.Author)
                 .OrderByDescending(a => a.CreatedAt)
                 .Take(count)
                 .ToListAsync();

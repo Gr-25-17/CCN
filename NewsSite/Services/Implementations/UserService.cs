@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using NewsSite.Mapping;
 using NewsSite.Models.ViewModels;
 using NewsSite.Repositories.Interfaces;
 using NewsSite.Services.Interfaces;
@@ -20,22 +21,14 @@ namespace NewsSite.Services.Implementations
             foreach (var user in users)
             {
                 var userRoles = await userRepository.GetUserRolesAsync(user);
-                model.Users.Add(new UserDisplayInfo
-                {
-                    Id = user.Id,
-                    Email = user.Email!,
-                    FullName = $"{user.FirstName} {user.LastName}",
-                    DateOfBirth = user.DateOfBirth,
-                    CurrentRole = userRoles.FirstOrDefault() ?? "Ingen roll",
-                    IsDeleted = user.IsDeleted
-                });
+                model.Users.Add(user.ToDisplayInfo(userRoles.FirstOrDefault()));
             }
 
             return model;
         }
 
-        public async Task<bool> UpdateUserRoleAsync(string userId, string newRole) => await userRepository.UpdateUserRoleAsync(userId, newRole);
-        
+        public async Task<bool> UpdateUserRoleAsync(string userId, string newRole)
+            => await userRepository.UpdateUserRoleAsync(userId, newRole);
 
         public async Task<bool> SoftDeleteUserAsync(string userId)
         {
