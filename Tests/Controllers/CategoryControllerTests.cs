@@ -2,6 +2,7 @@
 using Moq;
 using NewsSite.Controllers;
 using NewsSite.Models.Entities;
+using NewsSite.Models.ViewModels;
 using NewsSite.Services.Interfaces;
 using FluentAssertions;
 using Xunit;
@@ -24,7 +25,7 @@ public class CategoryControllerTests
     [Fact]
     public async Task Index_ShouldReturnNotFound_WhenCategoryMissing()
     {
-        _categoryServiceMock.Setup(s => s.GetAllAsync()).ReturnsAsync(new List<Category>());
+        _categoryServiceMock.Setup(s => s.GetAllAsync()).ReturnsAsync(new List<CategoryViewModel>());
         var result = await _controller.Index("finns-inte");
         result.Should().BeOfType<NotFoundResult>();
     }

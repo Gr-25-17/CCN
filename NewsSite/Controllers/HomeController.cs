@@ -1,7 +1,5 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using NewsSite.Data;
 using NewsSite.Models;
 using NewsSite.Models.Entities;
 using NewsSite.Models.ViewModels;
@@ -18,7 +16,6 @@ namespace NewsSite.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly INewsletterService _newsletterService;
 
-
         public HomeController(
             IArticleService articleService,
             ICategoryService categoryService,
@@ -32,13 +29,13 @@ namespace NewsSite.Controllers
             _subscriptionService = subscriptionService;
             _userManager = userManager;
             _newsletterService = newsletterService;
-             
+            
         }
 
         public async Task<IActionResult> Index()
         {
             var hasSubscription = false;
-            List<int> preferredCategoryIds = null;
+            List<int>? preferredCategoryIds = null;
 
             if (User.Identity.IsAuthenticated)
             {
@@ -60,9 +57,9 @@ namespace NewsSite.Controllers
                 }
             }
 
-            IEnumerable<Article> latestArticles;
-            IEnumerable<Article> mostPopularArticles;
-            IEnumerable<Article> editorChoiceArticles;
+            IEnumerable<ArticleSummaryViewModel> latestArticles;
+            IEnumerable<ArticleSummaryViewModel> mostPopularArticles;
+            IEnumerable<ArticleSummaryViewModel> editorChoiceArticles;
 
             if (preferredCategoryIds != null && preferredCategoryIds.Any())
             {
@@ -82,10 +79,9 @@ namespace NewsSite.Controllers
                 LatestArticles = latestArticles,
                 MostPopularArticles = mostPopularArticles,
                 EditorChoiceArticles = editorChoiceArticles,
-                Categories = await _categoryService.GetAllAsync()
+                Categories = await _categoryService.GetAllAsync(),
+                HasActiveSubscription = hasSubscription
             };
-
-            ViewBag.HasSubscription = hasSubscription;
 
             return View(viewModel);
         }
