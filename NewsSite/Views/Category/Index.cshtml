@@ -36,6 +36,12 @@
                     <p>Stay updated with the latest news from @category?.Name.</p>
                 </div>
             </div>
+            @if (category?.Name == "Economy")
+            {
+                <div class="mt-4">
+                    @await Component.InvokeAsync("GoldVC")
+                </div>
+            }
         </div>
     </div>
 </div>
