@@ -88,28 +88,31 @@
                             </div>
                         </div>
 
-                        <div class="form-check mb-3">
-                            <input asp-for="IsReadyForPublish" class="form-check-input" />
-                            <label asp-for="IsReadyForPublish" class="form-check-label">Redo för publicering</label>
-                        </div>
+
+
                         
                         @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
                         {
-                            <div class="form-check mb-3">
-                                <input asp-for="IsEditorsChoice" class="form-check-input" />
-                                <label asp-for="IsEditorsChoice" class="form-check-label">Editor's Choice</label>
-                            </div>
                             <div class="form-check mb-3">
                                 <input asp-for="IsPremium" class="form-check-input" id="premiumCheck" />
                                 <label asp-for="IsPremium" class="form-check-label text-primary fw-bold">
                                     ⭐ Premiumartikel (Endast prenumeranter)
                                 </label>
                             </div>
+                            <div class="form-check mb-3">
+                                <input asp-for="IsEditorsChoice" class="form-check-input" />
+                                <label asp-for="IsEditorsChoice" class="form-check-label">Editor's Choice</label>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input asp-for="IsReadyForPublish" class="form-check-input" />
+                                <label asp-for="IsReadyForPublish" class="form-check-label">Redo för publicering</label>
+                            </div>
                         }
                         else
                         {
-                            <input type="hidden" asp-for="IsEditorsChoice" />
                             <input type="hidden" asp-for="IsPremium" />
+                            <input type="hidden" asp-for="IsEditorsChoice" />
+                            <input type="hidden" asp-for="IsReadyForPublish" />
                         }
 
                         <button type="submit" class="btn btn-primary w-100">Spara ändringar</button>
