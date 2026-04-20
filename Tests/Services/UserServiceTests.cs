@@ -4,9 +4,8 @@ using Moq;
 using NewsSite.Models.Entities;
 using NewsSite.Repositories.Interfaces;
 using NewsSite.Services.Implementations;
-using System.Formats.Asn1;
 
-namespace NewsSite.Tests.Services
+namespace Tests.Services
 {
 
 	public class UserServiceTests

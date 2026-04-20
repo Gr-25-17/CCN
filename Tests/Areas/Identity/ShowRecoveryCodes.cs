@@ -2,9 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using NewsSite.Areas.Identity.Pages.Account.Manage;
-using Xunit;
 
-namespace NewsSite.Tests.Areas.Identity;
+namespace Tests.Areas.Identity;
 
 public class ShowRecoveryCodesTests
 {

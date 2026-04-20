@@ -2,9 +2,8 @@
 using Microsoft.Extensions.Configuration;
 using Moq;
 using NewsSite.Services.Implementations;
-using Xunit;
 
-namespace NewsSite.Tests.Services;
+namespace Tests.Services;
 
 public class EmailSenderTests
 {

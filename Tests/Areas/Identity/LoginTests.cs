@@ -1,19 +1,16 @@
 ﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NewsSite.Areas.Identity.Pages.Account;
 using NewsSite.Models.Entities;
-using NewsSite.Tests.Helpers;
+using Tests.Helpers;
 using FluentAssertions;
-using Xunit;
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
-namespace NewsSite.Tests.Areas.Identity
+namespace Tests.Areas.Identity
 {
     public class LoginTests
     {

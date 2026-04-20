@@ -3,12 +3,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using NewsSite.Controllers;
-using NewsSite.Models.Entities;
 using NewsSite.Services.Interfaces;
 using System.Security.Claims;
-using Xunit;
 
-namespace NewsSite.Tests.Controllers;
+namespace Tests.Controllers;
 
 public class ArticlesControllerTests
 {

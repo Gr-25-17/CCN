@@ -2,17 +2,15 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Moq;
 using NewsSite.Controllers;
-using NewsSite.Data;
 using NewsSite.Models.Entities;
 using NewsSite.Models.ViewModels;
 using NewsSite.Services.Interfaces;
 using System.Security.Claims;
-using NewsSite.Tests.Helpers;
+using Tests.Helpers;
 
-namespace NewsSite.Tests.Controllers;
+namespace Tests.Controllers;
 
 public class HomeControllerTests
 {

@@ -2,11 +2,11 @@
 using Moq;
 using NewsSite.Areas.Identity.Pages.Account.Manage;
 using NewsSite.Models.Entities;
-using NewsSite.Tests.Helpers;
+using Tests.Helpers;
 using FluentAssertions;
 using System.Security.Claims;
 
-namespace NewsSite.Tests.Areas.Identity;
+namespace Tests.Areas.Identity;
 
 public class TwoFactorAuthenticationTests
 {
