@@ -9,7 +9,7 @@ namespace NewsSite.Models.ViewModels
 
         public int TemperatureC { get; set; }
 
-        public string TemperatureDisplay => $"{TemperatureC} °C";
+        public string TemperatureDisplay { get; set; } = string.Empty;
 
 
     }

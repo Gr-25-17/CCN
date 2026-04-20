@@ -1,4 +1,5 @@
 ﻿using NewsSite.Models.Entities;
+using System.ComponentModel.DataAnnotations;
 
 namespace NewsSite.Models.ViewModels;
 
@@ -10,4 +11,5 @@ public class HomeViewModel
     public IEnumerable<Category> Categories { get; set; } = new List<Category>();
 
     public bool HasActiveSubscription { get; set; } = false;
+    public required WeatherViewModel Weather {  get; set; }
 }

@@ -27,6 +27,7 @@
         </div>
 
         <div class="col-md-4">
+
             
             <div class="card mb-4 shadow-sm">
                 <div class="card-header bg-warning">
@@ -92,7 +93,7 @@
                         {
                             <div class="col-6 mb-2">
                                 <a asp-controller="Category" asp-action="Index" asp-route-slug="@category.Name"
-                                   class="btn btn-outline-secondary btn-sm w-100">
+                                       class="btn btn-outline-secondary btn-sm w-100">
                                     @category.Name
                                 </a>
                             </div>
@@ -127,28 +128,28 @@
 
 
     // kan ta bort delar eller hela
-<script>
-    window.onload = function () {
-    var modal = new bootstrap.Modal(document.getElementById('subscribeModal'));
-    modal.show();
+    <script>
+        window.onload = function () {
+        var modal = new bootstrap.Modal(document.getElementById('subscribeModal'));
+        modal.show();
 
-    var clicks = 0;
-    var btn = document.getElementById('maybeLaterBtn');
+        var clicks = 0;
+        var btn = document.getElementById('maybeLaterBtn');
 
-        btn.addEventListener('click', function () {
-        clicks++;
-        if (clicks == 1) {
-            btn.textContent = "Click here if you're sure you don't to buy subscription.";
-            } else if (clicks == 2) {
-                btn.textContent = "No subscription?!!!";
-            } else if (clicks == 3) {
-                btn.textContent = "NO SUBSCRIPTION!=!?!!!!!!!!!!!!!";
-            } else if (clicks == 4) {
-                btn.textContent = "Fine.... I wouldn't sell you a subscription anyway...";
-            } else {
-                modal.hide();
+            btn.addEventListener('click', function () {
+            clicks++;
+            if (clicks == 1) {
+                btn.textContent = "Click here if you're sure you don't to buy subscription.";
+                } else if (clicks == 2) {
+                    btn.textContent = "No subscription?!!!";
+                } else if (clicks == 3) {
+                    btn.textContent = "NO SUBSCRIPTION!=!?!!!!!!!!!!!!!";
+                } else if (clicks == 4) {
+                    btn.textContent = "Fine.... I wouldn't sell you a subscription anyway...";
+                } else {
+                    modal.hide();
+                }
+            });
             }
-        });
-        }
     </script>
 }

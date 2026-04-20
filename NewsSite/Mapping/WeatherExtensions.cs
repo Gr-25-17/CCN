@@ -5,13 +5,13 @@ namespace NewsSite.Mapping
 {
     public static class WeatherExtensions
     {
-
         public static WeatherBasicVM ToViewModel(this WeatherForecast response)
         {
             return new WeatherBasicVM
             {
-                UrlIcon = response.Icon?.Url,
-                TemperatureC = response.TemperatureC
+                UrlIcon = response.Icon?.Url ?? string.Empty,
+                TemperatureC = response.TemperatureC,
+                TemperatureDisplay = $"{response.TemperatureC:F1}°C"
             };
         }
 
@@ -27,5 +27,18 @@ namespace NewsSite.Mapping
             };
         }
 
+        public static WeatherViewModel ToWeatherViewModel(this WeatherForecast response)
+        {
+            return new WeatherViewModel
+            {
+                City = response.City ?? string.Empty,
+                TemperatureC = response.TemperatureC,
+                Humidity = response.Humidity,
+                WindSpeed = response.WindSpeed,
+                Date = response.Date,
+                IconUrl = response.Icon?.Url ?? string.Empty,
+                IconCode = response.Icon?.Code ?? string.Empty
+            };
+        }
     }
 }

@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using NewsSite.Models;
 using NewsSite.Models.Entities;
 using NewsSite.Models.ViewModels;
+using NewsSite.Services.Implementations;
 using NewsSite.Services.Interfaces;
 using System.Diagnostics;
+using NewsSite.Mapping;
 
 namespace NewsSite.Controllers
 {
@@ -15,15 +17,18 @@ namespace NewsSite.Controllers
 
         private readonly ISubscriptionService _subscriptionService;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly WeatherService _weatherService;
 
         public HomeController(IArticleService articleService, ICategoryService categoryService,
-            ISubscriptionService subscriptionService, UserManager<ApplicationUser> userManager)
+            ISubscriptionService subscriptionService, UserManager<ApplicationUser> userManager, WeatherService weatherService)
         {
             _articleService = articleService;
             _categoryService = categoryService;
 
             _subscriptionService = subscriptionService;
             _userManager = userManager;
+            _weatherService = weatherService;
+            
         }
 
         public async Task<IActionResult> Index()
@@ -34,12 +39,16 @@ namespace NewsSite.Controllers
                 var userId = _userManager.GetUserId(User);
                 hasSubscription = await _subscriptionService.HasActiveSubscriptionAsync(userId);
             }
+
+            var weather = await _weatherService.GetWeatherAsync();
             var viewModel = new HomeViewModel
             {
                 LatestArticles = await _articleService.GetLatestAsync(6),
                 MostPopularArticles = await _articleService.GetMostPopularAsync(6),
                 EditorChoiceArticles = await _articleService.GetEditorChoiceAsync(3),
-                Categories = await _categoryService.GetAllAsync()
+                Categories = await _categoryService.GetAllAsync(),
+
+                Weather = weather?.ToWeatherViewModel(),
             };
 
             return View(viewModel);
@@ -50,10 +59,18 @@ namespace NewsSite.Controllers
             return View();
         }
 
+        public async Task<IActionResult> WeatherWidget(bool detailed = false)
+        {
+            return ViewComponent("WeatherCardVC", new { detailed });
+        }
+
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+
     }
 }

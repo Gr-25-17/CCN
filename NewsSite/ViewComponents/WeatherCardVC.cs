@@ -1,26 +1,41 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NewsSite.Mapping;
+using NewsSite.Models.ViewModels;
 using NewsSite.Services.Implementations;
-using NuGet.Protocol;
 
 namespace NewsSite.ViewComponents
 {
     public class WeatherCardVC : ViewComponent
     {
-    
-            private readonly WeatherService _weatherService;
 
-            public WeatherCardVC(WeatherService weatherService)
-            {
-                _weatherService = weatherService;
-            }
+        private readonly WeatherService _weatherService;
 
-            public async Task<IViewComponentResult> InvokeAsync()
+        public WeatherCardVC(WeatherService weatherService)
+        {
+            _weatherService = weatherService;
+        }
+
+        public async Task<IViewComponentResult> InvokeAsync(bool detailed = false)
+        {
+            try
             {
                 var weather = await _weatherService.GetWeatherAsync();
-                var vm = weather.ToViewModel();
-                return View(vm); 
+
+                if (detailed)
+                {
+                    var vm = weather?.ToWeatherViewModel();
+                    return View("Detailed", vm);
+                }
+                else
+                {
+                    var vm = weather?.ToViewModel();
+                    return View("Default", vm);
+                }
+            }
+            catch (Exception ex)
+            {
+                return View("Default");
             }
         }
-    
+    }
 }
