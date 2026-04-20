@@ -72,11 +72,22 @@ public static class SeedData
             {
                 Title = "Local Football Team Wins Championship",
                 Summary = "A thrilling final match ends with a 3-2 victory for the home team.",
-                Content = "Detailed article content about the football match...",
+                Content = "Detailed article content about the football match...Lorem ipsum dolor sit amet,  " +
+                " consectetur adipiscing elit. Nullam tristique, sapien ut malesuada tristique, " +
+                "ligula tellus facilisis ante, ut egestas purus dolor in quam. " +
+                "Vivamus elementum porttitor nulla, ac cursus nisi consectetur et. In non erat ac nunc bibendum lobortis." +
+                " Phasellus imperdiet erat in massa finibus, nec dapibus lacus pulvinar. Mauris purus erat, finibus ut lacinia vitae, convallis nec ipsum. " +
+                "Pellentesque lacinia fermentum quam volutpat finibus. Nam consectetur tellus ac fermentum rhoncus." +
+                " Aliquam luctus ac purus vel porta.\r\n\r\nPhasellus at pharetra ex. Sed rutrum vitae leo a viverra. " +
+                "Vivamus quis convallis justo. Aenean et tincidunt mi. Mauris tincidunt non enim non dapibus. Ut neque felis, tincidunt ac velit quis," +
+                " dictum blandit sapien. Nunc ac sollicitudin sapien. Nam interdum erat vel condimentum vehicula. Quisque eget posuere orci, id malesuada mauris. " +
+                "Integer lacus mi, iaculis a tincidunt ut, laoreet sollicitudin nulla. Maecenas consectetur, sem vitae pretium fringilla, quam ipsum egestas massa, " +
+                "ac condimentum odio mauris vitae diam. Suspendisse ac odio cursus augue viverra rutrum.",
                 Slug = "football-championship-win",
                 ImageUrl = "https://images.pexels.com/photos/36213442/pexels-photo-36213442.jpeg",
                 CreatedAt = DateTime.Now.AddDays(-3),
                 IsReadyForPublish = true,
+                IsPremium = true,
                 IsArchived = false,
                 IsDeleted = false,
                 IsEditorsChoice = false,
