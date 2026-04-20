@@ -33,7 +33,7 @@ namespace NewsSite
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 
-            builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
+            builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             builder.Services.AddControllersWithViews();
@@ -96,10 +96,10 @@ namespace NewsSite
             {
                 var services = scope.ServiceProvider;
                 var context = services.GetRequiredService<ApplicationDbContext>();
-                if (context.Database.IsSqlServer())
-                {
-                    context.Database.Migrate();
-                }
+                //if (context.Database.IsSqlServer())
+                //{
+                //    context.Database.Migrate();
+                //}
             }
 
             using (var scope = app.Services.CreateScope())
