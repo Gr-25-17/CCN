@@ -1,18 +1,11 @@
 ﻿using NewsSite.Services.Implementations;
 using FluentAssertions;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Moq;
-using NewsSite.Controllers;
 using NewsSite.Models.Entities;
 using NewsSite.Models.ViewModels;
 using NewsSite.Repositories.Interfaces;
-using NewsSite.Services.Implementations;
-using NewsSite.Services.Interfaces;
-using System.Security.Claims;
-using Xunit;
 
-namespace NewsSite.Tests.Services;
+namespace Tests.Services;
 
 public class ArticleServiceTests
 {
@@ -91,5 +84,109 @@ public class ArticleServiceTests
         _repoMock.Verify(r => r.AddLikeAsync(articleId, userId), Times.Never);
         result.IsLiked.Should().BeFalse();
         result.LikesCount.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task GetLatestAsync_ShouldReturnList()
+    {
+        _repoMock.Setup(r => r.GetLatestAsync(5)).ReturnsAsync(new List<Article>());
+        var result = await _service.GetLatestAsync(5);
+        result.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task GetMostPopularAsync_ShouldReturnList()
+    {
+        _repoMock.Setup(r => r.GetMostPopularAsync(5)).ReturnsAsync(new List<Article>());
+        var result = await _service.GetMostPopularAsync(5);
+        result.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task GetEditorChoiceAsync_ShouldReturnList()
+    {
+        _repoMock.Setup(r => r.GetEditorChoiceAsync(5)).ReturnsAsync(new List<Article>());
+        var result = await _service.GetEditorChoiceAsync(5);
+        result.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task GetByCategoryAsync_ShouldReturnList()
+    {
+        _repoMock.Setup(r => r.GetByCategoryAsync(1, 1, 10)).ReturnsAsync(new List<Article>());
+        var result = await _service.GetByCategoryAsync(1, 1, 10);
+        result.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task GetLatestByCategoryIdsAsync_ShouldReturnList()
+    {
+        _repoMock.Setup(r => r.GetLatestByCategoryIdsAsync(It.IsAny<List<int>>(), 5)).ReturnsAsync(new List<Article>());
+        var result = await _service.GetLatestByCategoryIdsAsync(new List<int> { 1, 2 }, 5);
+        result.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task GetMostPopularByCategoryIdsAsync_ShouldReturnList()
+    {
+        _repoMock.Setup(r => r.GetMostPopularByCategoryIdsAsync(It.IsAny<List<int>>(), 5)).ReturnsAsync(new List<Article>());
+        var result = await _service.GetMostPopularByCategoryIdsAsync(new List<int> { 1, 2 }, 5);
+        result.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task GetEditorChoiceByCategoryIdsAsync_ShouldReturnList()
+    {
+        _repoMock.Setup(r => r.GetEditorChoiceByCategoryIdsAsync(It.IsAny<List<int>>(), 5)).ReturnsAsync(new List<Article>());
+        var result = await _service.GetEditorChoiceByCategoryIdsAsync(new List<int> { 1, 2 }, 5);
+        result.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task GetBackendArticlesAsync_ShouldReturnList()
+    {
+        _repoMock.Setup(r => r.GetAllBackendArticlesAsync()).ReturnsAsync(new List<Article>());
+        var result = await _service.GetBackendArticlesAsync("user", true);
+        result.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task GetForEditAsync_ShouldReturnNull_WhenArticleNotFound()
+    {
+        _repoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync((Article)null);
+        var result = await _service.GetForEditAsync(1, "user", true);
+        result.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task GetEditorModelAsync_ShouldReturnModel()
+    {
+        _repoMock.Setup(r => r.GetAllCategoriesAsync()).ReturnsAsync(new List<Category>());
+        var result = await _service.GetEditorModelAsync();
+        result.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task GetBySlugAsync_ShouldReturnNull_WhenNotFound()
+    {
+        _repoMock.Setup(r => r.GetBySlugAsync("slug")).ReturnsAsync((Article)null);
+        var result = await _service.GetBySlugAsync("slug");
+        result.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task IncrementViewCountAsync_ShouldCallRepo()
+    {
+        _repoMock.Setup(r => r.IncrementViewCountAsync(1)).Returns(Task.CompletedTask).Verifiable();
+        await _service.IncrementViewCountAsync(1);
+        _repoMock.Verify(r => r.IncrementViewCountAsync(1), Times.Once);
+    }
+
+    [Fact]
+    public async Task HasUserLikedArticleAsync_ShouldCallRepo()
+    {
+        _repoMock.Setup(r => r.HasUserLikedArticleAsync(1, "user")).ReturnsAsync(true);
+        var result = await _service.HasUserLikedArticleAsync(1, "user");
+        result.Should().BeTrue();
     }
 }

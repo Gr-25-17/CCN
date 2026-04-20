@@ -1,7 +1,7 @@
 ﻿using FluentAssertions;
 using NewsSite.Models.Entities;
 
-namespace NewsSite.Tests.Models
+namespace Tests.Models
 {
     public class ArticlePersistenceTests
     {

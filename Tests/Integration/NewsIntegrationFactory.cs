@@ -8,7 +8,7 @@ using NewsSite.Data;
 using NewsSite.Models.Entities;
 using System.Data.Common;
 
-namespace NewsSite.Tests.Integration
+namespace Tests.Integration
 {
     public class NewsIntegrationFactory : WebApplicationFactory<Program>
     {

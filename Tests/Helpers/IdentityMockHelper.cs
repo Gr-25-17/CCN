@@ -1,10 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Moq;
-using NewsSite.Models.Entities;
 using Microsoft.AspNetCore.Http;
 
 
-namespace NewsSite.Tests.Helpers
+namespace Tests.Helpers
 {
     public static class IdentityMockHelper
     {

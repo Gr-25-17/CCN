@@ -3,7 +3,7 @@ using Moq;
 using NewsSite.Areas.Identity.Pages.Account.Manage;
 using NewsSite.Models.Entities;
 using NewsSite.Services.Interfaces;
-using NewsSite.Tests.Helpers;
+using Tests.Helpers;
 using FluentAssertions;
 using System.Security.Claims;
 using Microsoft.Extensions.Logging;
