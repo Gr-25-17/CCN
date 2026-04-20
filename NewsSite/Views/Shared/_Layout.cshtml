@@ -41,6 +41,7 @@
                     <partial name="_LoginPartial" />
                 </div>
                 <div class="d-flex align-items-center me-3">
+                    @if(Model != null)
                     @await Component.InvokeAsync("WeatherCardVC")
                 </div>
             </div>

@@ -18,7 +18,7 @@ using System.Net.Http.Json;
 
             var result = await _httpClient.GetFromJsonAsync<StockPrice>(url);
 
-            // Match the actual API symbol
+          
             var gold = result?.Top10Stock?
                 .FirstOrDefault(x => x.Symbol == "GC=F" || x.Name == "Gold");
 

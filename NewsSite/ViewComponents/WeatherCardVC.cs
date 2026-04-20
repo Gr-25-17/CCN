@@ -14,12 +14,20 @@ namespace NewsSite.ViewComponents
                 _weatherService = weatherService;
             }
 
-            public async Task<IViewComponentResult> InvokeAsync()
+        public async Task<IViewComponentResult> InvokeAsync()
+        {
+            try
             {
                 var weather = await _weatherService.GetWeatherAsync();
-                var vm = weather.ToViewModel();
-                return View(vm); 
+
+                var vm = weather?.ToViewModel();
+                return View(vm);
+            }
+            catch (Exception ex)
+            {
+                return View(null);
             }
         }
+    }
     
 }

@@ -17,7 +17,7 @@ public class GoldMarketTimer
         _configuration = configuration; 
     }
 
-    [Function("GoldUpdater")]//
+    [Function("GoldUpdater")]
     public async Task Run([TimerTrigger("0 0 0 */2 * *")] TimerInfo myTimer)
     {
         _logger.LogInformation($"Gold Fetcher started at: {DateTime.Now}");

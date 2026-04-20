@@ -2,29 +2,20 @@
 
 @if (Model != null)
 {
-    string bgClass;
-    string textClass = "text-dark";
+    string bgClass = Model.TemperatureC switch
+    {
+        < 0 => "bg-primary",
+        < 8 => "bg-secondary",
+        <= 22 => "bg-success",
+        _ => "bg-danger"
+    };
 
-    if (Model.TemperatureC < 0)
-    {
-        bgClass = "bg-primary";
-    }
-    else if (Model.TemperatureC >= 0 && Model.TemperatureC < 8)
-    {
-        bgClass = "bg-secondary";
-    }
-    else if (Model.TemperatureC >= 8 && Model.TemperatureC <= 22)
-    {
-        bgClass = "bg-success";
-    }
-    else
-    {
-        bgClass = "bg-danger";
-    }
-
-
-    <div class="d-flex align-items-center @bgClass @textClass border border-white rounded px-2 py-1" style="font-size:0.85rem;">
+    <div class="d-flex align-items-center @bgClass text-dark border border-white rounded px-2 py-1" style="font-size:0.85rem;">
         <img src="@Model.UrlIcon" alt="Weather icon" class="me-2" style="width:30px; height:30px;" />
         <span>@Model.TemperatureDisplay</span>
     </div>
+}
+else
+{
+    <div class="text-muted small px-2">Weather unavailable</div>
 }
