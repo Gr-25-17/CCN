@@ -1,5 +1,4 @@
 ﻿using NewsSite.Models.Entities;
-using System.IO;
 
 namespace NewsSite.Services.Interfaces
 {

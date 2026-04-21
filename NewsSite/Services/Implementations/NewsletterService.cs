@@ -1,5 +1,4 @@
 ﻿using NewsSite.Mapping;
-using NewsSite.Models.Entities;
 using NewsSite.Models.ViewModels;
 using NewsSite.Repositories.Interfaces;
 using NewsSite.Services.Interfaces;

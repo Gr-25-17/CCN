@@ -1,6 +1,4 @@
-﻿using NewsSite.Models.ViewModels;
-
-namespace NewsSite.Models.ViewModels
+﻿namespace NewsSite.Models.ViewModels
 {
     public class HomeViewModel
     {
