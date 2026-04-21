@@ -1,7 +1,4 @@
-﻿using Microsoft.Extensions.Hosting;
-using NewsSite.Models.APIs;
-using NewsSite.Models.ViewModels;
-using static System.Net.WebRequestMethods;
+﻿using NewsSite.Models.APIs;
 
 namespace NewsSite.Services.Implementations
 {

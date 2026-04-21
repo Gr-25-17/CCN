@@ -4,8 +4,6 @@ using NewsSite.Services.Interfaces;
 using NewsSite.Models.ViewModels;
 using NewsSite.Models.Entities;
 using System.Security.Claims;
-using System.Net.Http;
-using System.IO;
 
 namespace NewsSite.Controllers
 {

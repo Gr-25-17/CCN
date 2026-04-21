@@ -1,5 +1,4 @@
-﻿using NewsSite.Models.Entities;
-using NewsSite.Models.ViewModels;
+﻿using NewsSite.Models.ViewModels;
 
 namespace NewsSite.Services.Interfaces
 {

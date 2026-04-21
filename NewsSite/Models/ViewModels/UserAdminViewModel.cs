@@ -1,9 +1,11 @@
-﻿namespace NewsSite.Models.ViewModels
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+
+namespace NewsSite.Models.ViewModels
 {
     public class UserAdminViewModel
     {
         public List<UserDisplayInfo> Users { get; set; } = new();
-        public List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem> AvailableRoles { get; set; } = new();
+        public List<SelectListItem> AvailableRoles { get; set; } = new();
     }
 
     public class UserDisplayInfo

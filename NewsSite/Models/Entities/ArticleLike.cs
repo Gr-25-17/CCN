@@ -1,6 +1,4 @@
-﻿using NewsSite.Models.Entities;
-
-namespace NewsSite.Models.Entities
+﻿namespace NewsSite.Models.Entities
 {
     public class ArticleLike
     {
