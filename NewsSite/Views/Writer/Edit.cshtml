@@ -94,8 +94,8 @@
                         @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
                         {
                             <div class="form-check mb-3">
-                                <input asp-for="IsPremium" class="form-check-input" id="premiumCheck" />
-                                <label asp-for="IsPremium" class="form-check-label text-primary fw-bold">
+                                <input asp-for="IsPremium" class="form-check-input" />
+                                <label asp-for="IsPremium" class="form-check-label">
                                     ⭐ Premiumartikel (Endast prenumeranter)
                                 </label>
                             </div>

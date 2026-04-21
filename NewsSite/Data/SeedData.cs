@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NewsSite.Models.Entities;
-using NewsSite.Data;
 
 namespace NewsSite.Data;
 

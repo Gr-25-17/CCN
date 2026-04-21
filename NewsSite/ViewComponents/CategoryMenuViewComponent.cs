@@ -1,7 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using NewsSite.Data;
-using NewsSite.Models.Entities;
 using NewsSite.Services.Interfaces;
 
 namespace NewsSite.ViewComponents;
