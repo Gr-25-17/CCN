@@ -20,6 +20,7 @@ public class HomeControllerTests
     private readonly Mock<UserManager<ApplicationUser>> _userManagerMock;
     private readonly Mock<INewsletterService> _newsletterServiceMock;
     private readonly HomeController _controller;
+    private readonly Mock<IWeatherService> _weatherServiceMock;
 
     public HomeControllerTests()
     {
@@ -28,6 +29,7 @@ public class HomeControllerTests
         _subscriptionServiceMock = new Mock<ISubscriptionService>();
         _userManagerMock = IdentityMockHelper.MockUserManager<ApplicationUser>();
         _newsletterServiceMock = new Mock<INewsletterService>();
+        _weatherServiceMock = new Mock<IWeatherService>();
 
 
         _controller = new HomeController(
@@ -35,7 +37,8 @@ public class HomeControllerTests
             _categoryServiceMock.Object,
             _subscriptionServiceMock.Object,
             _userManagerMock.Object,
-            _newsletterServiceMock.Object);
+            _newsletterServiceMock.Object,
+            _weatherServiceMock.Object);
             
 
         var user = new ClaimsPrincipal(new ClaimsIdentity());

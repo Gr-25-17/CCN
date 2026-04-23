@@ -1,10 +1,11 @@
 ﻿using Azure;
 using Azure.Data.Tables;
+using NewsSite.Services.Interfaces;
 
 
 namespace NewsSite.Services.Implementations
 {
-    public class GoldService
+    public class GoldService : IGoldService
     {
         private readonly TableClient _tableClient;
         private readonly ILogger<GoldService> _logger; 

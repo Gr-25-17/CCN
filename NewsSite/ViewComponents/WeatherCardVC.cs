@@ -1,15 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NewsSite.Mapping;
-using NewsSite.Services.Implementations;
+using NewsSite.Services.Interfaces;
 
 namespace NewsSite.ViewComponents
 {
     public class WeatherCardVC : ViewComponent
     {
     
-            private readonly WeatherService _weatherService;
+            private readonly IWeatherService _weatherService;
 
-            public WeatherCardVC(WeatherService weatherService)
+            public WeatherCardVC(IWeatherService weatherService)
             {
                 _weatherService = weatherService;
             }

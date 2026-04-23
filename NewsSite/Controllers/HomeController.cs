@@ -5,7 +5,6 @@ using NewsSite.Models.Entities;
 using NewsSite.Models.ViewModels;
 using NewsSite.Services.Interfaces;
 using System.Diagnostics;
-using NewsSite.Services.Implementations;
 using NewsSite.Mapping;
 
 namespace NewsSite.Controllers
@@ -17,7 +16,7 @@ namespace NewsSite.Controllers
         private readonly ISubscriptionService _subscriptionService;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly INewsletterService _newsletterService;
-        private readonly WeatherService _weatherService;
+        private readonly IWeatherService _weatherService;
 
         public HomeController(
             IArticleService articleService,
@@ -25,7 +24,7 @@ namespace NewsSite.Controllers
             ISubscriptionService subscriptionService,
             UserManager<ApplicationUser> userManager,
             INewsletterService newsletterService,
-            WeatherService weatherService)
+            IWeatherService weatherService)
             
         {
             _articleService = articleService;
