@@ -1,8 +1,9 @@
 ﻿using NewsSite.Models.APIs;
+using NewsSite.Services.Interfaces;
 
 namespace NewsSite.Services.Implementations
 {
-    public class WeatherService
+    public class WeatherService : IWeatherService
     {
         private readonly HttpClient _httpClient;
 

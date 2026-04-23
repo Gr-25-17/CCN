@@ -52,8 +52,8 @@ namespace NewsSite
 
             builder.Services.AddScoped<IBlobService, BlobService>();
             builder.Services.AddHttpClient();       
-            builder.Services.AddScoped<WeatherService>();
-            builder.Services.AddScoped<GoldService>();
+            builder.Services.AddScoped<IWeatherService, WeatherService>();
+            builder.Services.AddScoped<IGoldService, GoldService>();
             builder.Services.AddScoped<INewsletterService, NewsletterService>();
             builder.Services.AddScoped<INewsletterPreferenceRepository, NewsletterPreferenceRepository>();
 
@@ -98,7 +98,7 @@ namespace NewsSite
                 var context = services.GetRequiredService<ApplicationDbContext>();
                 //if (context.Database.IsSqlServer())
                 //{
-                //    context.Database.Migrate();
+                    context.Database.Migrate();
                 //}
             }
 

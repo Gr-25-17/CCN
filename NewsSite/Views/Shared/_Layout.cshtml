@@ -41,9 +41,23 @@
                     <partial name="_LoginPartial" />
                 </div>
                 <div class="d-flex align-items-center me-3">
-                    @if(Model != null)
-                    @await Component.InvokeAsync("WeatherCardVC")
+                    <div id="weatherWidget">
+                        @await Component.InvokeAsync("WeatherCardVC", new { detailed = false })
+                    </div>
+                    <button type="button" class="btn btn-sm btn-primary ms-2" onclick="toggleWeather()" title="Toggle weather view">
+                        ⇆
+                    </button>
                 </div>
+
+                <script>
+                                    let isDetailed = false;
+                                    async function toggleWeather() {
+                                        isDetailed = !isDetailed;
+                                        const response = await fetch(`/Home/WeatherWidget?detailed=${isDetailed}`);
+                                        const html = await response.text();
+                                        document.getElementById('weatherWidget').innerHTML = html;
+                                    }
+                </script>
             </div>
         </nav>
     </header>

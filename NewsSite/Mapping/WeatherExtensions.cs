@@ -15,6 +15,20 @@ namespace NewsSite.Mapping
             };
         }
 
+        public static WeatherViewModel ToWeatherViewModel(this WeatherForecast response)
+        {
+            return new WeatherViewModel
+            {
+                City = response.City ?? string.Empty,
+                TemperatureC = response.TemperatureC,
+                Humidity = response.Humidity,
+                WindSpeed = response.WindSpeed,
+                Date = response.Date,
+                IconUrl = response.Icon?.Url ?? string.Empty,
+                IconCode = response.Icon?.Code ?? string.Empty
+            };
+        }
+
         public static WeatherForecast ToEntity(this WeatherBasicVM vm)
         {
             return new WeatherForecast
@@ -22,7 +36,7 @@ namespace NewsSite.Mapping
                 TemperatureC = vm.TemperatureC,
                 Icon = new Icon
                 {
-                    Url = vm.UrlIcon
+                    Url = vm.UrlIcon ?? string.Empty
                 }
             };
         }
