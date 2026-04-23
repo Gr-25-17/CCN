@@ -36,7 +36,7 @@ namespace NewsSite.Mapping
                 TemperatureC = vm.TemperatureC,
                 Icon = new Icon
                 {
-                    Url = vm.UrlIcon
+                    Url = vm.UrlIcon ?? string.Empty
                 }
             };
         }

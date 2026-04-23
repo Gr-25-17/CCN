@@ -31,7 +31,7 @@ namespace NewsSite.ViewComponents
                     return View("Default", vm);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return View("Default");
             }
