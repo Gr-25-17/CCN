@@ -1,0 +1,38 @@
+﻿@model NewsSite.Models.ViewModels.WeatherViewModel
+
+@if (Model != null)
+{
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title">
+                <i class="bi bi-cloud-sun"></i> Väder
+            </h5>
+            <div class="d-flex align-items-center">
+                <img src="@Model.IconUrl" alt="Weather icon" style="width:60px; height:60px;" class="me-3" />
+                <div>
+                    <h3 class="mb-0">@Model.TemperatureC.ToString("F1")°C</h3>
+                    <p class="text-muted mb-0">@Model.City</p>
+                </div>
+            </div>
+            <hr />
+            <div class="row text-center">
+                <div class="col-6">
+                    <small class="text-muted">💧 Luftfuktighet</small>
+                    <p class="mb-0"><strong>@Model.Humidity%</strong></p>
+                </div>
+                <div class="col-6">
+                    <small class="text-muted">💨 Vind</small>
+                    <p class="mb-0"><strong>@Model.WindSpeed m/s</strong></p>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="card shadow-sm">
+        <div class="card-body text-center text-muted">
+            <p>Väderdata kunde inte hämtas</p>
+        </div>
+    </div>
+}
