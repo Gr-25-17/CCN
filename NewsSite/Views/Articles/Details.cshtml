@@ -73,24 +73,24 @@
                                 Du har läst ditt gratis smakprov. Som prenumerant får du obegränsad tillgång till all vår journalistik och exklusiva reportage.
                             </p>
                             
-                            <button type="button" class="btn btn-warning btn-lg fw-bold w-100 mb-3 shadow-sm px-5"
+                      @*       <button type="button" class="btn btn-warning btn-lg fw-bold w-100 mb-3 shadow-sm px-5"
                                     data-bs-toggle="offcanvas" data-bs-target="#subscribeOffcanvas">
                                     Bli Prenumerant – 99 kr/mån
-                            </button>
+                            </button> *@
                             
-                            @if (User.Identity != null && User.Identity.IsAuthenticated)
+                            @if (User.Identity?.IsAuthenticated == true)
                             {
-                                <div class="border-top pt-3 mt-2">
-                                    <small class="text-muted">Inloggad som @User.Identity.Name. Saknar aktiv prenumeration.</small>
-                                </div>
+                                <button type="button" class="btn btn-warning btn-lg fw-bold w-100 mb-3 shadow-sm"
+                                        data-bs-toggle="offcanvas" data-bs-target="#loginOffcanvas">
+                                    Logga in för att prenumerera
+                                </button>
                             }
                             else
                             {
-                                <div class="border-top pt-3 mt-2">
-                                    <p class="mb-0 text-muted">
-                                        Redan prenumerant? <a asp-area="Identity" asp-page="/Account/Login" class="text-primary fw-bold text-decoration-none">Logga in här</a>
-                                    </p>
-                                </div>
+                                <button type="button" class="btn btn-warning btn-lg fw-bold w-100 mb-3 shadow-sm"
+                                        data-bs-toggle="offcanvas" data-bs-target="#subscribeOffcanvas">
+                                    Bli Prenumerant – 99 kr/mån
+                                </button>
                             }
                         </div>
                     </div>
@@ -194,6 +194,54 @@
             
                 <p class="text-center mt-4 small text-muted">
                     Ingen bindningstid. Avsluta när du vill.
+                </p>
+            </form>
+        </div>
+        <p class="text-center mt-3 small text-muted">
+            Redan medlem?
+            <button type="button" class="btn btn-link p-0 text-decoration-none small"
+                    data-bs-toggle="offcanvas" data-bs-target="#loginOffcanvas">
+                Logga in istället
+            </button>
+        </p>
+    </div>
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="loginOffcanvas" aria-labelledby="loginOffcanvasLabel">
+        <div class="offcanvas-header border-bottom">
+            <h5 class="offcanvas-title fw-bold" id="loginOffcanvasLabel"> Logga in</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <h4 class="mb-3">Välkommen tillbaka</h4>
+            <p class="text-muted small mb-4">Logga in för att låsa upp @Model.Title och se dina prenumerationer.</p>
+
+            <form asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Context.Request.Path" method="post">
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">E-postadress</label>
+                    <input name="Input.Email" type="email" class="form-control" placeholder="namn@exempel.se" required />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Lösenord</label>
+                    <input name="Input.Password" type="password" class="form-control" placeholder="********" required />
+                </div>
+
+                <div class="form-check mb-4">
+                    <input class="form-check-input" type="checkbox" name="Input.RememberMe" id="rememberMe">
+                    <label class="form-check-label small" for="rememberMe">
+                        Kom ihåg mig
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm fw-bold">
+                    Logga in
+                </button>
+        
+                <p class="text-center mt-4 small text-muted">
+                    Saknar du konto?
+                    <button type="button" class="btn btn-link p-0 text-primary fw-bold text-decoration-none small"
+                            data-bs-toggle="offcanvas" data-bs-target="#subscribeOffcanvas">
+                        Skapa konto & prenumerera här
+                    </button>
                 </p>
             </form>
         </div>
