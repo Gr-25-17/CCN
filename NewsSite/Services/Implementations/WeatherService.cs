@@ -14,14 +14,14 @@ namespace NewsSite.Services.Implementations
 
         public async Task<WeatherForecast> GetWeatherAsync()
         {
-            var url = "http://weatherapi.dreammaker-it.se/forecast?City=Stockholm&Language=Eng";
+            var url = "http://localhost:7192/api/GetWeather?city=Stockholm";
+
             try
             {
-                
                 var weather = await _httpClient.GetFromJsonAsync<WeatherForecast>(url);
                 if (weather != null) return weather;
             }
-            catch {}
+            catch { }
 
             return new WeatherForecast();
         }
