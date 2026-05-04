@@ -1,9 +1,10 @@
 using API_Weather.Models;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+using Azure.Storage.Blobs;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using System.Net.Http.Json;
+using System.Text.Json;
+using Microsoft.Azure.Functions.Worker;
 
 namespace API_Weather
 {
@@ -18,17 +19,13 @@ namespace API_Weather
             _httpClient = httpClientFactory.CreateClient();
         }
 
-        [Function("GetWeather")]
-        public async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest req)
+        [Function("UpdateWeather")]
+        public async Task Run([TimerTrigger("0 */15 * * * *")] TimerInfo myTimer)
         {
-            _logger.LogInformation("GetWeather function triggered");
+            _logger.LogInformation($"Weather update triggered at: {DateTime.Now}");
 
-
-
-            string city = req.Query["city"].ToString() ?? "Stockholm";
-            string language = req.Query["language"].ToString() ?? "Eng";
-
+            string city = "Stockholm";
+            string language = "Eng";
             var url = $"http://weatherapi.dreammaker-it.se/forecast?City={city}&Language={language}";
 
             try
@@ -37,17 +34,29 @@ namespace API_Weather
 
                 if (weather != null)
                 {
-                    _logger.LogInformation($"Successfully fetched weather for {city}");
-                    return new OkObjectResult(weather);
-                }
+                    var connectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
+                    var blobServiceClient = new BlobServiceClient(connectionString);
+                    var containerClient = blobServiceClient.GetBlobContainerClient("weather-cache");
+                    await containerClient.CreateIfNotExistsAsync();
 
-                _logger.LogWarning($"No weather data returned for {city}");
-                return new NotFoundObjectResult("Weather data not found");
+                    var blobClient = containerClient.GetBlobClient("current-weather.json");
+                    var jsonData = JsonSerializer.Serialize(weather);
+
+                    using (var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(jsonData)))
+                    {
+                        await blobClient.UploadAsync(stream, overwrite: true);
+                    }
+
+                    _logger.LogInformation($"Successfully updated weather for {city}");
+                }
+                else
+                {
+                    _logger.LogWarning($"No weather data returned for {city}");
+                }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error fetching weather for {city}");
-                return new StatusCodeResult(500);
+                _logger.LogError(ex, $"Error updating weather for {city}");
             }
         }
     }
