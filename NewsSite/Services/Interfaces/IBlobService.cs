@@ -6,5 +6,6 @@ namespace NewsSite.Services.Interfaces
     {
         Task<string> UploadFileToContainer(FileUpLoadModel model);
         Task<string> UploadStreamToContainer(Stream stream, string fileName);
+        Task<string> UploadToContainerAsync(Stream stream, string blobName, string contentType, string containerName);
     }
 }

@@ -13,6 +13,7 @@ public class WriterControllerTests
     private readonly Mock<IArticleService> _articleServiceMock;
     private readonly Mock<IBlobService> _blobServiceMock;
     private readonly Mock<IHttpClientFactory> _httpMock;
+    private readonly Mock<IImageOrchestrationService> _imageOrchestrationMock;
     private readonly WriterController _controller;
 
     public WriterControllerTests()
@@ -20,7 +21,8 @@ public class WriterControllerTests
         _articleServiceMock = new Mock<IArticleService>();
         _blobServiceMock = new Mock<IBlobService>();
         _httpMock = new Mock<IHttpClientFactory>();
-        _controller = new WriterController(_articleServiceMock.Object, _blobServiceMock.Object, _httpMock.Object);
+        _imageOrchestrationMock = new Mock<IImageOrchestrationService>();
+        _controller = new WriterController(_articleServiceMock.Object, _blobServiceMock.Object, _httpMock.Object, _imageOrchestrationMock.Object);
     }
 
     [Fact]

@@ -8,7 +8,7 @@ using System.Security.Claims;
 namespace NewsSite.Controllers
 {
     [Authorize(Roles = "Admin,Editor,Writer")]
-    public class WriterController(IArticleService articleService, IBlobService blobService, IHttpClientFactory httpClientFactory) : Controller
+    public class WriterController(IArticleService articleService, IBlobService blobService, IHttpClientFactory httpClientFactory, IImageOrchestrationService imageOrchestrationService) : Controller
     {
         public async Task<IActionResult> Index()
         {
@@ -82,6 +82,45 @@ namespace NewsSite.Controllers
             }
 
             return RedirectToAction(nameof(Index));
+        }
+        [HttpPost]
+        public async Task<IActionResult> UploadImageAjax(IFormFile? file, [FromForm] string externalUrl)
+        {
+            Stream? stream = null;
+            string fileName = string.Empty;
+            string contentType = string.Empty;
+
+            try
+            {
+                if (file is { Length: > 0 })
+                {
+                    stream = file.OpenReadStream();
+                    fileName = file.FileName;
+                    contentType = file.ContentType;
+                }
+                else if (!string.IsNullOrWhiteSpace(externalUrl))
+                {
+                    stream = await imageOrchestrationService.FetchExternalImageAsync(externalUrl);
+                    if (stream is null) return BadRequest("Kunde inte hämta resurser från URL:en");
+
+                    fileName = Path.GetFileName(new Uri(externalUrl).LocalPath);
+                    contentType = "application/octet-stream";
+                }
+                else
+                {
+                    return BadRequest("Ingen giltig fil eller URL tillhandahölls.");
+                }
+                var (finalName, tempUrl, processing) = await imageOrchestrationService.HandleIncomingImageAsync(stream, fileName, contentType);
+                if (string.IsNullOrEmpty(finalName))
+                    return BadRequest("Filen är antingen korrupt eller inte ett giltigt bildformat.");
+
+                return Ok(new { fileName = finalName, temporaryUrl = tempUrl, isProcessing = processing });
+            }
+            finally
+            {
+                stream?.Dispose();
+
+            }
         }
 
         private async Task HandleImageUpload(ArticleViewModel model)

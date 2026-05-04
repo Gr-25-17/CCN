@@ -3,6 +3,7 @@ using Moq;
 using NewsSite.Services.Implementations;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
+using Azure.Storage.Blobs;
 
 namespace Tests.Services;
 
@@ -14,7 +15,8 @@ public class BlobServiceTests
         var configMock = new Mock<IConfiguration>();
         configMock.Setup(c => c["AzureWebJobsStorage"]).Returns(string.Empty);
 
-        var service = new BlobService(configMock.Object);
+        var blobServiceClientMock = new Mock<BlobServiceClient>();
+        var service = new BlobService(configMock.Object, blobServiceClientMock.Object);
         var fileMock = new Mock<IFormFile>();
 
         var result = await service.UploadImageAsync(fileMock.Object);
