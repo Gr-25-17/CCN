@@ -10,7 +10,7 @@ using System.Data.Common;
 
 namespace Tests.Integration
 {
-    public class NewsIntegrationFactory : WebApplicationFactory<Program>
+    public class NewsIntegrationFactory : WebApplicationFactory<NewsSite.Program>
     {
         private SqliteConnection? _connection;
 
