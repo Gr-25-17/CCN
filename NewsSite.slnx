@@ -1,8 +1,11 @@
 <Solution>
   <Project Path="API_Weather/Weather.csproj" Id="5e1e081f-74c8-4fee-ba6e-cd53a1ef5605">
-    <Build Solution="Debug|*" Project="false" />
+    <Build Project="false" />
   </Project>
   <Project Path="GoldApIUpdater/GoldApIUpdater/GoldApIUpdater.csproj" />
+  <Project Path="ImageProcessor/ImageProcessor.csproj" Id="e559db9b-05d1-46b1-9d47-14993580bce7">
+    <Build Project="false" />
+  </Project>
   <Project Path="NewsSite/NewsSite.csproj" />
   <Project Path="Tests/Tests.csproj" Id="0b055612-4ab6-48f6-990c-64f0b4c87c16" />
 </Solution>

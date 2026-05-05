@@ -4,7 +4,6 @@ namespace NewsSite.Services.Interfaces
 {
     public interface IBlobService
     {
-        Task<string> UploadFileToContainer(FileUpLoadModel model);
-        Task<string> UploadStreamToContainer(Stream stream, string fileName);
+        Task<string> UploadToContainerAsync(Stream stream, string fileName, string contentType, string containerName);
     }
 }
