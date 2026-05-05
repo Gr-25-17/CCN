@@ -1,0 +1,15 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+    "ApplicationInsightsKey": "",
+    "SendGridApiKey": "",
+    "NewsletterFromEmail": "noreply@newssite.com",
+    "NewsletterFromName": "NewsletterSender",
+    "NewsletterBaseUrl": "https://localhost:7071",
+    "NewsletterApiBaseUrl": "https://localhost:5000",
+    "NewsletterContainer": "newsletter-templates",
+    "NewsSiteDbConnection": "Server=.;Database=NewsSiteDb;Integrated Security=true;"
+  }
+}

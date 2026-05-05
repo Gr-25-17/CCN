@@ -84,5 +84,23 @@ namespace NewsSite.Mapping
             existingArticle.MetaTitle = model.MetaTitle ?? model.Title;
             existingArticle.MetaDescription = model.MetaDescription ?? model.Summary;
         }
+
+        public static SearchArticleVM MapToSearchViewModel(this Article article)
+        {
+            return new SearchArticleVM
+            {
+                Id = article.Id,
+                Title = article.Title,
+                Summary = article.Summary,
+                Slug = article.Slug,
+               
+                CategoryName = article.Category?.Name ?? "Allmänt",
+                AuthorName = article.AuthorName,
+                CreatedAt = article.CreatedAt,
+                IsPremium = article.IsPremium,
+                IsArchived = article.IsArchived,
+                ViewsCount = article.ViewsCount
+            };
+        }
     }
 }

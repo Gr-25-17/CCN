@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using NewsSite.Services.Interfaces;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
 
 namespace NewsSite.Controllers
 {
@@ -53,6 +54,17 @@ namespace NewsSite.Controllers
 
             var result = await articleService.ToggleLikeAsync(articleId, userId);
             return Json(new { success = true, isLiked = result.IsLiked, likesCount = result.LikesCount });
+        }
+
+        public IActionResult Search(string searchTerm)
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            // Redirect to Home Index with search term as query parameter so HomeController handles building the view model.
+            return RedirectToAction("Index", "Home", new { searchTerm = searchTerm });
         }
     }
 }

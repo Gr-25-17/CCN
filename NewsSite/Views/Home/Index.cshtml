@@ -7,22 +7,45 @@
 <div class="container">
     <div class="row">
         <div class="col-md-8">
-            <h2 class="mb-4">Latest News</h2>
-
-            @if (Model.LatestArticles.Any())
+            @if (Model.IsSearch)
             {
-                <div class="row">
-                    @foreach (var article in Model.LatestArticles)
-                    {
-                        <div class="col-12 mb-4">
-                            <partial name="Partials/_ArticleCard" model="article" />
-                        </div>
-                    }
-                </div>
+                <h2 class="mb-4">Sökresultat för "@Model.SearchTerm"</h2>
+
+                @if (Model.SearchResults.Any())
+                {
+                    <div class="row">
+                        @foreach (var article in Model.SearchResults)
+                        {
+                            <div class="col-12 mb-4">
+                                <partial name="Partials/_SearchResult" model="article" />
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info">Inga artiklar hittades för "@Model.SearchTerm".</div>
+                }
             }
             else
             {
-                <div class="alert alert-info">No articles yet. Check back soon!</div>
+                <h2 class="mb-4">Latest News</h2>
+
+                @if (Model.LatestArticles.Any())
+                {
+                    <div class="row">
+                        @foreach (var article in Model.LatestArticles)
+                        {
+                            <div class="col-12 mb-4">
+                                <partial name="Partials/_ArticleCard" model="article" />
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info">No articles yet. Check back soon!</div>
+                }
             }
         </div>
 

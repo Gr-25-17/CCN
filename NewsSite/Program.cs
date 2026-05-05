@@ -56,6 +56,8 @@ namespace NewsSite
             builder.Services.AddScoped<IGoldService, GoldService>();
             builder.Services.AddScoped<INewsletterService, NewsletterService>();
             builder.Services.AddScoped<INewsletterPreferenceRepository, NewsletterPreferenceRepository>();
+            builder.Services.AddScoped<INewsletterRepository, NewsletterRepository>();
+            builder.Services.AddScoped<INewsletterManagementService, NewsletterManagementService>();
 
             builder.Services.AddAuthorization(options =>
             {

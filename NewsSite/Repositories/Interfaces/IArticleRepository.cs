@@ -25,5 +25,7 @@ namespace NewsSite.Repositories.Interfaces
         Task<IEnumerable<Article>> GetLatestByCategoryIdsAsync(List<int> categoryIds, int count);
         Task<IEnumerable<Article>> GetMostPopularByCategoryIdsAsync(List<int> categoryIds, int count);
         Task<IEnumerable<Article>> GetEditorChoiceByCategoryIdsAsync(List<int> categoryIds, int count);
+
+        Task<IEnumerable<Article>> SearchArticlesAsync(string searchTerm);
     }
 }

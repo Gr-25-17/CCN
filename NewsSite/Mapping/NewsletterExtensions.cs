@@ -38,5 +38,29 @@ namespace NewsSite.Mapping
                 UnsubscribeToken = Guid.NewGuid().ToString()
             };
         }
+
+        /// <summary>
+        /// Parse comma-separated category IDs from the newsletter
+        /// </summary>
+        public static List<int> GetSelectedCategoryIds(this Newsletter newsletter)
+        {
+            if (string.IsNullOrEmpty(newsletter.SelectedCategoryIds))
+                return new List<int>();
+
+            return newsletter.SelectedCategoryIds
+                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(id => int.TryParse(id.Trim(), out var parsed) ? parsed : 0)
+                .Where(id => id > 0)
+                .ToList();
+        }
+
+        /// <summary>
+        /// Check if newsletter has any specific categories selected
+        /// </summary>
+        public static bool HasCategorySelection(this Newsletter newsletter)
+        {
+            return !string.IsNullOrEmpty(newsletter.SelectedCategoryIds) && 
+                   newsletter.SelectedCategoryIds.Split(',').Any(s => !string.IsNullOrWhiteSpace(s));
+        }
     }
 }

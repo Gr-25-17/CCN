@@ -38,6 +38,23 @@ namespace NewsSite.Controllers
 
         public async Task<IActionResult> Index()
         {
+            // Check for search term query param and if present, return search results on the home page.
+            var searchTerm = HttpContext.Request.Query["searchTerm"].ToString();
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var searchResults = await _articleService.SearchArticlesAsync(searchTerm);
+
+                var searchVm = new HomeViewModel
+                {
+                    SearchResults = searchResults,
+                    IsSearch = true,
+                    SearchTerm = searchTerm,
+                    Categories = await _categoryService.GetAllAsync()
+                };
+
+                return View(searchVm);
+            }
+
             var hasSubscription = false;
             List<int>? preferredCategoryIds = null;
 

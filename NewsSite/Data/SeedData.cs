@@ -51,7 +51,10 @@ public static class SeedData
                 IsArchived = false,
                 IsDeleted = false,
                 IsEditorsChoice = true,
-                CategoryId = sweden?.Id ?? 1
+                CategoryId = sweden?.Id ?? 1,
+                AuthorName = "John Doe"
+
+
             },
             new Article
             {

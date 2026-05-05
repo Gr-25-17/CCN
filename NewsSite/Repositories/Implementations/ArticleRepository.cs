@@ -145,5 +145,47 @@ namespace NewsSite.Repositories.Implementations
                 .Take(count)
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<Article>> SearchArticlesAsync(string searchItem)
+        {
+            if (string.IsNullOrWhiteSpace(searchItem))
+            {
+                return new List<Article>();
+            }
+
+            var item = searchItem.ToLower();
+
+            // Find articles where title, summary or author matches the search term.
+            // We fetch matching rows from the database and then apply a simple relevance
+            // score in memory so results containing the term in the title rank higher,
+            // then author matches, then summary matches.
+            var query = context.Articles
+                .Where(a => !a.IsDeleted && a.IsReadyForPublish && !a.IsArchived &&
+                    (a.Title.ToLower().Contains(item)
+                     || a.Summary.ToLower().Contains(item)
+                     || (a.AuthorName != null && a.AuthorName.ToLower().Contains(item))
+                     || (a.Author != null && (a.Author.FirstName + " " + a.Author.LastName).ToLower().Contains(item))
+                    ))
+                .Include(a => a.Category)
+                .Include(a => a.Author);
+
+            var list = await query.ToListAsync();
+
+            var ordered = list
+                .Select(a => new
+                {
+                    Article = a,
+                    Score = (a.Title != null && a.Title.ToLower().Contains(item) ? 3 : 0)
+                            + ((a.AuthorName != null && a.AuthorName.ToLower().Contains(item)) || (a.Author != null && (a.Author.FirstName + " " + a.Author.LastName).ToLower().Contains(item)) ? 2 : 0)
+                            + (a.Summary != null && a.Summary.ToLower().Contains(item) ? 1 : 0)
+                })
+                .OrderByDescending(x => x.Score)
+                .ThenByDescending(x => x.Article.CreatedAt)
+                .Select(x => x.Article)
+                .ToList();
+
+            return ordered;
+        }
+ 
     }
 }
