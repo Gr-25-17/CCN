@@ -19,10 +19,8 @@ public class WriterControllerTests
     public WriterControllerTests()
     {
         _articleServiceMock = new Mock<IArticleService>();
-        _blobServiceMock = new Mock<IBlobService>();
-        _httpMock = new Mock<IHttpClientFactory>();
         _imageOrchestrationMock = new Mock<IImageOrchestrationService>();
-        _controller = new WriterController(_articleServiceMock.Object, _blobServiceMock.Object, _httpMock.Object, _imageOrchestrationMock.Object);
+        _controller = new WriterController(_articleServiceMock.Object, _imageOrchestrationMock.Object);
     }
 
     [Fact]

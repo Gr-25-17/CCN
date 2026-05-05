@@ -1,52 +1,56 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using Moq;
 using NewsSite.Services.Implementations;
-using FluentAssertions;
-using Microsoft.AspNetCore.Http;
-using Azure.Storage.Blobs;
+using NewsSite.Services.Interfaces;
 
 namespace Tests.Services;
 
 public class BlobServiceTests
 {
-    [Fact]
-    public async Task UploadImageAsync_ShouldReturnEmpty_WhenConfigIsMissing()
+    // 1. Deklarera variablerna som klassfält
+    private readonly Mock<BlobServiceClient> _mockBlobServiceClient;
+    private readonly IBlobService _blobService;
+
+    // 2. Skapa en konstruktor för att instansiera dem innan testerna körs
+    public BlobServiceTests()
     {
-        var configMock = new Mock<IConfiguration>();
-        configMock.Setup(c => c["AzureWebJobsStorage"]).Returns(string.Empty);
+        _mockBlobServiceClient = new Mock<BlobServiceClient>();
 
-        var blobServiceClientMock = new Mock<BlobServiceClient>();
-        var service = new BlobService(configMock.Object, blobServiceClientMock.Object);
-        var fileMock = new Mock<IFormFile>();
-
-        var result = await service.UploadImageAsync(fileMock.Object);
-
-        result.Should().BeEmpty();
+        // Skicka in det mockade objektet i din faktiska BlobService
+        _blobService = new BlobService(_mockBlobServiceClient.Object);
     }
 
-    //[Fact]
-    //public async Task UploadFileToContainer_ShouldCallUploadStreamToContainer()
-    //{
-    //    var configMock = new Mock<IConfiguration>();
-    //    var fileMock = new Mock<Microsoft.AspNetCore.Http.IFormFile>();
-    //    var stream = new MemoryStream();
-    //    fileMock.Setup(f => f.OpenReadStream()).Returns(stream);
-    //    fileMock.Setup(f => f.FileName).Returns("test.txt");
-    //    var model = new NewsSite.Models.Entities.FileUpLoadModel { File = fileMock.Object };
-    //    var service = new BlobService(configMock.Object);
-    //    var result = await service.UploadFileToContainer(model);
-    //    result.Should().NotBeNull();
-    //}
+    [Fact]
+    public async Task UploadToContainerAsync_ShouldReturnBlobUri()
+    {
+        // Arrange
+        using var stream = new MemoryStream("fejkad-bild-data"u8.ToArray());
+        var fileName = "testbild.webp";
+        var contentType = "image/webp";
+        var containerName = "articles-raw";
 
-    //[Fact]
-    //public async Task UploadStreamToContainer_ShouldReturnUri()
-    //{
-    //    var configMock = new Mock<IConfiguration>();
-    //    configMock.Setup(c => c["AzureWebJobsStorage"]).Returns("UseDevelopmentStorage=true");
-    //    configMock.Setup(c => c["BlobContainerName"]).Returns("testcontainer");
-    //    var service = new BlobService(configMock.Object);
-    //    var stream = new MemoryStream(new byte[] { 1, 2, 3 });
-    //    var result = await service.UploadStreamToContainer(stream, "file.txt");
-    //    result.Should().NotBeNull();
-    //}
+        var mockContainerClient = new Mock<BlobContainerClient>();
+        var mockBlobClient = new Mock<BlobClient>();
+        var fakeUri = new Uri("https://dittstorage.blob.core.windows.net/articles-raw/testbild.webp");
+
+        mockBlobClient.Setup(x => x.Uri).Returns(fakeUri);
+        mockContainerClient.Setup(x => x.GetBlobClient(fileName)).Returns(mockBlobClient.Object);
+
+        // Nu existerar _mockBlobServiceClient och fungerar korrekt
+        _mockBlobServiceClient.Setup(x => x.GetBlobContainerClient(containerName)).Returns(mockContainerClient.Object);
+
+        // Act
+        // Nu existerar _blobService och fungerar korrekt
+        var result = await _blobService.UploadToContainerAsync(stream, fileName, contentType, containerName);
+
+        // Assert
+        Assert.Equal(fakeUri.ToString(), result);
+
+        mockBlobClient.Verify(x => x.UploadAsync(
+            It.IsAny<Stream>(),
+            It.Is<BlobUploadOptions>(o => o.HttpHeaders.ContentType == contentType),
+            It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
 }

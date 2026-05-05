@@ -1,23 +1,55 @@
 ﻿using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
+using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Formats.Webp;
-using Microsoft.Azure.Functions.Worker;
-using Azure.Storage.Blobs.Models;
+using SixLabors.ImageSharp.Processing;
+using System.Net;
 
 namespace ImageProcessor
 {
     public class ImageWorker(BlobServiceClient blobService, ILogger<ImageWorker> logger)
     {
         private const string RawContainer = "articles-raw";
-        private readonly(string Container, int Width)[] _targets=[
-            ("articles-full",0),
-            ("articles-med",800),
-            ("articles-min",200)
+        private readonly (string Container, int Width)[] _targets = [
+            ("articles-full", 0),
+            ("articles-med", 800),
+            ("articles-min", 200)
         ];
+
+        // Denna reagerar på NYA filer
         [Function("ProcessArticleImage")]
-        public async Task Run([BlobTrigger($"{RawContainer}/{{name}}")]Stream stream, string name)
+        public async Task Run([BlobTrigger($"{RawContainer}/{{name}}", Connection = "AzureWebJobsStorage")] Stream stream, string name)
+        {
+            await ProcessImageInternal(stream, name);
+        }
+
+        // NY FUNKTION: Denna anropar du manuellt för att fixa EXISTERANDE filer
+        [Function("RepairExistingImages")]
+        public async Task<HttpResponseData> Repair([HttpTrigger(AuthorizationLevel.Function, "get", "post")] HttpRequestData req)
+        {
+            logger.LogInformation("Startar reparation av existerande bilder...");
+            var containerClient = blobService.GetBlobContainerClient(RawContainer);
+            int count = 0;
+
+            await foreach (var blobItem in containerClient.GetBlobsAsync())
+            {
+                var blobClient = containerClient.GetBlobClient(blobItem.Name);
+                var downloadResult = await blobClient.DownloadStreamingAsync();
+
+                await ProcessImageInternal(downloadResult.Value.Content, blobItem.Name);
+                count++;
+            }
+
+            var response = req.CreateResponse(HttpStatusCode.OK);
+            await response.WriteStringAsync($"Reparationen klar! Bearbetade {count} bilder.");
+            return response;
+        }
+
+        // Gemensam logik för konvertering
+        private async Task ProcessImageInternal(Stream stream, string name)
         {
             try
             {
@@ -45,18 +77,16 @@ namespace ImageProcessor
                     var client = blobService.GetBlobContainerClient(container).GetBlobClient($"{baseName}.webp");
                     await client.UploadAsync(outputStream, new BlobUploadOptions
                     {
-                        HttpHeaders = new BlobHttpHeaders
-                        {
-                            ContentType = "image/webp"
-                        }
+                        HttpHeaders = new BlobHttpHeaders { ContentType = "image/webp" }
                     });
                 }
+                // Ta bort originalet när vi är klara[cite: 1]
                 await blobService.GetBlobContainerClient(RawContainer).GetBlobClient(name).DeleteAsync();
-                logger.LogInformation("Processed and converted {ImageName} to WebP.", name);
+                logger.LogInformation("Lyckades konvertera: {ImageName}", name);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Failed to process {ImageName}. The file might be corrupt.", name);
+                logger.LogError(ex, "Fel vid bearbetning av {ImageName}", name);
             }
         }
     }

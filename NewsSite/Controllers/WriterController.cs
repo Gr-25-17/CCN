@@ -2,13 +2,12 @@
 using Microsoft.AspNetCore.Mvc;
 using NewsSite.Services.Interfaces;
 using NewsSite.Models.ViewModels;
-using NewsSite.Models.Entities;
 using System.Security.Claims;
 
 namespace NewsSite.Controllers
 {
     [Authorize(Roles = "Admin,Editor,Writer")]
-    public class WriterController(IArticleService articleService, IBlobService blobService, IHttpClientFactory httpClientFactory, IImageOrchestrationService imageOrchestrationService) : Controller
+    public class WriterController(IArticleService articleService, IImageOrchestrationService imageOrchestrationService) : Controller
     {
         public async Task<IActionResult> Index()
         {
@@ -37,7 +36,6 @@ namespace NewsSite.Controllers
                 return View(model);
             }
 
-            await HandleImageUpload(model);
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             await articleService.CreateAsync(model, userId!);
@@ -70,7 +68,6 @@ namespace NewsSite.Controllers
                 return View(model);
             }
 
-            await HandleImageUpload(model);
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var canSeeAll = User.IsInRole("Admin") || User.IsInRole("Editor");
@@ -84,7 +81,7 @@ namespace NewsSite.Controllers
             return RedirectToAction(nameof(Index));
         }
         [HttpPost]
-        public async Task<IActionResult> UploadImageAjax(IFormFile? file, [FromForm] string externalUrl)
+        public async Task<IActionResult> UploadImageAjax(IFormFile? file, [FromForm] string? externalUrl)
         {
             Stream? stream = null;
             string fileName = string.Empty;
@@ -123,55 +120,7 @@ namespace NewsSite.Controllers
             }
         }
 
-        private async Task HandleImageUpload(ArticleViewModel model)
-        {
-            if (model.ImageFile != null && model.ImageFile.Length > 0)
-            {
-                var fileUploadModel = new FileUpLoadModel { File = model.ImageFile };
-                var blobUrl = await blobService.UploadFileToContainer(fileUploadModel);
-
-                if (blobUrl.StartsWith("https"))
-                {
-                    model.ImageUrl = blobUrl;
-                }
-            }
-            else if (!string.IsNullOrWhiteSpace(model.ImageExternalUrl))
-            {
-                try
-                {
-                    var client = httpClientFactory.CreateClient();
-                    var response = await client.GetAsync(model.ImageExternalUrl);
-
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var contentType = response.Content.Headers.ContentType?.MediaType;
-                        if (contentType != null && contentType.StartsWith("image/"))
-                        {
-                            var uri = new Uri(model.ImageExternalUrl);
-                            var fileName = Path.GetFileName(uri.LocalPath);
-
-                            if (string.IsNullOrWhiteSpace(fileName))
-                            {
-                                fileName = Guid.NewGuid().ToString() + "." + contentType.Split('/')[1];
-                            }
-
-                            using (var stream = await response.Content.ReadAsStreamAsync())
-                            {
-                                var blobUrl = await blobService.UploadStreamToContainer(stream, fileName);
-
-                                if (blobUrl.StartsWith("https"))
-                                {
-                                    model.ImageUrl = blobUrl;
-                                }
-                            }
-                        }
-                    }
-                }
-                catch
-                {
-
-                }
-            }
-        }
+        
+        
     }
 }

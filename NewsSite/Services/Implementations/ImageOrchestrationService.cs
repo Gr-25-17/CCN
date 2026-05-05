@@ -25,9 +25,11 @@ namespace NewsSite.Services.Implementations
             return (finalFileName, tempUrl, !isSvg);
         }
 
-        public Task<Stream?> FetchExternalImageAsync(string url)
+        public async Task<Stream?> FetchExternalImageAsync(string url)
         {
-            throw new NotImplementedException();
+            var client = httpClientFactory.CreateClient();
+            var response = await client.GetAsync(url);
+            return response.IsSuccessStatusCode ? await response.Content.ReadAsStreamAsync() : null;
         }
     }
 }
