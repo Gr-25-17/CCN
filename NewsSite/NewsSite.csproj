@@ -43,7 +43,8 @@
 	  <ProjectReference Include="..\API_Weather\Weather.csproj">
 		  <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
 	  </ProjectReference>
-    <ProjectReference Include="..\GoldApIUpdater\GoldApIUpdater\GoldApIUpdater.csproj" />
+	  <ProjectReference Include="..\GoldApIUpdater\GoldApIUpdater\GoldApIUpdater.csproj">
+	  </ProjectReference>
   </ItemGroup>
 
 </Project>
