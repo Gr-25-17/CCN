@@ -1,16 +1,17 @@
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-var host = new HostBuilder()
-    .ConfigureFunctionsWebApplication()
-    .ConfigureServices(services =>
-    {
-        services.AddApplicationInsightsTelemetryWorkerService();
-        services.ConfigureFunctionsApplicationInsights();
+var builder = FunctionsApplication.CreateBuilder(args);
 
-        services.AddHttpClient();
-    })
-    .Build();
+builder.ConfigureFunctionsWebApplication();
 
-host.Run();
+// Telemetri & Loggning (Application Insights)
+builder.Services.AddApplicationInsightsTelemetryWorkerService();
+builder.Services.ConfigureFunctionsApplicationInsights();
+
+// Tjänster & Beroenden
+builder.Services.AddHttpClient();
+
+builder.Build().Run();

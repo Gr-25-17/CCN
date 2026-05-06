@@ -7,11 +7,12 @@ var builder = FunctionsApplication.CreateBuilder(args);
 
 builder.ConfigureFunctionsWebApplication();
 
+// Telemetry & Logging
+builder.Services.AddApplicationInsightsTelemetryWorkerService();
+builder.Services.ConfigureFunctionsApplicationInsights();
+
+// Dependencies
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<StockMarketService>();
-
-//builder.Services
-//    .AddApplicationInsightsTelemetryWorkerService()
-//    .ConfigureFunctionsApplicationInsights();
 
 builder.Build().Run();
