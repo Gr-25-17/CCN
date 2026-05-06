@@ -7,4 +7,6 @@ public interface INewsletterService
     Task<NewsletterPreferencesViewModel> GetPreferencesAsync(string userId);
     Task SavePreferencesAsync(string userId, NewsletterPreferencesViewModel preferences);
     Task<List<CategoryViewModel>> GetAllCategoriesAsync();
+    Task<List<AuthorViewModel>> GetAllAuthorsAsync();
+
 }

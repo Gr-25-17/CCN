@@ -2,14 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
-using System;
-using System.ComponentModel.DataAnnotations;
-using System.Text.Encodings.Web;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using NewsSite.Models.Entities;
+using NewsSite.Services.Interfaces;
+using NewsSite.Models.ViewModels;
+using System.ComponentModel.DataAnnotations;
+
 
 namespace NewsSite.Areas.Identity.Pages.Account.Manage
 {
@@ -17,13 +17,16 @@ namespace NewsSite.Areas.Identity.Pages.Account.Manage
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly INewsletterService _newsletterService;
 
         public IndexModel(
             UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager)
+            SignInManager<ApplicationUser> signInManager,
+            INewsletterService newsletterService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _newsletterService = newsletterService;
         }
 
         /// <summary>
@@ -50,6 +53,10 @@ namespace NewsSite.Areas.Identity.Pages.Account.Manage
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
+        /// 
+
+        [BindProperty]
+        public NewsletterPreferencesViewModel ContentPreferences { get; set; } = new();
         public class InputModel
         {
             /// <summary>
@@ -89,6 +96,8 @@ namespace NewsSite.Areas.Identity.Pages.Account.Manage
             };
         }
 
+
+
         public async Task<IActionResult> OnGetAsync()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -98,6 +107,20 @@ namespace NewsSite.Areas.Identity.Pages.Account.Manage
             }
 
             await LoadAsync(user);
+
+            var prefs = await _newsletterService.GetPreferencesAsync(user.Id);
+
+            var categories = await _newsletterService.GetAllCategoriesAsync();
+            var authors = await _newsletterService.GetAllAuthorsAsync();
+
+            ContentPreferences = new NewsletterPreferencesViewModel
+            {
+                SelectedCategoryIds = prefs.SelectedCategoryIds,
+                SelectedAuthorIds = prefs.SelectedAuthorIds,
+                AvailableCategories = categories,
+                AvailableAuthors = authors
+            };
+
             return Page();
         }
 
