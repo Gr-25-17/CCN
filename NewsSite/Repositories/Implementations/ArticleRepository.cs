@@ -145,5 +145,6 @@ namespace NewsSite.Repositories.Implementations
                 .Take(count)
                 .ToListAsync();
         }
+        public IQueryable<Article> GetQueryable() => context.Articles.AsQueryable();
     }
 }

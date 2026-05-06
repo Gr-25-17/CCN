@@ -149,9 +149,8 @@ namespace NewsSite.Services.Implementations
             => (await _articleRepository.GetBySlugAsync(slug))?.MapToArticleViewModel();
 
         public async Task IncrementViewCountAsync(int articleId)
-        {
-            await _articleRepository.IncrementViewCountAsync(articleId);
-        }
+            =>  await _articleRepository.IncrementViewCountAsync(articleId);
+        
 
         public async Task<bool> HasUserLikedArticleAsync(int articleId, string userId)
             => await _articleRepository.HasUserLikedArticleAsync(articleId, userId);

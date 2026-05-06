@@ -1,3 +1,8 @@
 ﻿@using NewsSite
 @using NewsSite.Models
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@* Injicera IConfiguration globalt så alla vyer kan läsa appsettings.json *@
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+
+@* Gör dina extension methods tillgängliga för alla vyer (dubbelkolla att detta matchar din namespace) *@
+@using NewsSite.Mapping
