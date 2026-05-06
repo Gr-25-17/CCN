@@ -51,7 +51,7 @@ namespace NewsSite
             builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 
             builder.Services.AddScoped<IBlobService, BlobService>();
-            builder.Services.AddHttpClient();       
+            builder.Services.AddHttpClient();
             builder.Services.AddScoped<IWeatherService, WeatherService>();
             builder.Services.AddScoped<IGoldService, GoldService>();
             builder.Services.AddScoped<INewsletterService, NewsletterService>();

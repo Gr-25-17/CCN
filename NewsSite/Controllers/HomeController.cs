@@ -1,11 +1,12 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using NewsSite.Mapping;
 using NewsSite.Models;
 using NewsSite.Models.Entities;
 using NewsSite.Models.ViewModels;
+using NewsSite.Services.Implementations;
 using NewsSite.Services.Interfaces;
 using System.Diagnostics;
-using NewsSite.Mapping;
 
 namespace NewsSite.Controllers
 {

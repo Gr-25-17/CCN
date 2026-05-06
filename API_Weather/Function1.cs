@@ -1,10 +1,8 @@
 using API_Weather.Models;
-using Azure.Storage.Blobs;
+using Azure.Data.Tables;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using System.Net.Http.Json;
-using System.Text.Json;
-using Microsoft.Azure.Functions.Worker;
 
 namespace API_Weather
 {
@@ -20,7 +18,7 @@ namespace API_Weather
         }
 
         [Function("UpdateWeather")]
-        public async Task Run([TimerTrigger("0 */15 * * * *")] TimerInfo myTimer)
+        public async Task Run([TimerTrigger("0 0 */6 * * *")] TimerInfo myTimer)
         {
             _logger.LogInformation($"Weather update triggered at: {DateTime.Now}");
 
@@ -35,19 +33,24 @@ namespace API_Weather
                 if (weather != null)
                 {
                     var connectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
-                    var blobServiceClient = new BlobServiceClient(connectionString);
-                    var containerClient = blobServiceClient.GetBlobContainerClient("weather-cache");
-                    await containerClient.CreateIfNotExistsAsync();
+                    var tableClient = new TableClient(connectionString, "WeatherData");
+                    await tableClient.CreateIfNotExistsAsync();
 
-                    var blobClient = containerClient.GetBlobClient("current-weather.json");
-                    var jsonData = JsonSerializer.Serialize(weather);
-
-                    using (var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(jsonData)))
+                    var entity = new WeatherEntity
                     {
-                        await blobClient.UploadAsync(stream, overwrite: true);
-                    }
+                        RowKey = DateTime.UtcNow.ToString("yyyyMMddHHmmss"),
+                        City = weather.City ?? "Stockholm",
+                        TemperatureC = weather.TemperatureC,
+                        Humidity = weather.Humidity,
+                        WindSpeed = weather.WindSpeed,
+                        IconUrl = weather.Icon?.Url ?? string.Empty,
+                        IconCode = weather.Icon?.Code ?? string.Empty,
+                        DateString = weather.Date.ToString("yyyy-MM-dd HH:mm:ss")
+                    };
 
-                    _logger.LogInformation($"Successfully updated weather for {city}");
+                    await tableClient.UpsertEntityAsync(entity);
+
+                    _logger.LogInformation($"Successfully saved weather for {city} to Table Storage");
                 }
                 else
                 {
