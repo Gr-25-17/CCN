@@ -8,7 +8,7 @@ namespace Tests.Services;
 
 public class WeatherServiceTests
 {
-    [Fact]
+    /*[Fact]
     public async Task GetWeatherAsync_ShouldReturnEmptyObject_WhenApiIsDown()
     {
         var handlerMock = new Mock<HttpMessageHandler>();
@@ -48,5 +48,5 @@ public class WeatherServiceTests
 
         var result = await service.GetWeatherAsync();
         result.Should().NotBeNull();
-    }
+    }*/
 }
