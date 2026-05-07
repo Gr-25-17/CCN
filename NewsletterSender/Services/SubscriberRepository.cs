@@ -69,6 +69,35 @@ public class SubscriberRepository
                 }
             }
 
+    /// <summary>
+    /// Upserts a subscriber entity into the Subscribers table.
+    /// </summary>
+    public async Task UpsertSubscriberAsync(Subscriber subscriber)
+    {
+        try
+        {
+            var entity = new SubscriberTableEntity
+            {
+                PartitionKey = "Subscribers",
+                RowKey = subscriber.UserId ?? Guid.NewGuid().ToString(),
+                UserId = subscriber.UserId ?? string.Empty,
+                Email = subscriber.Email ?? string.Empty,
+                FirstName = subscriber.FirstName ?? string.Empty,
+                LastName = subscriber.FirstName ?? string.Empty,
+                PreferredCategoryIds = subscriber.PreferredCategoryIds ?? string.Empty,
+                IsActive = subscriber.IsActive,
+                LastSentAt = subscriber.LastSentAt
+            };
+
+            await _tableClient.UpsertEntityAsync(entity);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error upserting subscriber {UserId}", subscriber.UserId);
+            throw;
+        }
+    }
+
             _logger.LogInformation($"Updated LastSentAt for {userIds.Count} subscribers");
         }
         catch (Exception ex)

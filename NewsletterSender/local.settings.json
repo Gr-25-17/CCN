@@ -11,5 +11,23 @@
     "NewsletterApiBaseUrl": "https://localhost:5000",
     "NewsletterContainer": "newsletter-templates",
     "NewsSiteDbConnection": "Server=.;Database=NewsSiteDb;Integrated Security=true;"
+  },
+
+  "AllowedHosts": "*",
+
+  "EmailSettings": {
+
+    "SmtpServer": "smtp.gmail.com",
+
+    "SmtpPort": "465",
+
+    "SmtpUsername": "emailaddress@gmail.com",
+
+    "SmtpPassword": "-I Used my own but deleted it",
+
+    "SenderEmail": "emailaddress@gmail.com ",
+
+    "SenderName": "CCNNewsletter"
+
   }
 }

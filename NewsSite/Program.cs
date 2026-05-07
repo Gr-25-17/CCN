@@ -100,7 +100,7 @@ namespace NewsSite
                 var context = services.GetRequiredService<ApplicationDbContext>();
                 //if (context.Database.IsSqlServer())
                 //{
-                    context.Database.Migrate();
+                    //context.Database.Migrate();
                 //}
             }
 
