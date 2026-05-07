@@ -1,3 +1,4 @@
+using Azure.Storage.Blobs;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
@@ -33,7 +34,7 @@ namespace NewsSite
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 
-            builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             builder.Services.AddControllersWithViews();
@@ -50,8 +51,21 @@ namespace NewsSite
             builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
             builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 
+            builder.Services.AddSingleton(x =>
+            {
+                var connectionString = builder.Configuration["AzureWebJobsStorage"];
+
+                if (string.IsNullOrEmpty(connectionString))
+                {
+                    throw new InvalidOperationException("Anslutningssträngen 'AzureWebJobsStorage' saknas i konfigurationen.");
+                }
+
+                return new BlobServiceClient(connectionString);
+            });
+
             builder.Services.AddScoped<IBlobService, BlobService>();
             builder.Services.AddHttpClient();
+            builder.Services.AddScoped<IImageOrchestrationService, ImageOrchestrationService>();
             builder.Services.AddScoped<IWeatherService, WeatherService>();
             builder.Services.AddScoped<IGoldService, GoldService>();
             builder.Services.AddScoped<INewsletterService, NewsletterService>();
@@ -96,20 +110,12 @@ namespace NewsSite
             {
                 var services = scope.ServiceProvider;
                 var context = services.GetRequiredService<ApplicationDbContext>();
-                //if (context.Database.IsSqlServer())
-                //{
-                    context.Database.Migrate();
-                //}
-            }
 
-            using (var scope = app.Services.CreateScope())
-            {
-                var services = scope.ServiceProvider;
+                context.Database.Migrate();
+
                 await DbInitializer.SeedRolesAndAdminAsync(services);
-            }
-            using (var scope = app.Services.CreateScope())
-            {
-                await SeedData.InitializeAsync(scope.ServiceProvider);
+
+                await SeedData.InitializeAsync(services);
             }
 
             await app.RunAsync();

@@ -19,10 +19,13 @@ public class NewsletterPreference
     public string Frequency { get; set; } = "Weekly";
 
     public string? SelectedCategoryIds { get; set; }
+    public string? SelectedAuthIds { get; set; }
 
     public DateTime? LastSentDate { get; set; }
 
     public string? UnsubscribeToken { get; set; }
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+
 }

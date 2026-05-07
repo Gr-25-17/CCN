@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using NewsSite.Models.Entities;
 
 namespace NewsSite.Data;
@@ -9,6 +10,8 @@ public static class SeedData
     {
         using var scope = serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
 
         await context.Database.EnsureCreatedAsync();
 
@@ -37,6 +40,11 @@ public static class SeedData
         var economy = await context.Categories.FirstOrDefaultAsync(c => c.Name == "Economy");
         var weather = await context.Categories.FirstOrDefaultAsync(c => c.Name == "Weather");
 
+        var anna = await userManager.FindByEmailAsync("anna.bergman@newsite.com");
+        var erik = await userManager.FindByEmailAsync("erik.lindgren@newsite.com");
+        var sara = await userManager.FindByEmailAsync("sara.wallin@newsite.com");
+        var mikael = await userManager.FindByEmailAsync("mikael.sundstrom@newsite.com");
+
         var articles = new Article[]
         {
             new Article
@@ -51,7 +59,9 @@ public static class SeedData
                 IsArchived = false,
                 IsDeleted = false,
                 IsEditorsChoice = true,
-                CategoryId = sweden?.Id ?? 1
+                CategoryId = sweden?.Id ?? 1,
+                AuthorId = anna?.Id, 
+                AuthorName = anna != null ? $"{anna.FirstName} {anna.LastName}" : "Unknown"
             },
             new Article
             {
@@ -65,7 +75,9 @@ public static class SeedData
                 IsArchived = false,
                 IsDeleted = false,
                 IsEditorsChoice = false,
-                CategoryId = world?.Id ?? 2
+                CategoryId = world?.Id ?? 2,
+                AuthorId = erik?.Id, 
+            AuthorName = erik != null ? $"{erik.FirstName} {erik.LastName}" : "Unknown"
             },
             new Article
             {
@@ -90,7 +102,9 @@ public static class SeedData
                 IsArchived = false,
                 IsDeleted = false,
                 IsEditorsChoice = false,
-                CategoryId = sport?.Id ?? 3
+                CategoryId = sport?.Id ?? 3,
+                AuthorId = sara?.Id,  
+            AuthorName = sara != null ? $"{sara.FirstName} {sara.LastName}" : "Unknown"
             },
             new Article
             {
@@ -104,7 +118,9 @@ public static class SeedData
                 IsArchived = false,
                 IsDeleted = false,
                 IsEditorsChoice = true,
-                CategoryId = world?.Id ?? 2
+                CategoryId = world?.Id ?? 2,
+                AuthorId = mikael?.Id,
+            AuthorName = mikael != null ? $"{mikael.FirstName} {mikael.LastName}" : "Unknown"
             },
             new Article
             {
@@ -118,11 +134,14 @@ public static class SeedData
                 IsArchived = false,
                 IsDeleted = false,
                 IsEditorsChoice = false,
-                CategoryId = weather?.Id ?? 5
+                CategoryId = weather?.Id ?? 5,
+                AuthorId = anna?.Id,
+            AuthorName = anna != null ? $"{anna.FirstName} {anna.LastName}" : "Unknown"
             }
         };
 
         await context.Articles.AddRangeAsync(articles);
         await context.SaveChangesAsync();
+
     }
 }

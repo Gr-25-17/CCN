@@ -103,3 +103,55 @@
         </div>
     </div>
 </div>
+<div class="card shadow-sm border-warning mb-4">
+    <div class="card-body">
+        <h5 class="card-title text-warning"><i class="bi bi-exclamation-triangle"></i> Systemverktyg: Bildmigrering</h5>
+        <p class="card-text text-muted">
+            Kör detta skript för att konvertera alla gamla bilder i databasen till den nya WebP-arkitekturen.
+            Detta körs i bakgrunden. Stäng inte den här fliken förrän processen är klar.
+        </p>
+        
+        <button id="btnMigrate" class="btn btn-warning" onclick="startMigration()">
+            Kör migrering nu
+        </button>
+
+        <div id="migrationFeedback" class="mt-3 d-none align-items-center">
+            <div class="spinner-border spinner-border-sm text-warning me-2" role="status"></div>
+            <span id="migrationStatus" class="fw-bold text-secondary">Startar migrering... Detta kan ta flera minuter.</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function startMigration() {
+        const btn = document.getElementById('btnMigrate');
+        const feedback = document.getElementById('migrationFeedback');
+        const statusText = document.getElementById('migrationStatus');
+
+        // Lås knappen och visa spinner
+        btn.disabled = true;
+        feedback.classList.replace('d-none', 'd-flex');
+        statusText.innerText = "Migrering pågår... vänligen vänta.";
+        statusText.className = "fw-bold text-primary";
+
+        try {
+            // Anropar din AdminController
+            const response = await fetch('/Admin/RunImageMigration', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (response.ok) {
+                statusText.innerText = "Migrering skickad till Azure! Bilderna bearbetas nu i bakgrunden.";
+                statusText.className = "fw-bold text-success";
+            } else {
+                throw new Error("Ett fel uppstod på servern.");
+            }
+        } catch (error) {
+            statusText.innerText = error.message;
+            statusText.className = "fw-bold text-danger";
+        } finally {
+            btn.disabled = false;
+        }
+    }
+</script>
