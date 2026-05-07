@@ -1,9 +1,8 @@
 using API_Weather.Models;
-using Azure.Storage.Blobs;
+using Azure.Data.Tables;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using System.Net.Http.Json;
-using System.Text.Json;
 
 namespace API_Weather;
 
@@ -19,10 +18,10 @@ public class WeatherFunction(ILogger<WeatherFunction> logger, IHttpClientFactory
         var baseUrl = Environment.GetEnvironmentVariable("WEATHER_API_URL")
             ?? throw new InvalidOperationException("Missing configuration: WEATHER_API_URL");
 
-        var city = Environment.GetEnvironmentVariable("WEATHER_API_CITY") ?? "Stockholm";
-        var language = Environment.GetEnvironmentVariable("WEATHER_API_LANG") ?? "Eng";
-
-        var url = $"{baseUrl}?City={city}&Language={language}";
+        [Function("UpdateWeather")]
+        public async Task Run([TimerTrigger("0 0 */6 * * *")] TimerInfo myTimer)
+        {
+            _logger.LogInformation($"Weather update triggered at: {DateTime.Now}");
 
         try
         {
@@ -32,22 +31,34 @@ public class WeatherFunction(ILogger<WeatherFunction> logger, IHttpClientFactory
             // Modern pattern matching istället för != null
             if (weather is { })
             {
-                var connectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage")
-                    ?? throw new InvalidOperationException("Missing configuration: AzureWebJobsStorage");
+                var weather = await _httpClient.GetFromJsonAsync<WeatherForecast>(url);
 
-                // Arkitekturell notis: Om BlobServiceClient återanvänds hårt på sikt bör den injiceras via DI i Program.cs
-                var blobServiceClient = new BlobServiceClient(connectionString);
-                var containerClient = blobServiceClient.GetBlobContainerClient("weather-cache");
-                await containerClient.CreateIfNotExistsAsync();
+                if (weather != null)
+                {
+                    var connectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
+                    var tableClient = new TableClient(connectionString, "WeatherData");
+                    await tableClient.CreateIfNotExistsAsync();
 
-                var blobClient = containerClient.GetBlobClient("current-weather.json");
-                var jsonData = JsonSerializer.Serialize(weather);
+                    var entity = new WeatherEntity
+                    {
+                        RowKey = DateTime.UtcNow.ToString("yyyyMMddHHmmss"),
+                        City = weather.City ?? "Stockholm",
+                        TemperatureC = weather.TemperatureC,
+                        Humidity = weather.Humidity,
+                        WindSpeed = weather.WindSpeed,
+                        IconUrl = weather.Icon?.Url ?? string.Empty,
+                        IconCode = weather.Icon?.Code ?? string.Empty,
+                        DateString = weather.Date.ToString("yyyy-MM-dd HH:mm:ss")
+                    };
 
-                // Modern using-deklaration minimerar kod-nesting
-                using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(jsonData));
-                await blobClient.UploadAsync(stream, overwrite: true);
+                    await tableClient.UpsertEntityAsync(entity);
 
-                logger.LogInformation("Successfully updated weather for {City}", city);
+                    _logger.LogInformation($"Successfully saved weather for {city} to Table Storage");
+                }
+                else
+                {
+                    _logger.LogWarning($"No weather data returned for {city}");
+                }
             }
             else
             {
