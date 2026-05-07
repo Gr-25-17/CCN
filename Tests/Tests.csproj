@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="Services\NewsletterServiceTests.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Azure.Core" Version="1.54.0" />
     <PackageReference Include="Azure.ResourceManager.ContainerRegistry" Version="1.4.0" />
     <PackageReference Include="coverlet.collector" Version="10.0.0">
