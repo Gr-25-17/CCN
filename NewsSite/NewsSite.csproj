@@ -40,7 +40,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\API_Weather\Weather.csproj" />
     <ProjectReference Include="..\GoldApIUpdater\GoldApIUpdater\GoldApIUpdater.csproj" />
   </ItemGroup>
 

@@ -4,29 +4,32 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using System.Net.Http.Json;
 
-namespace API_Weather
-{
-    public class WeatherFunction
-    {
-        private readonly ILogger<WeatherFunction> _logger;
-        private readonly HttpClient _httpClient;
+namespace API_Weather;
 
-        public WeatherFunction(ILogger<WeatherFunction> logger, IHttpClientFactory httpClientFactory)
-        {
-            _logger = logger;
-            _httpClient = httpClientFactory.CreateClient();
-        }
+// C# 12 Primary Constructor för renare Dependency Injection
+public class WeatherFunction(ILogger<WeatherFunction> logger, IHttpClientFactory httpClientFactory)
+{
+    [Function(nameof(WeatherFunction))]
+    public async Task Run([TimerTrigger("0 */15 * * * *")] TimerInfo myTimer)
+    {
+        logger.LogInformation("Weather update triggered at: {Time}", DateTime.Now);
+
+        // Guard clauses mot config. Fallbacks implementerade där rimligt.
+        var baseUrl = Environment.GetEnvironmentVariable("WEATHER_API_URL")
+            ?? throw new InvalidOperationException("Missing configuration: WEATHER_API_URL");
 
         [Function("UpdateWeather")]
         public async Task Run([TimerTrigger("0 0 */6 * * *")] TimerInfo myTimer)
         {
             _logger.LogInformation($"Weather update triggered at: {DateTime.Now}");
 
-            string city = "Stockholm";
-            string language = "Eng";
-            var url = $"http://weatherapi.dreammaker-it.se/forecast?City={city}&Language={language}";
+        try
+        {
+            using var client = httpClientFactory.CreateClient();
+            var weather = await client.GetFromJsonAsync<WeatherForecast>(url);
 
-            try
+            // Modern pattern matching istället för != null
+            if (weather is { })
             {
                 var weather = await _httpClient.GetFromJsonAsync<WeatherForecast>(url);
 
@@ -57,10 +60,14 @@ namespace API_Weather
                     _logger.LogWarning($"No weather data returned for {city}");
                 }
             }
-            catch (Exception ex)
+            else
             {
-                _logger.LogError(ex, $"Error updating weather for {city}");
+                logger.LogWarning("No weather data returned for {City}", city);
             }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error updating weather for {City}", city);
         }
     }
 }

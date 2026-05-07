@@ -1,35 +1,37 @@
 using Azure.Data.Tables;
 using Microsoft.Azure.Functions.Worker;
-
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-public class GoldMarketTimer
+// C# 12 Primary Constructor för renare Dependency Injection
+public class GoldMarketTimer(
+    ILoggerFactory loggerFactory, 
+    StockMarketService stockService, 
+    IConfiguration configuration)
 {
-    private readonly ILogger _logger;
-    private readonly StockMarketService _stockService;
-    private readonly IConfiguration _configuration;
+    private readonly ILogger _logger = loggerFactory.CreateLogger<GoldMarketTimer>();
 
-    public GoldMarketTimer(ILoggerFactory loggerFactory, StockMarketService stockService, IConfiguration configuration)
-    {
-        _logger = loggerFactory.CreateLogger<GoldMarketTimer>();
-        _stockService = stockService;
-        _configuration = configuration; 
-    }
-
-    [Function("GoldUpdater")]
+    [Function(nameof(GoldMarketTimer))]
     public async Task Run([TimerTrigger("0 0 0 */2 * *")] TimerInfo myTimer)
     {
-        _logger.LogInformation($"Gold Fetcher started at: {DateTime.Now}");
+        _logger.LogInformation("Gold Fetcher started at: {Time}", DateTime.Now);
 
-        var goldData = await _stockService.GetGoldAsync();
-        if (goldData == null) return;
+        var goldData = await stockService.GetGoldAsync();
+        
+        // Guard clause med loggning istället för silent return
+        if (goldData is null)
+        {
+            _logger.LogWarning("No gold data returned from StockMarketService. Aborting update.");
+            return;
+        }
 
-        string connectionString = _configuration["AzureWebJobsStorage"];
+        var connectionString = configuration["AzureWebJobsStorage"] 
+            ?? throw new InvalidOperationException("Missing config: AzureWebJobsStorage");
+            
         var tableClient = new TableClient(connectionString, "GoldPrices");
         await tableClient.CreateIfNotExistsAsync();
 
-     
+        // 1. Spara det nya priset
         var entity = new GoldPrice
         {
             PartitionKey = "Gold", 
@@ -40,19 +42,26 @@ public class GoldMarketTimer
         };
 
         await tableClient.UpsertEntityAsync(entity);
+        _logger.LogInformation("Successfully saved new gold price: {Close}", entity.Close);
 
-   
-        var allGoldEntries = tableClient.Query<GoldPrice>(x => x.PartitionKey == "Gold").ToList();
+        // 2. Hämta asynkront och städa upp gamla poster (behåll de 10 nyaste)
+        var allGoldEntries = new List<GoldPrice>();
+        await foreach (var page in tableClient.QueryAsync<GoldPrice>(x => x.PartitionKey == "Gold").AsPages())
+        {
+            allGoldEntries.AddRange(page.Values);
+        }
 
         if (allGoldEntries.Count > 10)
         {
-           
-            var entitiesToDelete = allGoldEntries.OrderBy(x => x.RowKey).SkipLast(10);
+            // Reverse-ticks gör att OrderBy(RowKey) lägger de NYASTE först.
+            // .Skip(10) hoppar över de 10 nyaste, och returnerar de äldre posterna.
+            var entitiesToDelete = allGoldEntries.OrderBy(x => x.RowKey).Skip(10);
 
             foreach (var oldPrice in entitiesToDelete)
             {
+                // Säker radering via RowKey och PartitionKey
                 await tableClient.DeleteEntityAsync(oldPrice.PartitionKey, oldPrice.RowKey);
-                _logger.LogInformation($"Deleted old record: {oldPrice.RowKey}");
+                _logger.LogInformation("Deleted old record: {RowKey}", oldPrice.RowKey);
             }
         }
     }

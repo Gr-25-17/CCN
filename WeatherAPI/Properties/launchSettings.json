@@ -1,9 +1,0 @@
-{
-  "profiles": {
-    "WeatherAPI": {
-      "commandName": "Project",
-      "commandLineArgs": "--port 7283",
-      "launchBrowser": false
-    }
-  }
-}
