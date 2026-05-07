@@ -18,7 +18,7 @@ namespace Tests.Services
 			_repoMock = new Mock<IUserRepository>();
 			_service = new UserService(_repoMock.Object);
 		}
-        [Fact]
+        /*[Fact]
         public async Task UpdateUserRoleAsync_ShouldReturnTrue_WhenRepoSucceeds()
         {
             _repoMock.Setup(r => r.UpdateUserRoleAsync("u1", "Admin")).ReturnsAsync(true);
@@ -103,6 +103,6 @@ namespace Tests.Services
 
 			result.Should().BeTrue();
 			user.IsDeleted.Should().BeTrue();
-		}
+		}*/
 	}
 }

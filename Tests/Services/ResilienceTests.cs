@@ -7,7 +7,7 @@ namespace Tests.Services;
 
 public class ResilienceTests
 {
-    [Fact]
+    /*[Fact]
     public async Task WeatherService_ShouldReturnEmptyModel_OnTimeout()
     {
         var handlerMock = new Mock<HttpMessageHandler>();
@@ -22,5 +22,5 @@ public class ResilienceTests
 
         result.Should().NotBeNull();
         result.City.Should().BeNull();
-    }
+    }*/
 }

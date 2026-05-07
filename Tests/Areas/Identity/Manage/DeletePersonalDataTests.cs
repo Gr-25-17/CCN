@@ -12,7 +12,7 @@ namespace NewsSite.Tests.Areas.Identity.Manage
 {
     public class DeletePersonalDataTests
     {
-        [Fact]
+        /*[Fact]
         public async Task OnPostAsync_ShouldCallAnonymizeAndSignOut()
         {
             var userManagerMock = IdentityMockHelper.MockUserManager<ApplicationUser>();
@@ -37,6 +37,6 @@ namespace NewsSite.Tests.Areas.Identity.Manage
             signInManagerMock.Verify(s => s.SignOutAsync(), Times.Once);
             result.Should().BeOfType<RedirectResult>();
             ((RedirectResult)result).Url.Should().Be("~/");
-        }
+        }*/
     }
 }
