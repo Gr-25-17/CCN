@@ -14,7 +14,8 @@ public class GoldMarketTimer(
         logger.LogInformation("Gold Fetcher started at: {Time}", DateTime.Now);
 
         var goldData = await stockService.GetGoldAsync();
-
+        
+        // Guard clause med loggning istället för silent return
         if (goldData is null)
         {
             logger.LogWarning("No gold data returned from StockMarketService. Aborting update.");
@@ -37,7 +38,9 @@ public class GoldMarketTimer(
         };
 
         await tableClient.UpsertEntityAsync(entity);
-        logger.LogInformation("Successfully saved new gold price: {Close}", entity.Close);
+        _logger.LogInformation("Successfully saved new gold price: {Close}", entity.Close);
+
+        // 2. Hämta asynkront och städa upp gamla poster (behåll de 10 nyaste)
         var allGoldEntries = new List<GoldPrice>();
         await foreach (var page in tableClient.QueryAsync<GoldPrice>(x => x.PartitionKey == "Gold").AsPages())
         {
@@ -53,7 +56,12 @@ public class GoldMarketTimer(
 
             await Task.WhenAll(deleteTasks);
 
-            logger.LogInformation("Cleaned up {Count} old gold records.", entitiesToDelete.Count);
+            foreach (var oldPrice in entitiesToDelete)
+            {
+                // Säker radering via RowKey och PartitionKey
+                await tableClient.DeleteEntityAsync(oldPrice.PartitionKey, oldPrice.RowKey);
+                _logger.LogInformation("Deleted old record: {RowKey}", oldPrice.RowKey);
+            }
         }
     }
 }

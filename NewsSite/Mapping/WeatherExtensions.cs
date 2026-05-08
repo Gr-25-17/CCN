@@ -23,12 +23,18 @@ namespace NewsSite.Mapping
             {
                 City = response.City ?? "Okänd",
                 TemperatureC = response.TemperatureC,
-                Humidity = response.Humidity,      
+                Humidity = response.Humidity,
                 WindSpeed = response.WindSpeed,
-                IconUrl = response.Icon?.Url ?? "/img/default-weather.png",
-                Date = response.Date == default ? DateTime.Now : response.Date
-            }
-        };
+                Date = response.Date,
+                IconUrl = response.Icon?.Url ?? string.Empty,
+                IconCode = response.Icon?.Code ?? string.Empty
+            };
+        }
+        }
+        }
+        }
+        }
+        }
 
         public static WeatherForecast ToEntity(this WeatherBasicVM vm)
         {

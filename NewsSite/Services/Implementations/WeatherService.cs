@@ -3,9 +3,9 @@ using NewsSite.Models.APIs;
 using NewsSite.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-
-namespace NewsSite.Services.Implementations;
-
+    public class WeatherService : IWeatherService
+    {
+        private readonly HttpClient _httpClient;
 // C# 12 Primary Constructor med injicerad ILogger för att undvika tysta krascher
 public class WeatherService(
     IHttpClientFactory httpClientFactory,
@@ -22,7 +22,7 @@ public class WeatherService(
             // Centraliserad config. Fallback till Stockholm för säkerhet.
             var city = config["WeatherSettings:City"] ?? "Stockholm";
             var tableClient = new TableClient(connectionString, "WeatherData");
-
+        {
             // Nu matchar vi Azure-funktionens dynamiska PartitionKey
             var latestEntity = await tableClient.QueryAsync<TableEntity>(
                 filter: $"PartitionKey eq '{city}'",
@@ -34,7 +34,7 @@ public class WeatherService(
                 logger.LogWarning("Ingen väderdata hittades i Table Storage för staden {City}", city);
                 return null;
             }
-
+                {
             return new WeatherForecast
             {
                 City = latestEntity.GetString("City") ?? "Okänd",
@@ -54,6 +54,12 @@ public class WeatherService(
             // Fånga och logga undantaget explicit istället för att tyst returnera null
             logger.LogError(ex, "Ett kritiskt fel uppstod vid hämtning av väderdata från Table Storage.");
             return null;
+                return new WeatherForecast();
+            }
+            catch
+            {
+                return new WeatherForecast();
+            }
         }
     }
 }
