@@ -97,7 +97,7 @@
                             </p>
                             
                             <button type="button" class="btn btn-warning btn-lg fw-bold w-100 mb-3 shadow-sm px-5"
-                                    data-bs-toggle="offcanvas" data-bs-target="#subscribeOffcanvas">
+                                    data-bs-toggle="offcanvas" data-bs-target="#subscribeOffcanvas" data-article-slug="@Model.Slug">
                                     Bli Prenumerant – 99 kr/mån
                             </button>
                             
@@ -111,7 +111,7 @@
                             {
                                 <div class="border-top pt-3 mt-2">
                                     <p class="mb-0 text-muted">
-                                        Redan prenumerant? <a asp-area="Identity" asp-page="/Account/Login" class="text-primary fw-bold text-decoration-none">Logga in här</a>
+                                        Redan prenumerant? <a href="#" class="text-primary fw-bold text-decoration-none" data-bs-toggle="offcanvas" data-bs-target="#loginOffcanvas">Logga in här</a>
                                     </p>
                                 </div>
                             }
@@ -178,47 +178,4 @@
             }
         });
     </script>
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="subscribeOffcanvas" aria-labelledby="subscribeOffcanvasLabel">
-        <div class="offcanvas-header border-bottom">
-            <h5 class="offcanvas-title fw-bold" id="subscribeOffcanvasLabel">⭐ Prenumerera</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        <div class="offcanvas-body">
-            <h4 class="mb-3">Slutför din betalning</h4>
-            <p class="text-muted small mb-4">Få omedelbar tillgång till @Model.Title och alla andra premiumartiklar.</p>
-
-            <form asp-controller="Subscription" asp-action="Index" method="post">
-                <input type="hidden" name="ArticleSlug" value="@Model.Slug" />
-
-                <div class="mb-3">
-                    <label class="form-label small fw-bold">Namn på kortet</label>
-                    <input name="CardName" class="form-control" placeholder="Förnamn Efternamn" required />
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label small fw-bold">Kortnummer</label>
-                    <input name="CardNumber" class="form-control" placeholder="1234 5678 1234 5678" required />
-                </div>
-
-                <div class="row">
-                    <div class="col-7 mb-3">
-                        <label class="form-label small fw-bold">Giltighetstid</label>
-                        <input name="ExpirationDate" class="form-control" placeholder="MM/ÅÅ" required />
-                    </div>
-                    <div class="col-5 mb-3">
-                        <label class="form-label small fw-bold">CVV</label>
-                        <input name="CVV" class="form-control" placeholder="123" required />
-                    </div>
-                </div>
-
-                <button type="submit" class="btn btn-warning btn-lg w-100 shadow-sm mt-3 fw-bold">
-                    Betala 99 kr / mån
-                </button>
-            
-                <p class="text-center mt-4 small text-muted">
-                    Ingen bindningstid. Avsluta när du vill.
-                </p>
-            </form>
-        </div>
-    </div>
 }

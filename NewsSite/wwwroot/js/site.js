@@ -49,10 +49,32 @@
         statusText.innerText = data.isProcessing ? "Optimeras till WebP..." : "Klar!";
         statusText.className = "text-success fw-bold";
 
-    } catch (err) {
-        statusText.innerText = "Fel: " + err.message;
-        statusText.className = "text-danger fw-bold";
-    } finally {
-        setTimeout(() => feedback.classList.replace('d-flex', 'd-none'), 5000);
+        } catch (err) {
+            statusText.innerText = "Fel: " + err.message;
+            statusText.className = "text-danger fw-bold";
+        } finally {
+            setTimeout(() => feedback.classList.replace('d-flex', 'd-none'), 5000);
+        }
     }
-}
+
+    // Handle ArticleSlug for subscription offcanvas
+    document.addEventListener('DOMContentLoaded', function () {
+        const subscribeOffcanvasEl = document.getElementById('subscribeOffcanvas');
+        if (subscribeOffcanvasEl) {
+            subscribeOffcanvasEl.addEventListener('show.bs.offcanvas', function (event) {
+                const triggerEl = event.relatedTarget;
+                if (triggerEl && triggerEl.dataset.articleSlug) {
+                    // Find or create hidden input for ArticleSlug
+                    const form = subscribeOffcanvasEl.querySelector('form');
+                    let slugInput = form.querySelector('input[name="ArticleSlug"]');
+                    if (!slugInput) {
+                        slugInput = document.createElement('input');
+                        slugInput.type = 'hidden';
+                        slugInput.name = 'ArticleSlug';
+                        form.appendChild(slugInput);
+                    }
+                    slugInput.value = triggerEl.dataset.articleSlug;
+                }
+            });
+        }
+    });
