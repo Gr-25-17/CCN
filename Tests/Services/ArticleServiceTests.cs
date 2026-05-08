@@ -20,7 +20,7 @@ public class ArticleServiceTests
             _service = new ArticleService(_repoMock.Object, _userRepoMock.Object);
         }
 
-    /*[Theory]
+    [Theory]
     [InlineData("MMA i Örebro", "mma-i-orebro")]
     [InlineData("Träning & Hälsa", "traning-halsa")]
     public async Task UpdateAsync_ShouldGenerateCorrectSlug(string title, string expected)
@@ -188,5 +188,5 @@ public class ArticleServiceTests
         _repoMock.Setup(r => r.HasUserLikedArticleAsync(1, "user")).ReturnsAsync(true);
         var result = await _service.HasUserLikedArticleAsync(1, "user");
         result.Should().BeTrue();
-    }*/
+    }
 }

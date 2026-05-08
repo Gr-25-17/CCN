@@ -7,7 +7,7 @@ namespace Tests.Services;
 
 public class EmailSenderTests
 {
-    /*[Fact]
+    [Fact]
     public async Task SendEmailAsync_ShouldReadFromConfigAndNotThrow()
     {
         var configMock = new Mock<IConfiguration>();
@@ -24,5 +24,5 @@ public class EmailSenderTests
         var act = async () => await service.SendEmailAsync("user@test.com", "Sub", "Body");
 
         await act.Should().NotThrowAsync<ArgumentNullException>();
-    }*/
+    }
 }

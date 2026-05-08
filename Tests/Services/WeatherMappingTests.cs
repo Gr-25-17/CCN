@@ -7,7 +7,7 @@ namespace Tests.Services;
 
 public class WeatherMappingTests
 {
-    /*[Theory]
+    [Theory]
     [InlineData(-5)]
     [InlineData(15)]
     public void ToViewModel_ShouldMapCorrectly(int temp)
@@ -24,5 +24,5 @@ public class WeatherMappingTests
         result.Should().BeOfType<WeatherBasicVM>();
         result.TemperatureC.Should().Be(temp);
         result.UrlIcon.Should().Be("http://icon.com");
-    }*/
+    }
 }

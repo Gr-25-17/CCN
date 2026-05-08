@@ -15,7 +15,7 @@ namespace Tests.Repositories
             return new ApplicationDbContext(options);
         }
 
-        /*[Fact]
+        [Fact]
         public async Task SubscriptionRepo_ShouldCheckEndDate()
         {
             using var context = GetContext();
@@ -26,6 +26,6 @@ namespace Tests.Repositories
             var repo = new SubscriptionRepository(context);
             (await repo.HasActiveSubscriptionAsync("u1")).Should().BeTrue();
             (await repo.HasActiveSubscriptionAsync("u2")).Should().BeFalse();
-        }*/
+        }
     }
 }

@@ -1,64 +1,44 @@
 ﻿using Azure.Data.Tables;
 using NewsSite.Models.APIs;
 using NewsSite.Services.Interfaces;
-namespace NewsSite.Services.Implementations
+using Microsoft.Extensions.Configuration;
+
+namespace NewsSite.Services.Implementations;
+
+public class WeatherService(IHttpClientFactory httpClientFactory, IConfiguration config) : IWeatherService
 {
-    public class WeatherService : IWeatherService
+    public async Task<WeatherForecast> GetWeatherAsync()
     {
-        private readonly HttpClient _httpClient;
-
-        public WeatherService(HttpClient httpClient)
+        try
         {
-            _httpClient = httpClient;
+            var connectionString = config.GetConnectionString("AzureWebJobsStorage");
+            var tableClient = new TableClient(connectionString, "WeatherData");
+
+            // Med inverterad RowKey ligger den senaste väderrapporten ALLTID först.
+            var latestEntity = await tableClient.QueryAsync<TableEntity>(
+                filter: "PartitionKey eq 'Weather'",
+                maxPerPage: 1)
+                .FirstOrDefaultAsync();
+
+            if (latestEntity is null) return null;
+
+            return new WeatherForecast
+            {
+                City = latestEntity.GetString("City") ?? "Okänd",
+                TemperatureC = latestEntity.GetDouble("TemperatureC") ?? 0,
+                Humidity = latestEntity.GetDouble("Humidity") ?? 0,
+                WindSpeed = latestEntity.GetDouble("WindSpeed") ?? 0,
+                Date = DateTime.TryParse(latestEntity.GetString("DateString"), out var d) ? d : DateTime.UtcNow,
+                Icon = new Icon
+                {
+                    Url = latestEntity.GetString("IconUrl") ?? string.Empty,
+                    Code = latestEntity.GetString("IconCode") ?? string.Empty
+                }
+            };
         }
-
-        public async Task<WeatherForecast> GetWeatherAsync()
+        catch (Exception)
         {
-            try
-            {
-                var connectionString = "DefaultEndpointsProtocol=https;AccountName=ccnstorage;AccountKey=BFpTXfEqkCmNdZX9W3KeUxnyv44VtjrJXe4ZoxTCT+k0p+f7qpSriJ+xPn78Sxcgo885k18v7vUb+AStUJbl0Q==;EndpointSuffix=core.windows.net";
-
-                var tableClient = new TableClient(connectionString, "WeatherData");
-
-
-
-                var query = tableClient.QueryAsync<TableEntity>(
-                    filter: "PartitionKey eq 'Weather'",
-                    maxPerPage: 1
-                );
-
-                TableEntity? latestEntity = null;
-                await foreach (var entity in query)
-                {
-                    if (latestEntity == null || string.Compare(entity.RowKey, latestEntity.RowKey) > 0)
-                    {
-                        latestEntity = entity;
-                    }
-                }
-
-                if (latestEntity != null)
-                {
-                    return new WeatherForecast
-                    {
-                        City = latestEntity.GetString("City"),
-                        TemperatureC = (int)latestEntity.GetDouble("TemperatureC").GetValueOrDefault(),
-                        Humidity = (int)latestEntity.GetDouble("Humidity").GetValueOrDefault(),
-                        WindSpeed = (int)latestEntity.GetDouble("WindSpeed").GetValueOrDefault(),
-                        Date = DateTime.Parse(latestEntity.GetString("DateString") ?? DateTime.UtcNow.ToString()),
-                        Icon = new Icon
-                        {
-                            Url = latestEntity.GetString("IconUrl") ?? string.Empty,
-                            Code = latestEntity.GetString("IconCode") ?? string.Empty
-                        }
-                    };
-                }
-
-                return new WeatherForecast();
-            }
-            catch
-            {
-                return new WeatherForecast();
-            }
+            return null;
         }
     }
 }
