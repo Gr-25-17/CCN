@@ -5,7 +5,7 @@ namespace API_Weather.Models
 {
     public class WeatherForecast
     {
-        [JsonPropertyName("currentWeather")]
+        [JsonPropertyName("summary")]
         public string CurrentWeather { get; set; } = string.Empty;
 
         [JsonPropertyName("city")]
