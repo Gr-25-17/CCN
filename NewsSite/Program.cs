@@ -8,6 +8,7 @@ using NewsSite.Repositories.Implementations;
 using NewsSite.Repositories.Interfaces;
 using NewsSite.Services.Implementations;
 using NewsSite.Services.Interfaces;
+using Polly;
 
 namespace NewsSite
 {
@@ -66,7 +67,15 @@ namespace NewsSite
             builder.Services.AddScoped<IBlobService, BlobService>();
             builder.Services.AddHttpClient();
             builder.Services.AddScoped<IImageOrchestrationService, ImageOrchestrationService>();
+
+            // Ersätt builder.Services.AddHttpClient(); med:
+            builder.Services.AddHttpClient<IWeatherService, WeatherService>()
+                .AddTransientHttpErrorPolicy(policy =>
+                    policy.WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
+
+            // Registrera även tjänsten om den inte redan är det (använd scoped)
             builder.Services.AddScoped<IWeatherService, WeatherService>();
+
             builder.Services.AddScoped<IGoldService, GoldService>();
             builder.Services.AddScoped<INewsletterService, NewsletterService>();
             builder.Services.AddScoped<INewsletterPreferenceRepository, NewsletterPreferenceRepository>();

@@ -43,7 +43,7 @@ namespace Tests.Areas.Identity
             };
         }
 
-        /*[Fact]
+        [Fact]
         public async Task OnPostAsync_ShouldReturnLocalRedirect_WhenLoginSucceeds()
         {
             var user = new ApplicationUser { Email = "test@test.com", IsDeleted = false };
@@ -68,6 +68,6 @@ namespace Tests.Areas.Identity
             result.Should().BeOfType<PageResult>();
             _pageModel.ModelState.IsValid.Should().BeFalse();
             _pageModel.ModelState[string.Empty].Errors[0].ErrorMessage.Should().Contain("inaktiverat");
-        }*/
+        }
     }
 }

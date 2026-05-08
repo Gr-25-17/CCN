@@ -23,7 +23,7 @@ public class WriterControllerTests
         _controller = new WriterController(_articleServiceMock.Object, _imageOrchestrationMock.Object);
     }
 
-    /*[Fact]
+    [Fact]
     public async Task Index_ShouldCallServiceWithUserContext()
     {
         var user = new ClaimsPrincipal(new ClaimsIdentity(new[] {
@@ -37,5 +37,5 @@ public class WriterControllerTests
         await _controller.Index();
 
         _articleServiceMock.Verify(s => s.GetBackendArticlesAsync("writer-1", false), Times.Once);
-    }*/
+    }
 }

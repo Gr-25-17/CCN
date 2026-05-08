@@ -31,7 +31,7 @@ public class SubscriptionControllerTests
         };
     }
 
-    /*[Fact]
+    [Fact]
     public async Task Index_Post_ShouldReturnView_WhenModelStateIsInvalid()
     {
         var model = new PaymentViewModel { CardName = "Test" };
@@ -53,5 +53,5 @@ public class SubscriptionControllerTests
 
         result.Should().BeOfType<RedirectToActionResult>()
             .Which.ActionName.Should().Be("Success");
-    }*/
+    }
 }

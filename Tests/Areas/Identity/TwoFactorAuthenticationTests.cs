@@ -10,7 +10,7 @@ namespace Tests.Areas.Identity;
 
 public class TwoFactorAuthenticationTests
 {
-    /*[Fact]
+    [Fact]
     public async Task OnGetAsync_ShouldReturnNotFound_WhenUserIsNull()
     {
         var userManagerMock = IdentityMockHelper.MockUserManager<ApplicationUser>();
@@ -22,5 +22,5 @@ public class TwoFactorAuthenticationTests
         var result = await pageModel.OnGetAsync();
 
         result.Should().BeOfType<NotFoundObjectResult>();
-    }*/
+    }
 }
