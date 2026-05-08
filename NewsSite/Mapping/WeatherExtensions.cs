@@ -15,7 +15,7 @@ namespace NewsSite.Mapping
             };
         }
 
-        
+
         public static WeatherViewModel ToWeatherViewModel(this WeatherForecast? response) => response switch
         {
             null => new WeatherViewModel(), // Eller hantera som null i vyn
@@ -28,13 +28,9 @@ namespace NewsSite.Mapping
                 Date = response.Date,
                 IconUrl = response.Icon?.Url ?? string.Empty,
                 IconCode = response.Icon?.Code ?? string.Empty
-            };
-        }
-        }
-        }
-        }
-        }
-        }
+            }
+        };
+
 
         public static WeatherForecast ToEntity(this WeatherBasicVM vm)
         {
