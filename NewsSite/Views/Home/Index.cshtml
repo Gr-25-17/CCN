@@ -7,6 +7,21 @@
 <div class="container">
     <div class="row">
         <div class="col-md-8">
+            @if (Model.PrioritizedArticles.Any())
+            {
+                <div class="mb-5">
+                    <h2 class="mb-3">Preferences</h2>
+                    <div class="row">
+                        @foreach (var article in Model.PrioritizedArticles)
+                        {
+                            <div class="col-md-3 mb-3">
+                                <partial name="Partials/_ArticleCard" model="article" />
+                            </div>
+                        }
+                    </div>
+                    <hr />
+                </div>
+            }
             <h2 class="mb-4">Latest News</h2>
 
             @if (Model.LatestArticles.Any())
