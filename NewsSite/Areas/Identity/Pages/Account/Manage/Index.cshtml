@@ -41,9 +41,9 @@
                         <div class="col-6 col-md-4 mb-2">
                             <div class="form-check">
                                 <input type="checkbox" class="form-check-input"
-                                       name="ContentPreferences.SelectedCategoryIds"
+                                       name="ContentPreferences.SelectedCategoryIdsTemp"
                                        value="@category.Id"
-                                @(Model.ContentPreferences.SelectedCategoryIdsList.Contains(category.Id) ? "checked" : "") />
+                                @(Model.ContentPreferences.SelectedCategoryIdsTemp.Contains(category.Id) ? "checked" : "") />
                                 <label class="form-check-label">@category.Name</label>
                             </div>
                         </div>
@@ -60,9 +60,9 @@
                         <div class="col-6 col-md-4 mb-2">
                             <div class="form-check">
                                 <input type="checkbox" class="form-check-input"
-                                       name="ContentPreferences.SelectedAuthorIds"
+                                       name="ContentPreferences.SelectedAuthorIdsTemp"
                                        value="@author.Id"
-                                @(Model.ContentPreferences.SelectedAuthorIdsList.Contains(author.Id) ? "checked" : "") />
+                                @(Model.ContentPreferences.SelectedAuthorIdsTemp.Contains(author.Id) ? "checked" : "") />
                                 <label class="form-check-label">
                                     @author.Name
                                     @if (author.ArticleCount > 0)
