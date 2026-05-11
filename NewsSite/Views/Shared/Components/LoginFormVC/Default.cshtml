@@ -3,33 +3,34 @@
 @inject SignInManager<ApplicationUser> SignInManager
 
 <section>
-    <form asp-area="Identity" asp-page="/Account/Login" method="post" id="loginOffcanvasForm">
+    <form id="loginOffcanvasForm">
         <h3 class="mb-3 fw-bold">Logga in</h3>
         <hr />
 
-        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+        <div id="loginErrorAlert" class="alert alert-danger d-none mb-3"></div>
+        <div id="loginSuccessAlert" class="alert alert-success d-none mb-3"></div>
 
         <div class="form-floating mb-3">
-            <input name="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-            <label for="Input_Email" class="form-label">Email</label>
-            <span class="text-danger"></span>
+            <input id="loginEmail" name="email" type="email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+            <label for="loginEmail" class="form-label">Email</label>
+            <span class="text-danger" id="emailError"></span>
         </div>
 
         <div class="form-floating mb-3">
-            <input name="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
-            <label for="Input_Password" class="form-label">Lösenord</label>
-            <span class="text-danger"></span>
+            <input id="loginPassword" name="password" type="password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
+            <label for="loginPassword" class="form-label">Lösenord</label>
+            <span class="text-danger" id="passwordError"></span>
         </div>
 
         <div class="checkbox mb-3">
             <label class="form-label">
-                <input class="form-check-input" name="Input.RememberMe" />
+                <input id="rememberMe" type="checkbox" class="form-check-input" name="rememberMe" />
                 Kom ihåg mig
             </label>
         </div>
 
         <div>
-            <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary">Logga in</button>
+            <button id="login-submit" type="button" class="w-100 btn btn-lg btn-primary" onclick="submitLoginForm()">Logga in</button>
         </div>
 
         <div class="mt-3">
@@ -45,3 +46,80 @@
         </div>
     </form>
 </section>
+
+<script>
+    async function submitLoginForm() {
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value.trim();
+        const rememberMe = document.getElementById('rememberMe').checked;
+
+        const errorAlert = document.getElementById('loginErrorAlert');
+        const successAlert = document.getElementById('loginSuccessAlert');
+        const emailError = document.getElementById('emailError');
+        const passwordError = document.getElementById('passwordError');
+
+        errorAlert.classList.add('d-none');
+        successAlert.classList.add('d-none');
+        emailError.textContent = '';
+        passwordError.textContent = '';
+
+        if (!email) {
+            emailError.textContent = 'E-post krävs';
+            return;
+        }
+
+        if (!password) {
+            passwordError.textContent = 'Lösenord krävs';
+            return;
+        }
+
+        const submitBtn = document.getElementById('login-submit');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Loggar in...';
+
+        try {
+            const response = await fetch('/api/accountapi/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password,
+                    rememberMe: rememberMe
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                successAlert.textContent = data.message || 'Inloggning lyckades!';
+                successAlert.classList.remove('d-none');
+
+                setTimeout(() => {
+                    const loginOffcanvas = bootstrap.Offcanvas.getInstance(document.getElementById('loginOffcanvas'));
+                    if (loginOffcanvas) {
+                        loginOffcanvas.hide();
+                    }
+                    location.reload();
+                }, 1000);
+            } else {
+                errorAlert.textContent = data.error || 'Inloggning misslyckades';
+                errorAlert.classList.remove('d-none');
+            }
+        } catch (error) {
+            errorAlert.textContent = 'Ett fel uppstod. Försök igen senare.';
+            errorAlert.classList.remove('d-none');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Logga in';
+        }
+    }
+
+    document.getElementById('loginOffcanvasForm').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            submitLoginForm();
+        }
+    });
+</script>
