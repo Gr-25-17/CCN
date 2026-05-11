@@ -1,11 +1,12 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using NewsSite.Mapping;
 using NewsSite.Models;
 using NewsSite.Models.Entities;
 using NewsSite.Models.ViewModels;
+using NewsSite.Services.Implementations;
 using NewsSite.Services.Interfaces;
 using System.Diagnostics;
-using NewsSite.Mapping;
 
 namespace NewsSite.Controllers
 {
@@ -56,7 +57,8 @@ namespace NewsSite.Controllers
             }
 
             var hasSubscription = false;
-            List<int>? preferredCategoryIds = null;
+            List<int> preferredCategoryIds = new List<int>();
+            List<string> preferredAuthorIds = new List<string>();
 
             if (User.Identity.IsAuthenticated)
             {
@@ -75,24 +77,28 @@ namespace NewsSite.Controllers
                             .Select(int.Parse)
                             .ToList();
                     }
+
+                    if (preferences != null && !string.IsNullOrEmpty(preferences.SelectedAuthorIds))
+                    {
+                        preferredAuthorIds = preferences.SelectedAuthorIds
+                            .Split(',')
+                            .ToList();
+                    }
                 }
             }
 
-            IEnumerable<ArticleSummaryViewModel> latestArticles;
-            IEnumerable<ArticleSummaryViewModel> mostPopularArticles;
-            IEnumerable<ArticleSummaryViewModel> editorChoiceArticles;
+            var latestArticles = await _articleService.GetLatestAsync(6);
+            var mostPopularArticles = await _articleService.GetMostPopularAsync(6);
+            var editorChoiceArticles = await _articleService.GetEditorChoiceAsync(3);
 
-            if (preferredCategoryIds != null && preferredCategoryIds.Any())
+            var prioritizedArticles = new List<ArticleSummaryViewModel>();
+
+            if (preferredCategoryIds.Any() || preferredAuthorIds.Any())
             {
-                latestArticles = await _articleService.GetLatestByCategoryIdsAsync(preferredCategoryIds, 6);
-                mostPopularArticles = await _articleService.GetMostPopularByCategoryIdsAsync(preferredCategoryIds, 6);
-                editorChoiceArticles = await _articleService.GetEditorChoiceByCategoryIdsAsync(preferredCategoryIds, 3);
-            }
-            else
-            {
-                latestArticles = await _articleService.GetLatestAsync(6);
-                mostPopularArticles = await _articleService.GetMostPopularAsync(6);
-                editorChoiceArticles = await _articleService.GetEditorChoiceAsync(3);
+                prioritizedArticles = (await _articleService.GetAllArticlesSortedByPreferencesAsync(
+                    preferredCategoryIds,
+                    preferredAuthorIds,
+                    4)).ToList();
             }
 
             var weather = await _weatherService.GetWeatherAsync();
@@ -101,6 +107,9 @@ namespace NewsSite.Controllers
                 LatestArticles = latestArticles,
                 MostPopularArticles = mostPopularArticles,
                 EditorChoiceArticles = editorChoiceArticles,
+
+                PrioritizedArticles = prioritizedArticles,
+
                 Categories = await _categoryService.GetAllAsync(),
                 HasActiveSubscription = hasSubscription,
                 Weather = weather?.ToWeatherViewModel()

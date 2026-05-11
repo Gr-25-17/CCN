@@ -50,59 +50,59 @@ namespace Tests.Services
             result.AvailableRoles.Should().Contain(r => r.Text == "Admin");
         }
         [Fact]
-		public async Task AnonymizeUserAsync_ShouldScrubPersonalDataButKeepRecord()
-		{
-			var user = new ApplicationUser
-			{
-				Id = "user-123",
-				Email = "testuser@example.com",
-				FirstName = "Kalle",
-				LastName = "Anka"
-			};
-			_repoMock.Setup(r => r.GetUserByIdAsync("user-123")).ReturnsAsync(user);
-			_repoMock.Setup(r => r.UpdateUserDetailsAsync(user)).ReturnsAsync(true);
+        public async Task AnonymizeUserAsync_ShouldScrubPersonalDataButKeepRecord()
+        {
+            var user = new ApplicationUser
+            {
+                Id = "user-123",
+                Email = "testuser@example.com",
+                FirstName = "Kalle",
+                LastName = "Anka"
+            };
+            _repoMock.Setup(r => r.GetUserByIdAsync("user-123")).ReturnsAsync(user);
+            _repoMock.Setup(r => r.UpdateUserDetailsAsync(user)).ReturnsAsync(true);
 
-			var result = await _service.AnonymizeUserAsync("user-123");
-			result.Should().BeTrue();
-			user.FirstName.Should().Be("Anonymous");
-			user.LastName.Should().Be("User");
-			user.Email.Should().Be($"deleted_{user.Id.Substring(0, 8)}@anonymized.com");
-			user.IsDeleted.Should().BeTrue();
+            var result = await _service.AnonymizeUserAsync("user-123");
+            result.Should().BeTrue();
+            user.FirstName.Should().Be("Anonymous");
+            user.LastName.Should().Be("User");
+            user.Email.Should().Be($"deleted_{user.Id.Substring(0, 8)}@anonymized.com");
+            user.IsDeleted.Should().BeTrue();
 
 
-		}
-		[Fact]
-		public async Task RestoreUserAsync_ShouldSetIsDeletedToFalse()
-		{
-			var user = new ApplicationUser { Id = "s1", IsDeleted = true };
-			_repoMock.Setup(r => r.GetUserByIdAsync("s1")).ReturnsAsync(user);
-			_repoMock.Setup(r => r.UpdateUserDetailsAsync(user)).ReturnsAsync(true);
-
-			var result = await _service.RestoreUserAsync("s1");
-
-			result.Should().BeTrue();
-			user.IsDeleted.Should().BeFalse();
         }
+        [Fact]
+        public async Task RestoreUserAsync_ShouldSetIsDeletedToFalse()
+        {
+            var user = new ApplicationUser { Id = "s1", IsDeleted = true };
+            _repoMock.Setup(r => r.GetUserByIdAsync("s1")).ReturnsAsync(user);
+            _repoMock.Setup(r => r.UpdateUserDetailsAsync(user)).ReturnsAsync(true);
 
-		[Fact]
-		public async Task AnonymizeUserAsync_ShouldReturnFalse_WhenUserNotFound()
-		{
-			_repoMock.Setup(r => r.GetUserByIdAsync(It.IsAny<string>())).ReturnsAsync((ApplicationUser)null!);
-			var result = await _service.AnonymizeUserAsync("unknown");
-			result.Should().BeFalse();
+            var result = await _service.RestoreUserAsync("s1");
+
+            result.Should().BeTrue();
+            user.IsDeleted.Should().BeFalse();
         }
 
         [Fact]
-		public async Task SoftDeleteUserAsync_ShouldSetIsDeletedToTrue()
-		{
-			var user = new ApplicationUser { Id = "user1", IsDeleted = false };
-			_repoMock.Setup(r => r.GetUserByIdAsync("user1")).ReturnsAsync(user);
-			_repoMock.Setup(r => r.UpdateUserDetailsAsync(user)).ReturnsAsync(true);
+        public async Task AnonymizeUserAsync_ShouldReturnFalse_WhenUserNotFound()
+        {
+            _repoMock.Setup(r => r.GetUserByIdAsync(It.IsAny<string>())).ReturnsAsync((ApplicationUser)null!);
+            var result = await _service.AnonymizeUserAsync("unknown");
+            result.Should().BeFalse();
+        }
 
-			var result = await _service.SoftDeleteUserAsync("user1");
+        [Fact]
+        public async Task SoftDeleteUserAsync_ShouldSetIsDeletedToTrue()
+        {
+            var user = new ApplicationUser { Id = "user1", IsDeleted = false };
+            _repoMock.Setup(r => r.GetUserByIdAsync("user1")).ReturnsAsync(user);
+            _repoMock.Setup(r => r.UpdateUserDetailsAsync(user)).ReturnsAsync(true);
 
-			result.Should().BeTrue();
-			user.IsDeleted.Should().BeTrue();
-		}
-	}
+            var result = await _service.SoftDeleteUserAsync("user1");
+
+            result.Should().BeTrue();
+            user.IsDeleted.Should().BeTrue();
+        }
+    }
 }

@@ -45,8 +45,31 @@
             @if (!string.IsNullOrEmpty(Model.ImageUrl))
             {
                 <div class="mb-4">
-                    <img src="@Model.ImageUrl" class="img-fluid rounded shadow-sm" alt="@Model.Title"
-                         style="width: 100%; max-height: 450px; object-fit: cover;">
+                    @* <img src="@Model.ImageUrl" class="img-fluid rounded shadow-sm" alt="@Model.Title"
+                         style="width: 100%; max-height: 450px; object-fit: cover;"> *@
+                    @* <picture class="article-hero">
+                        <source srcset="@Model.ImageUrl.ResolveImageUrl("med", Configuration)" media="(max-width: 992px)">
+                        <img src="@Model.ImageUrl.ResolveImageUrl("full", Configuration)"
+                             class="img-fluid rounded shadow"
+                             alt="@Model.Title"
+                             loading="eager"
+                             decoding="async">
+                    </picture> *@
+                    <picture class="article-hero mb-4 d-block">
+                        <!-- Mobiler och mindre tablets får 'med' -->
+                        <source srcset="@Model.ImageUrl.ResolveImageUrl("med", Configuration)" media="(max-width: 992px)">
+    
+                        <!-- Stora skärmar får 'full' -->
+                        <source srcset="@Model.ImageUrl.ResolveImageUrl("full", Configuration)" media="(min-width: 993px)">
+    
+                        <!-- Fallback-img måste alltid finnas -->
+                        <img src="@Model.ImageUrl.ResolveImageUrl("full", Configuration)"
+                             class="img-fluid rounded shadow-sm w-100"
+                             alt="@Model.Title"
+                             loading="eager"
+                             decoding="async">
+                    </picture>
+
                 </div>
             }
 
@@ -75,6 +98,8 @@
                             
                       @*       <button type="button" class="btn btn-warning btn-lg fw-bold w-100 mb-3 shadow-sm px-5"
                                     data-bs-toggle="offcanvas" data-bs-target="#subscribeOffcanvas">
+                            <button type="button" class="btn btn-warning btn-lg fw-bold w-100 mb-3 shadow-sm px-5"
+                                    data-bs-toggle="offcanvas" data-bs-target="#subscribeOffcanvas" data-article-slug="@Model.Slug">
                                     Bli Prenumerant – 99 kr/mån
                             </button> *@
                             
@@ -91,6 +116,11 @@
                                         data-bs-toggle="offcanvas" data-bs-target="#subscribeOffcanvas">
                                     Bli Prenumerant – 99 kr/mån
                                 </button>
+                                <div class="border-top pt-3 mt-2">
+                                    <p class="mb-0 text-muted">
+                                        Redan prenumerant? <a href="#" class="text-primary fw-bold text-decoration-none" data-bs-toggle="offcanvas" data-bs-target="#loginOffcanvas">Logga in här</a>
+                                    </p>
+                                </div>
                             }
                         </div>
                     </div>
@@ -246,4 +276,5 @@
             </form>
         </div>
     </div>
+}
 }

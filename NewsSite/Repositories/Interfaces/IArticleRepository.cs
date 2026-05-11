@@ -1,4 +1,5 @@
 ﻿using NewsSite.Models.Entities;
+using NewsSite.Models.ViewModels;
 
 namespace NewsSite.Repositories.Interfaces
 {
@@ -27,5 +28,8 @@ namespace NewsSite.Repositories.Interfaces
         Task<IEnumerable<Article>> GetEditorChoiceByCategoryIdsAsync(List<int> categoryIds, int count);
 
         Task<IEnumerable<Article>> SearchArticlesAsync(string searchTerm);
+        IQueryable<Article> GetQueryable();
+
+        Task<IEnumerable<ArticleSummaryViewModel>> GetAllArticlesSortedByPreferencesAsync(List<int> preferredCategoryIds, List<string> preferredAuthorIds, int count);
     }
 }

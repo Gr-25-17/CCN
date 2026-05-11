@@ -1,58 +1,63 @@
 using Azure.Data.Tables;
 using Microsoft.Azure.Functions.Worker;
-
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-public class GoldMarketTimer
+public class GoldMarketTimer(
+    ILogger<GoldMarketTimer> logger,
+    StockMarketService stockService,
+    IConfiguration configuration)
 {
-    private readonly ILogger _logger;
-    private readonly StockMarketService _stockService;
-    private readonly IConfiguration _configuration;
-
-    public GoldMarketTimer(ILoggerFactory loggerFactory, StockMarketService stockService, IConfiguration configuration)
+    [Function(nameof(GoldMarketTimer))]
+    public async Task Run([TimerTrigger("0 0 */6 * * *")] TimerInfo myTimer)
     {
-        _logger = loggerFactory.CreateLogger<GoldMarketTimer>();
-        _stockService = stockService;
-        _configuration = configuration; 
-    }
+        logger.LogInformation("Gold Fetcher started at: {Time}", DateTime.Now);
 
-    [Function("GoldUpdater")]
-    public async Task Run([TimerTrigger("0 0 0 */2 * *")] TimerInfo myTimer)
-    {
-        _logger.LogInformation($"Gold Fetcher started at: {DateTime.Now}");
+        var goldData = await stockService.GetGoldAsync();
+        
+        if (goldData is null)
+        {
+            logger.LogWarning("No gold data returned from StockMarketService. Aborting update.");
+            return;
+        }
 
-        var goldData = await _stockService.GetGoldAsync();
-        if (goldData == null) return;
+        var connectionString = configuration["AzureWebJobsStorage"]
+            ?? throw new InvalidOperationException("Missing config: AzureWebJobsStorage");
 
-        string connectionString = _configuration["AzureWebJobsStorage"];
         var tableClient = new TableClient(connectionString, "GoldPrices");
         await tableClient.CreateIfNotExistsAsync();
 
-     
         var entity = new GoldPrice
         {
-            PartitionKey = "Gold", 
+            PartitionKey = "Gold",
             RowKey = (DateTime.MaxValue.Ticks - DateTime.UtcNow.Ticks).ToString("d19"),
-            Close = (double)goldData.Close, 
-            PrevClose = (double)goldData.PrevClose,
-            PercentChange = (double)goldData.PercentChange
+            Close = goldData.Close,
+            PrevClose = goldData.PrevClose,
+            PercentChange = goldData.PercentChange
         };
 
         await tableClient.UpsertEntityAsync(entity);
+        logger.LogInformation("Successfully saved new gold price: {Close}", entity.Close);
 
-   
-        var allGoldEntries = tableClient.Query<GoldPrice>(x => x.PartitionKey == "Gold").ToList();
+        var allGoldEntries = new List<GoldPrice>();
+        await foreach (var page in tableClient.QueryAsync<GoldPrice>(x => x.PartitionKey == "Gold").AsPages())
+        {
+            allGoldEntries.AddRange(page.Values);
+        }
 
         if (allGoldEntries.Count > 10)
         {
-           
-            var entitiesToDelete = allGoldEntries.OrderBy(x => x.RowKey).SkipLast(10);
+            var entitiesToDelete = allGoldEntries.OrderBy(x => x.RowKey).Skip(10).ToList();
+
+            var deleteTasks = entitiesToDelete.Select(oldPrice =>
+                tableClient.DeleteEntityAsync(oldPrice.PartitionKey, oldPrice.RowKey));
+
+            await Task.WhenAll(deleteTasks);
 
             foreach (var oldPrice in entitiesToDelete)
             {
                 await tableClient.DeleteEntityAsync(oldPrice.PartitionKey, oldPrice.RowKey);
-                _logger.LogInformation($"Deleted old record: {oldPrice.RowKey}");
+                logger.LogInformation("Deleted old record: {RowKey}", oldPrice.RowKey);
             }
         }
     }

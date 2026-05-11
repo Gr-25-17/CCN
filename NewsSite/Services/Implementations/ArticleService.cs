@@ -149,9 +149,8 @@ namespace NewsSite.Services.Implementations
             => (await _articleRepository.GetBySlugAsync(slug))?.MapToArticleViewModel();
 
         public async Task IncrementViewCountAsync(int articleId)
-        {
-            await _articleRepository.IncrementViewCountAsync(articleId);
-        }
+            =>  await _articleRepository.IncrementViewCountAsync(articleId);
+        
 
         public async Task<bool> HasUserLikedArticleAsync(int articleId, string userId)
             => await _articleRepository.HasUserLikedArticleAsync(articleId, userId);
@@ -178,6 +177,9 @@ namespace NewsSite.Services.Implementations
             var articles = await _articleRepository.SearchArticlesAsync(searchTerm);
             return articles.Select(a => a.MapToSearchViewModel());
         }
+
+        public async Task<IEnumerable<ArticleSummaryViewModel>> GetAllArticlesSortedByPreferencesAsync(List<int> preferredCategoryIds, List<string> preferredAuthorIds, int count)
+    => await _articleRepository.GetAllArticlesSortedByPreferencesAsync(preferredCategoryIds, preferredAuthorIds, count);
 
     }
 }

@@ -34,8 +34,7 @@
                         </li>
 
                         <li class="nav-item">
-                            
-                            <a class="nav-link text-dark" asp-controller="Subscription" asp-action="Index">Subscribe</a>
+                            <a class="nav-link text-dark" href="#" data-bs-toggle="offcanvas" data-bs-target="#subscribeOffcanvas">Subscribe</a>
                         </li>
                     </ul>
                     <partial name="_LoginPartial" />
@@ -82,5 +81,59 @@
     <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+
+    <!-- Login Offcanvas -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="loginOffcanvas" aria-labelledby="loginOffcanvasLabel">
+        <div class="offcanvas-header border-bottom">
+            <h5 class="offcanvas-title fw-bold" id="loginOffcanvasLabel">Logga in</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            @await Component.InvokeAsync("LoginFormVC")
+        </div>
+    </div>
+
+    <!-- Subscribe Offcanvas -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="subscribeOffcanvas" aria-labelledby="subscribeOffcanvasLabel">
+        <div class="offcanvas-header border-bottom">
+            <h5 class="offcanvas-title fw-bold" id="subscribeOffcanvasLabel">⭐ Prenumerera</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <h4 class="mb-3">Slutför din betalning</h4>
+            <p class="text-muted small mb-4">Få omedelbar tillgång till alla premiumartiklar.</p>
+
+            <form asp-controller="Subscription" asp-action="Index" method="post">
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Namn på kortet</label>
+                    <input name="CardName" class="form-control" placeholder="Förnamn Efternamn" required />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Kortnummer</label>
+                    <input name="CardNumber" class="form-control" placeholder="1234 5678 1234 5678" required />
+                </div>
+
+                <div class="row">
+                    <div class="col-7 mb-3">
+                        <label class="form-label small fw-bold">Giltighetstid</label>
+                        <input name="ExpirationDate" class="form-control" placeholder="MM/ÅÅ" required />
+                    </div>
+                    <div class="col-5 mb-3">
+                        <label class="form-label small fw-bold">CVV</label>
+                        <input name="CVV" class="form-control" placeholder="123" required />
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-warning btn-lg w-100 shadow-sm mt-3 fw-bold">
+                    Betala 99 kr / mån
+                </button>
+
+                <p class="text-center mt-4 small text-muted">
+                    Ingen bindningstid. Avsluta när du vill.
+                </p>
+            </form>
+        </div>
+    </div>
 </body>
 </html>

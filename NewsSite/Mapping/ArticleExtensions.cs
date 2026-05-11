@@ -76,7 +76,7 @@ namespace NewsSite.Mapping
             existingArticle.Title = model.Title;
             existingArticle.Summary = model.Summary;
             existingArticle.Content = sanitizedContent;
-            existingArticle.ImageUrl = model.ImageUrl ?? existingArticle.ImageUrl;
+            existingArticle.ImageUrl = model.ImageUrl;
             existingArticle.IsReadyForPublish = model.IsReadyForPublish;
             existingArticle.IsEditorsChoice = model.IsEditorsChoice;
             existingArticle.IsPremium = model.IsPremium;
@@ -101,6 +101,15 @@ namespace NewsSite.Mapping
                 IsArchived = article.IsArchived,
                 ViewsCount = article.ViewsCount
             };
+        public static string ResolveImageUrl(this string? imageUrl, string size, IConfiguration config)
+        {
+            if (string.IsNullOrEmpty(imageUrl)) return "/images/placeholder.jpg";
+            if (imageUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase)) return imageUrl;
+
+            var baseUrl = config["StorageSettings:BaseUrl"]; // Ska vara https://ccnstorage.blob.core.windows.net/
+            var container = imageUrl.EndsWith(".svg", StringComparison.OrdinalIgnoreCase) ? "articles-full" : $"articles-{size}";
+
+            return $"{baseUrl}{container}/{imageUrl}"; // Bygger ihop den kompletta länken[cite: 15]
         }
     }
 }

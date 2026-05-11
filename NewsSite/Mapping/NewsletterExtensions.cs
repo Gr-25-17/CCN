@@ -34,6 +34,7 @@ namespace NewsSite.Mapping
                 ReceiveNewsletter = prefs.ReceiveNewsletter,
                 Frequency = prefs.Frequency,
                 SelectedCategoryIds = prefs.SelectedCategoryIds,
+                SelectedAuthIds = prefs.SelectedAuthorIds,
                 UpdatedAt = DateTime.UtcNow,
                 UnsubscribeToken = Guid.NewGuid().ToString()
             };

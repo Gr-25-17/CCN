@@ -30,10 +30,18 @@
 else
 {
     <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Register</a>
+        <button type="button" class="nav-link btn btn-link text-dark border-0" 
+                data-bs-toggle="offcanvas" 
+                data-bs-target="#loginOffcanvas">
+            Register
+        </button>
     </li>
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Login</a>
-    </li>
+   <li class="nav-item">
+    <button type="button" class="nav-link btn btn-link text-dark border-0" 
+            data-bs-toggle="offcanvas" 
+            data-bs-target="#loginOffcanvas">
+        Login
+    </button>
+</li>
 }
 </ul>

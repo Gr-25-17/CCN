@@ -6,7 +6,7 @@
 
     <form asp-action="Edit" method="post" enctype="multipart/form-data">
         <input type="hidden" asp-for="Id" />
-        <input type="hidden" asp-for="ImageUrl" />
+        @* <input type="hidden" asp-for="ImageUrl" /> *@
         
         <div class="row">
             <div class="col-md-8">
@@ -44,7 +44,7 @@
                             <span asp-validation-for="CategoryId" class="text-danger"></span>
                         </div>
                         
-                        <div class="card mb-3 shadow-sm">
+                        @* <div class="card mb-3 shadow-sm">
                             <div class="card-header bg-light">
                                 <strong>Artikelbild</strong>
                             </div>
@@ -86,8 +86,80 @@
                                     </div>
                                 }
                             </div>
+                        </div> *@
+
+                        <div class="card mb-3 shadow-sm">
+                            <div class="card-header bg-light">
+                                <strong>Artikelbild</strong>
+                            </div>
+                            <div class="card-body">
+                                <ul class="nav nav-pills mb-3" id="image-tab" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link active btn-sm" id="pills-upload-tab" data-bs-toggle="pill" data-bs-target="#pills-upload" type="button" role="tab">
+                                            Ladda upp fil
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link btn-sm" id="pills-url-tab" data-bs-toggle="pill" data-bs-target="#pills-url" type="button" role="tab">
+                                            Klistra in länk
+                                        </button>
+                                    </li>
+                                </ul>
+
+                                <div class="tab-content" id="pills-tabContent">
+                                    <div class="tab-pane fade show active" id="pills-upload" role="tabpanel">
+                                        <div class="mb-2">
+                                            <input asp-for="ImageFile" type="file" class="form-control" accept="image/*" id="imageFileInput" />
+                                            <span asp-validation-for="ImageFile" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade" id="pills-url" role="tabpanel">
+                                        <div class="mb-2">
+                                            <input asp-for="ImageExternalUrl" type="url" class="form-control" placeholder="https://exempel.se/bild.jpg" id="imageUrlInput" />
+                                            <span asp-validation-for="ImageExternalUrl" class="text-danger"></span>
+                                            <small class="text-muted">Bilden laddas ner och sparas på vår server automatiskt.</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex align-items-center mt-3 pb-3 border-bottom">
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="uploadImageAjax()">
+                                        Ladda upp & Förhandsgranska
+                                    </button>
+            
+                                    <div id="uploadFeedback" class="d-none ms-3 d-flex align-items-center">
+                                        <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                                        <span id="uploadStatusText" class="text-primary fw-bold">Validerar och laddar upp...</span>
+                                    </div>
+                                </div>
+
+                                <input type="hidden" asp-for="ImageUrl" id="hiddenImageUrl" />
+
+                                <div id="previewContainer" class="mt-3" style="@(string.IsNullOrEmpty(Model?.ImageUrl) ? "display:none;" : "")">
+                                    <small class="text-muted d-block mb-1">Artikelns bild:</small>
+                                    @* <img id="imagePreview" src="@Model?.ImageUrl" alt="Current Image" class="img-thumbnail" style="max-height: 120px;" /> *@
+                                    <img id="imagePreview"
+                                         src="@Model?.ImageUrl.ResolveImageUrl("med", Configuration)"
+                                         alt="Current Image"
+                                         class="img-thumbnail"
+                                         style="max-height: 120px;" />
+                                </div>
+                            </div>
                         </div>
 
+                        <div class="card mb-3">
+                            <div class="card-header">SEO Metadata</div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label asp-for="MetaTitle" class="form-label">Meta Titel</label>
+                                    <input asp-for="MetaTitle" class="form-control" placeholder="Lämna tom för att använda titel" />
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="MetaDescription" class="form-label">Meta Beskrivning</label>
+                                    <textarea asp-for="MetaDescription" class="form-control" rows="3" placeholder="Lämna tom för att använda sammanfattning"></textarea>
+                                </div>
+                            </div>
+                        </div>
 
 
                         
@@ -119,19 +191,7 @@
                     </div>
                 </div>
 
-                <div class="card mb-3">
-                    <div class="card-header">SEO Metadata</div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <label asp-for="MetaTitle" class="form-label">Meta Titel</label>
-                            <input asp-for="MetaTitle" class="form-control" placeholder="Lämna tom för att använda titel" />
-                        </div>
-                        <div class="mb-3">
-                            <label asp-for="MetaDescription" class="form-label">Meta Beskrivning</label>
-                            <textarea asp-for="MetaDescription" class="form-control" rows="3" placeholder="Lämna tom för att använda sammanfattning"></textarea>
-                        </div>
-                    </div>
-                </div>
+
             </div>
         </div>
     </form>

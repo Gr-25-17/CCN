@@ -8,6 +8,24 @@
     <div class="row">
         <div class="col-md-8">
             @if (Model.IsSearch)
+            @if (Model.PrioritizedArticles.Any())
+            {
+                <div class="mb-5">
+                    <h2 class="mb-3">Preferences</h2>
+                    <div class="row">
+                        @foreach (var article in Model.PrioritizedArticles)
+                        {
+                            <div class="col-md-3 mb-3">
+                                <partial name="Partials/_ArticleCard" model="article" />
+                            </div>
+                        }
+                    </div>
+                    <hr />
+                </div>
+            }
+            <h2 class="mb-4">Latest News</h2>
+
+            @if (Model.LatestArticles.Any())
             {
                 <h2 class="mb-4">Sökresultat för "@Model.SearchTerm"</h2>
 
@@ -150,7 +168,6 @@
     </div>
 
 
-    // kan ta bort delar eller hela
 <script>
     window.onload = function () {
     var modal = new bootstrap.Modal(document.getElementById('subscribeModal'));

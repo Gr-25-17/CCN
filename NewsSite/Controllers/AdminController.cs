@@ -1,11 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NewsSite.Repositories.Interfaces;
 using NewsSite.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace NewsSite.Controllers
 {
     [Authorize(Roles = "Admin")]
-    public class AdminController(IUserService userService) : Controller
+    public class AdminController(IUserService userService, IArticleRepository _articleRepository, IImageOrchestrationService _imageOrchestrationService) : Controller
     {
         [HttpGet]
         public async Task<IActionResult> Index()
@@ -56,6 +58,41 @@ namespace NewsSite.Controllers
             if (!success) TempData["Error"] = "Kunde inte återställa användaren.";
 
             return RedirectToAction(nameof(Index));
+        }
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> RunImageMigration()
+        {
+            // Hämtar endast artiklar som behöver migreras (körs som SQL Query tack vare IQueryable)
+            var articles = await _articleRepository.GetQueryable()
+                .Where(a => !string.IsNullOrEmpty(a.ImageUrl) && !a.ImageUrl.EndsWith(".webp") && !a.ImageUrl.EndsWith(".svg"))
+                .ToListAsync();
+
+            foreach (var article in articles)
+            {
+                try
+                {
+                    using var stream = await _imageOrchestrationService.FetchExternalImageAsync(article.ImageUrl!);
+                    if (stream == null) continue;
+
+                    // Fix CS8130: Ta emot hela tupeln i en variabel istället för dekonstruktion
+                    var result = await _imageOrchestrationService.HandleIncomingImageAsync(
+                        stream, article.ImageUrl, "application/octet-stream");
+
+                    if (!string.IsNullOrEmpty(result.FileName))
+                    {
+                        article.ImageUrl = result.FileName;
+                        await _articleRepository.UpdateAsync(article);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Implementera ILogger här framöver för att fånga upp specifika artiklar som misslyckas 
+                    // _logger.LogWarning(ex, "Kunde inte migrera bild för artikel {Id}", article.Id);
+                }
+            }
+
+            return Ok("Migration slutförd. Azure Functions bearbetar bilderna asynkront.");
         }
     }
 }

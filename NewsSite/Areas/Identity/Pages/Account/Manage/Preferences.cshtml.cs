@@ -35,6 +35,8 @@ public class PreferencesModel : PageModel
         }
 
         Input = await _newsletterService.GetPreferencesAsync(user.Id);
+        Input.AvailableCategories = await _newsletterService.GetAllCategoriesAsync();
+        Input.AvailableAuthors = await _newsletterService.GetAllAuthorsAsync();
 
         return Page();
     }
@@ -50,6 +52,7 @@ public class PreferencesModel : PageModel
         if (!ModelState.IsValid)
         {
             Input.AvailableCategories = await _newsletterService.GetAllCategoriesAsync();
+            Input.AvailableAuthors = await _newsletterService.GetAllAuthorsAsync();
             return Page();
         }
 

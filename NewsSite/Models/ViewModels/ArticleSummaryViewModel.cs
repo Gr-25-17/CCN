@@ -13,5 +13,7 @@
         public bool IsPremium { get; set; }
         public int ViewsCount { get; set; }
         public int LikesCount { get; set; }
+
+        public bool IsEditorsChoice { get; set; }
     }
 }

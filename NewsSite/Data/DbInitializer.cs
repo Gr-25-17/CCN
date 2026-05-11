@@ -40,6 +40,40 @@ namespace NewsSite.Data
                     await userManager.AddToRoleAsync(admin, "Admin");
                 }
             }
+
+            await SeedWritersAsync(userManager);
+        }
+        private static async Task SeedWritersAsync(UserManager<ApplicationUser> userManager)
+        {
+            var writers = new (string Email, string FirstName, string LastName, string Password)[]
+            {
+        ("anna.bergman@newsite.com", "Anna", "Bergman", "Writer123!"),
+        ("erik.lindgren@newsite.com", "Erik", "Lindgren", "Writer123!"),
+        ("sara.wallin@newsite.com", "Sara", "Wallin", "Writer123!"),
+        ("mikael.sundstrom@newsite.com", "Mikael", "Sundström", "Writer123!")
+            };
+
+            foreach (var writer in writers)
+            {
+                var existingUser = await userManager.FindByEmailAsync(writer.Email);
+                if (existingUser == null)
+                {
+                    var user = new ApplicationUser
+                    {
+                        UserName = writer.Email,
+                        Email = writer.Email,
+                        FirstName = writer.FirstName,
+                        LastName = writer.LastName,
+                        EmailConfirmed = true 
+                    };
+
+                    var result = await userManager.CreateAsync(user, writer.Password);
+                    if (result.Succeeded)
+                    {
+                        await userManager.AddToRoleAsync(user, "Writer");
+                    }
+                }
+            }
         }
     }
 }
