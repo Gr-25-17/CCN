@@ -118,7 +118,15 @@ namespace NewsSite.Areas.Identity.Pages.Account.Manage
                 SelectedCategoryIds = prefs.SelectedCategoryIds,
                 SelectedAuthorIds = prefs.SelectedAuthorIds,
                 AvailableCategories = categories,
-                AvailableAuthors = authors
+                AvailableAuthors = authors,
+
+                 SelectedCategoryIdsTemp = prefs.SelectedCategoryIds?
+            .Split(',', StringSplitOptions.RemoveEmptyEntries)
+            .Select(int.Parse)
+            .ToList() ?? new List<int>(),
+                SelectedAuthorIdsTemp = prefs.SelectedAuthorIds?
+            .Split(',', StringSplitOptions.RemoveEmptyEntries)
+            .ToList() ?? new List<string>()
             };
 
             return Page();
@@ -126,6 +134,13 @@ namespace NewsSite.Areas.Identity.Pages.Account.Manage
 
         public async Task<IActionResult> OnPostAsync()
         {
+            // 🔍 DEBUG: Skriv ut ALL data som kommer från formuläret
+            System.Diagnostics.Debug.WriteLine($"=== FORMULÄR DATA ===");
+            foreach (var key in Request.Form.Keys)
+            {
+                System.Diagnostics.Debug.WriteLine($"Key: {key} = {Request.Form[key]}");
+            }
+
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
@@ -152,8 +167,55 @@ namespace NewsSite.Areas.Identity.Pages.Account.Manage
             user.FirstName = Input.FirstName;
             user.LastName = Input.LastName;
             user.DateOfBirth = Input.DateOfBirth;
-
             await _userManager.UpdateAsync(user);
+
+            // 🔍 DEBUG: Kolla Temp lists innan sparning
+            System.Diagnostics.Debug.WriteLine($"=== TEMP LISTS ===");
+            System.Diagnostics.Debug.WriteLine($"SelectedCategoryIdsTemp count: {ContentPreferences?.SelectedCategoryIdsTemp?.Count ?? 0}");
+            System.Diagnostics.Debug.WriteLine($"SelectedAuthorIdsTemp count: {ContentPreferences?.SelectedAuthorIdsTemp?.Count ?? 0}");
+
+            if (ContentPreferences?.SelectedCategoryIdsTemp != null && ContentPreferences.SelectedCategoryIdsTemp.Any())
+            {
+                System.Diagnostics.Debug.WriteLine($"Category Temp values: {string.Join(",", ContentPreferences.SelectedCategoryIdsTemp)}");
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"Category Temp är NULL eller tom!");
+            }
+
+            if (ContentPreferences?.SelectedAuthorIdsTemp != null && ContentPreferences.SelectedAuthorIdsTemp.Any())
+            {
+                System.Diagnostics.Debug.WriteLine($"Author Temp values: {string.Join(",", ContentPreferences.SelectedAuthorIdsTemp)}");
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"Author Temp är NULL eller tom!");
+            }
+
+            var existingPrefs = await _newsletterService.GetPreferencesAsync(user.Id);
+
+            // 🔍 DEBUG: Kolla befintliga värden
+            System.Diagnostics.Debug.WriteLine($"=== BEFINTLIGA VÄRDEN ===");
+            System.Diagnostics.Debug.WriteLine($"Innan sparning - SelectedCategoryIds: {existingPrefs.SelectedCategoryIds}");
+            System.Diagnostics.Debug.WriteLine($"Innan sparning - SelectedAuthorIds: {existingPrefs.SelectedAuthorIds}");
+
+            // Konvertera listor till strings
+            var newCategoryIds = string.Join(",", ContentPreferences?.SelectedCategoryIdsTemp ?? new List<int>());
+            var newAuthorIds = string.Join(",", ContentPreferences?.SelectedAuthorIdsTemp ?? new List<string>());
+
+            System.Diagnostics.Debug.WriteLine($"=== NYA VÄRDEN ===");
+            System.Diagnostics.Debug.WriteLine($"Nya SelectedCategoryIds: {newCategoryIds}");
+            System.Diagnostics.Debug.WriteLine($"Nya SelectedAuthorIds: {newAuthorIds}");
+
+            existingPrefs.SelectedCategoryIds = newCategoryIds;
+            existingPrefs.SelectedAuthorIds = newAuthorIds;
+
+            await _newsletterService.SavePreferencesAsync(user.Id, existingPrefs);
+
+            // 🔍 DEBUG: Bekräfta sparning
+            System.Diagnostics.Debug.WriteLine($"=== SPARAT! ===");
+            System.Diagnostics.Debug.WriteLine($"SelectedCategoryIds sparades som: {newCategoryIds}");
+            System.Diagnostics.Debug.WriteLine($"SelectedAuthorIds sparades som: {newAuthorIds}");
 
             await _signInManager.RefreshSignInAsync(user);
             StatusMessage = "Your profile has been updated";

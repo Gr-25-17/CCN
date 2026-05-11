@@ -8,5 +8,7 @@
         public IEnumerable<CategoryViewModel> Categories { get; set; } = new List<CategoryViewModel>();
         public bool HasActiveSubscription { get; set; } = false;
         public WeatherViewModel? Weather { get; set; }
+
+        public IEnumerable<ArticleSummaryViewModel> PrioritizedArticles { get; set; } = new List<ArticleSummaryViewModel>();
     }
 }

@@ -33,12 +33,14 @@ public class NewsletterPreferenceRepository : INewsletterPreferenceRepository
             existing.ReceiveNewsletter = preference.ReceiveNewsletter;
             existing.Frequency = preference.Frequency;
             existing.SelectedCategoryIds = preference.SelectedCategoryIds;
+            existing.SelectedAuthIds = preference.SelectedAuthIds;
             existing.UpdatedAt = DateTime.UtcNow;
-            
+
             if (!string.IsNullOrEmpty(preference.UnsubscribeToken))
             {
                 existing.UnsubscribeToken = preference.UnsubscribeToken;
             }
+            _context.Entry(existing).Property(x => x.SelectedAuthIds).IsModified = true;
         }
 
         await _context.SaveChangesAsync();

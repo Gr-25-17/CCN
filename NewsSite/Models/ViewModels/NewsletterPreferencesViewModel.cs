@@ -10,6 +10,9 @@ public class NewsletterPreferencesViewModel
 
     public string? SelectedAuthorIds { get; set; }
 
+    public List<int> SelectedCategoryIdsTemp { get; set; } = new();
+    public List<string> SelectedAuthorIdsTemp { get; set; } = new();
+
     public List<CategoryViewModel> AvailableCategories { get; set; } = new();
 
     public List<AuthorViewModel> AvailableAuthors { get; set; } = new();

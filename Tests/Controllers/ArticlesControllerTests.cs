@@ -29,7 +29,7 @@ public class ArticlesControllerTests
         };
     }
 
-    /*[Fact]
+    [Fact]
     public async Task ToggleLike_ShouldReturnCorrectJson()
     {
         // Matchar din Tuple: (bool IsLiked, int LikesCount)
@@ -50,5 +50,5 @@ public class ArticlesControllerTests
     {
         var result = await _controller.Details("");
         result.Should().BeOfType<NotFoundResult>();
-    }*/
+    }
 }

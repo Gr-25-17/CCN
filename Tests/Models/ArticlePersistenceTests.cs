@@ -5,7 +5,7 @@ namespace Tests.Models
 {
     public class ArticlePersistenceTests
     {
-        /*[Fact]
+        [Fact]
         public void Article_ShouldKeepAuthorName_EvenIfUserIsAnonymized()
         {
             // Arrange
@@ -30,6 +30,6 @@ namespace Tests.Models
             // Assert
             article.AuthorName.Should().Be("Anna Andersson");
             article.AuthorName.Should().NotBe($"{user.FirstName} {user.LastName}");
-        }*/
+        }
     }
 }

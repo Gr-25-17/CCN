@@ -21,5 +21,7 @@ namespace NewsSite.Services.Interfaces
         Task<IEnumerable<ArticleSummaryViewModel>> GetLatestByCategoryIdsAsync(List<int> categoryIds, int count);
         Task<IEnumerable<ArticleSummaryViewModel>> GetMostPopularByCategoryIdsAsync(List<int> categoryIds, int count);
         Task<IEnumerable<ArticleSummaryViewModel>> GetEditorChoiceByCategoryIdsAsync(List<int> categoryIds, int count);
+
+        Task<IEnumerable<ArticleSummaryViewModel>> GetAllArticlesSortedByPreferencesAsync(List<int> preferredCategoryIds, List<string> preferredAuthorIds, int count);
     }
 }

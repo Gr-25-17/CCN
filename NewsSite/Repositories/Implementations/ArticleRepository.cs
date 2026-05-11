@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using NewsSite.Data;
 using NewsSite.Models.Entities;
+using NewsSite.Models.ViewModels;
 using NewsSite.Repositories.Interfaces;
 
 namespace NewsSite.Repositories.Implementations
@@ -146,5 +147,39 @@ namespace NewsSite.Repositories.Implementations
                 .ToListAsync();
         }
         public IQueryable<Article> GetQueryable() => context.Articles.AsQueryable();
+
+        public async Task<IEnumerable<ArticleSummaryViewModel>> GetAllArticlesSortedByPreferencesAsync(List<int> preferredCategoryIds, List<string> preferredAuthorIds, int count)
+        {
+            var articles = await context.Articles
+                .Where(a => a.IsReadyForPublish && !a.IsArchived && !a.IsDeleted)
+                .Include(a => a.Category)
+                .Include(a => a.Likes)
+                .ToListAsync();
+
+            
+            var sortedArticles = articles
+                .OrderByDescending(a => preferredCategoryIds.Contains(a.CategoryId) ||
+                                        preferredAuthorIds.Contains(a.AuthorId))
+                .ThenByDescending(a => a.IsEditorsChoice)
+                .ThenByDescending(a => a.ViewsCount)
+                .ThenByDescending(a => a.CreatedAt)
+                .Take(count)
+                .Select(a => new ArticleSummaryViewModel
+                {
+                    Id = a.Id,
+                    Title = a.Title,
+                    Slug = a.Slug,
+                    Summary = a.Summary,
+                    ImageUrl = a.ImageUrl,
+                    CreatedAt = a.CreatedAt,
+                    CategoryName = a.Category?.Name ?? "",
+                    ViewsCount = a.ViewsCount,
+                    LikesCount = a.Likes?.Count ?? 0,
+                    IsEditorsChoice = a.IsEditorsChoice
+                })
+                .ToList();
+
+            return sortedArticles;
+        }
     }
 }

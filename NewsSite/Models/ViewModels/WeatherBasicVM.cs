@@ -5,7 +5,7 @@
 
         public string? UrlIcon { get; set; }
 
-        public int TemperatureC { get; set; }
+        public double TemperatureC { get; set; }
 
         public string TemperatureDisplay => $"{TemperatureC} °C";
 

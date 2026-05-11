@@ -173,5 +173,8 @@ namespace NewsSite.Services.Implementations
             return (!hasLiked, likesCount);
         }
 
+        public async Task<IEnumerable<ArticleSummaryViewModel>> GetAllArticlesSortedByPreferencesAsync(List<int> preferredCategoryIds, List<string> preferredAuthorIds, int count)
+    => await _articleRepository.GetAllArticlesSortedByPreferencesAsync(preferredCategoryIds, preferredAuthorIds, count);
+
     }
 }
