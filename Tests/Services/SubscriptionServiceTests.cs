@@ -7,7 +7,7 @@ namespace Tests.Services;
 
 public class SubscriptionServiceTests
 {
-    /*[Fact]
+    [Fact]
     public async Task HasActiveSubscriptionAsync_ShouldReturnFalse_WhenUserIdIsEmpty()
     {
         var repoMock = new Mock<ISubscriptionRepository>();
@@ -17,5 +17,5 @@ public class SubscriptionServiceTests
 
         result.Should().BeFalse();
         repoMock.Verify(r => r.HasActiveSubscriptionAsync(It.IsAny<string>()), Times.Never);
-    }*/
+    }
 }

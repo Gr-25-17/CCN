@@ -1,28 +1,34 @@
-﻿
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
-
-    public class StockMarketService
+public class StockMarketService(HttpClient httpClient, IConfiguration configuration, ILogger<StockMarketService> logger)
+{
+    public async Task<Top10?> GetGoldAsync()
     {
+        var url = configuration["StockApiUrl"];
 
-        private readonly HttpClient _httpClient;
-
-        public StockMarketService(HttpClient httpClient)
+        if (string.IsNullOrEmpty(url))
         {
-            _httpClient = httpClient;
+            logger.LogError("Missing configuration for StockApiUrl.");
+            return null;
         }
 
-        public async Task<Top10?> GetGoldAsync()
+        try
         {
-            var url = "https://stockapinewsapp.azurewebsites.net/summary";
+            var result = await httpClient.GetFromJsonAsync<StockPrice>(url);
 
-            var result = await _httpClient.GetFromJsonAsync<StockPrice>(url);
-
-          
-            var gold = result?.Top10Stock?
-                .FirstOrDefault(x => x.Symbol == "GC=F" || x.Name == "Gold");
-
-            return gold;
+            // Pattern matching (is { }) säkerställer att vi inte får NullReferenceExceptions
+            if (result?.Top10Stock is { } stocks)
+            {
+                return stocks.FirstOrDefault(x => x.Symbol == "GC=F" || x.Name == "Gold");
+            }
         }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to fetch stock summary from external API.");
+        }
+
+        return null;
     }
-
+}

@@ -21,7 +21,7 @@ public class BlobServiceTests
         _blobService = new BlobService(_mockBlobServiceClient.Object);
     }
 
-    /*[Fact]
+    [Fact]
     public async Task UploadToContainerAsync_ShouldReturnBlobUri()
     {
         // Arrange
@@ -52,5 +52,5 @@ public class BlobServiceTests
             It.Is<BlobUploadOptions>(o => o.HttpHeaders.ContentType == contentType),
             It.IsAny<CancellationToken>()),
             Times.Once);
-    }*/
+    }
 }

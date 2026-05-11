@@ -16,7 +16,7 @@ public class CategoryRepositoryTests
         return new ApplicationDbContext(options);
     }
 
-    /*[Fact]
+    [Fact]
     public async Task GetAllAsync_ShouldReturnAllCategoriesOrderedById()
     {
         // Arrange
@@ -55,5 +55,5 @@ public class CategoryRepositoryTests
 
         // Assert
         result.Should().BeEmpty();
-    }*/
+    }
 }
