@@ -28,8 +28,18 @@ namespace NewsSite
             }
             else
             {
-                builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                    options.UseSqlServer(builder.Configuration.GetConnectionString("AzureSqlConnection")));
+                var azureSqlConnection = builder.Configuration.GetConnectionString("AzureSqlConnection");
+
+                if (string.IsNullOrEmpty(azureSqlConnection))
+                {
+                    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                        options.UseSqlite(connectionString));
+                }
+                else
+                {
+                    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                        options.UseSqlServer(azureSqlConnection));
+                }
             }
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
