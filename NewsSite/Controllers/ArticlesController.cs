@@ -54,5 +54,13 @@ namespace NewsSite.Controllers
             var result = await articleService.ToggleLikeAsync(articleId, userId);
             return Json(new { success = true, isLiked = result.IsLiked, likesCount = result.LikesCount });
         }
+        public IActionResult Search(string searchTerm)
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                return RedirectToAction("Index", "Home");
+            }         
+            return RedirectToAction("Index", "Home", new { searchTerm = searchTerm });
+        }
     }
 }
