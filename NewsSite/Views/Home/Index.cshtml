@@ -7,37 +7,64 @@
 <div class="container">
     <div class="row">
         <div class="col-md-8">
-            @if (Model.PrioritizedArticles.Any())
+            @* Show search results if in search mode *@
+            @if (Model.IsSearch)
             {
-                <div class="mb-5">
-                    <h2 class="mb-3">Preferences</h2>
+                <h2 class="mb-4">Sökresultat för "@Model.SearchTerm"</h2>
+
+                @if (Model.SearchResults.Any())
+                {
                     <div class="row">
-                        @foreach (var article in Model.PrioritizedArticles)
+                        @foreach (var article in Model.SearchResults)
                         {
-                            <div class="col-md-3 mb-3">
+                            <div class="col-12 mb-4">
+                                <partial name="Partials/_SearchResult" model="article" />
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info">Inga artiklar hittades för "@Model.SearchTerm".</div>
+                }
+            }
+            else
+            {
+                @* Show prioritized articles if user has preferences *@
+                @if (Model.PrioritizedArticles.Any())
+                {
+                    <div class="mb-5">
+                        <h2 class="mb-3">Personliga favoriter</h2>
+                        <div class="row">
+                            @foreach (var article in Model.PrioritizedArticles)
+                            {
+                                <div class="col-md-3 mb-3">
+                                    <partial name="Partials/_ArticleCard" model="article" />
+                                </div>
+                            }
+                        </div>
+                        <hr />
+                    </div>
+                }
+
+                @* Show latest articles *@
+                <h2 class="mb-4">Senaste nytt</h2>
+
+                @if (Model.LatestArticles.Any())
+                {
+                    <div class="row">
+                        @foreach (var article in Model.LatestArticles)
+                        {
+                            <div class="col-12 mb-4">
                                 <partial name="Partials/_ArticleCard" model="article" />
                             </div>
                         }
                     </div>
-                    <hr />
-                </div>
-            }
-            <h2 class="mb-4">Latest News</h2>
-
-            @if (Model.LatestArticles.Any())
-            {
-                <div class="row">
-                    @foreach (var article in Model.LatestArticles)
-                    {
-                        <div class="col-12 mb-4">
-                            <partial name="Partials/_ArticleCard" model="article" />
-                        </div>
-                    }
-                </div>
-            }
-            else
-            {
-                <div class="alert alert-info">No articles yet. Check back soon!</div>
+                }
+                else
+                {
+                    <div class="alert alert-info">Inga artiklar ännu. Kom tillbaka senare!</div>
+                }
             }
         </div>
 
@@ -121,7 +148,7 @@
 </div>
 
 
-@if (!Model.HasActiveSubscription)
+@if (!(User.Identity?.IsAuthenticated ?? false) || !(Model?.HasActiveSubscription ?? false))
 {
     <div id="subscribeBanner" class="alert alert-warning shadow-lg mb-0 d-none"
          role="alert"
