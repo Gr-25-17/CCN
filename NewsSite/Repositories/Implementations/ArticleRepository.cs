@@ -179,7 +179,26 @@ namespace NewsSite.Repositories.Implementations
                 })
                 .ToList();
 
+
             return sortedArticles;
+        }
+        public async Task<IEnumerable<Article>> GetArticlesToArchiveAsync(int days)
+        {
+            var archiveDate = DateTime.UtcNow.AddDays(-days);
+            return await context.Articles
+                .Where(a => !a.IsArchived &&
+                            !a.IsDeleted &&
+                            !a.IsPremium &&
+                            !a.IsEditorsChoice &&
+                            a.CreatedAt < archiveDate)
+                .ToListAsync();
+        }
+
+        public async Task ArchiveArticlesAsync(List<int> ids)
+        {
+            await context.Articles
+                .Where(a => ids.Contains(a.Id))
+                .ExecuteUpdateAsync(s => s.SetProperty(a => a.IsArchived, true));
         }
     }
 }

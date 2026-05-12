@@ -106,6 +106,7 @@ namespace NewsSite
                 .WithStaticAssets();
             app.MapRazorPages()
                .WithStaticAssets();
+            app.MapControllers();
             using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
