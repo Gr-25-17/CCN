@@ -101,23 +101,24 @@ namespace CCNLetter.Models
 
         public async Task<string> GenerateNewsletterHtmlAsync(List<Article> articles, string newsletterTitle)
         {
+
             var articlesHtml = new StringBuilder();
 
             foreach (var article in articles)
             {
-                var articleUrl = $"https://yourdomain.com/article/{article.Slug}";
+                var articleUrl = $"#";
 
                 var imageHtml = !string.IsNullOrEmpty(article.ImageUrl)
-                    ? $@"<table width=""100%"" cellpadding=""0"" cellspacing=""0"" border=""0"">
-                            <tr>
-                                <td align=""center"" style=""padding-bottom: 15px;"">
-                                    <a href=""{articleUrl}"" style=""text-decoration: none;"">
-                                        <img src=""{article.ImageUrl}"" alt=""{article.Title}"" style=""width: 100%; max-width: 560px; height: auto; border-radius: 8px; display: block; border: 0;"" />
-                                    </a>
-                                </td>
-                            </tr>
-                          </table>"
-                    : "";
+      ? $@"<table width=""100%"" cellpadding=""0"" cellspacing=""0"" border=""0"">
+            <tr>
+                <td align=""center"" style=""padding-bottom: 15px;"">
+                    <a href=""{articleUrl}"" style=""text-decoration: none;"">
+                        <img src=""{article.ImageUrl}"" alt=""{article.Title}"" style=""width: 100%; max-width: 560px; height: auto; border-radius: 8px; display: block; border: 0;"" />
+                    </a>
+                </td>
+            </tr>
+          </table>"
+      : "";
 
                 var premiumBadge = article.IsPremium
                     ? "<span style='background: #ffc107; color: #000; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-left: 8px; display: inline-block;'>⭐ PREMIUM</span>"
