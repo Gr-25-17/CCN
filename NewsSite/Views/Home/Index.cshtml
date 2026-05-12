@@ -160,7 +160,14 @@
                     <p class="mb-0 small">Få tillgång till alla premiumartiklar och exklusiva reportage.</p>
                 </div>
                 <div class="d-flex align-items-center">
-                    <button type="button" class="btn btn-dark btn-sm fw-bold me-3" data-bs-toggle="offcanvas" data-bs-target="#subscribeOffcanvas">Prenumerera</button>
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <button type="button" class="btn btn-dark btn-sm fw-bold me-3" data-bs-toggle="offcanvas" data-bs-target="#subscribeOffcanvas" onclick="hideBanner()">Prenumerera</button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-dark btn-sm fw-bold me-3" data-bs-toggle="offcanvas" data-bs-target="#loginOffcanvas" onclick="hideBanner()">Logga in</button>
+                    }
                     <button type="button" id="maybeLaterBtn" class="btn btn-outline-secondary btn-sm border-0 text-dark">Kanske senare...</button>
                 </div>
             </div>
@@ -234,6 +241,4 @@
             }
         });
     </script>
-}
-    }
 }

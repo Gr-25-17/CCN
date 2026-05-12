@@ -95,25 +95,25 @@
                             <p class="card-text text-muted mb-4">
                                 Du har läst ditt gratis smakprov. Som prenumerant får du obegränsad tillgång till all vår journalistik och exklusiva reportage.
                             </p>
-                       
 
-                            @if (User.Identity != null && User.Identity.IsAuthenticated)
-                                @if (User.Identity?.IsAuthenticated == true)
-                                {
-                                    <div class="border-top pt-3 mt-2">
-                                        <small class="text-muted">Inloggad som @User.Identity.Name. Saknar aktiv prenumeration.</small>
-                                    </div>
-                                    <button type="button" class="btn btn-warning btn-lg fw-bold w-100 mb-3 shadow-sm"
-                                            data-bs-toggle="offcanvas" data-bs-target="#loginOffcanvas">
-                                        Logga in för att prenumerera
-                                    </button>
-                                }
-                                else
-                                {
-                                    <button type="button" class="btn btn-warning btn-lg fw-bold w-100 mb-3 shadow-sm"
-                                            data-bs-toggle="offcanvas" data-bs-target="#subscribeOffcanvas">
-                                        Bli Prenumerant – 99 kr/mån
-                                    </button>
+                            @if (User.Identity?.IsAuthenticated == true)
+                            {
+                                // User is logged in but has no active subscription
+                                <div class="border-top pt-3 mt-2">
+                                    <small class="text-muted">Inloggad som @User.Identity.Name. Saknar aktiv prenumeration.</small>
+                                </div>
+                                <button type="button" class="btn btn-warning btn-lg fw-bold w-100 mb-3 shadow-sm"
+                                        data-bs-toggle="offcanvas" data-bs-target="#subscribeOffcanvas">
+                                    Bli Prenumerant – 99 kr/mån
+                                </button>
+                            }
+                            else
+                            {
+                                // User is NOT logged in
+                                <button type="button" class="btn btn-warning btn-lg fw-bold w-100 mb-3 shadow-sm"
+                                        data-bs-toggle="offcanvas" data-bs-target="#subscribeOffcanvas">
+                                    Bli Prenumerant – 99 kr/mån
+                                </button>
                                 <div class="border-top pt-3 mt-2">
                                     <p class="mb-0 text-muted">
                                         Redan prenumerant? <a href="#" class="text-primary fw-bold text-decoration-none" data-bs-toggle="offcanvas" data-bs-target="#loginOffcanvas">Logga in här</a>
@@ -141,6 +141,16 @@
 </div>
 
 @section Scripts {
+    <script>
+        function navigateBack() {
+            if (document.referrer) {
+                window.location.href = document.referrer;
+            } else {
+                window.history.back();
+            }
+        }
+    </script>
+
     <div class="offcanvas offcanvas-end" tabindex="-1" id="subscribeOffcanvas" aria-labelledby="subscribeOffcanvasLabel">
         <div class="offcanvas-header border-bottom">
             <h5 class="offcanvas-title fw-bold" id="subscribeOffcanvasLabel">⭐ Prenumerera</h5>
@@ -232,5 +242,4 @@
             </form>
         </div>
     </div>
-}
 }
