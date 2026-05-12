@@ -26,8 +26,8 @@ namespace CCNLetter.Controller
 
         // Runs every 5 seconds for testing
         [Function("SendNewsletter")]
-        //public async Task Run([TimerTrigger("0 0 8 * * 1")] TimerInfo myTimer)
-            public async Task Run([TimerTrigger("*/5 * * * * *")] TimerInfo myTimer)
+        public async Task Run([TimerTrigger("0 0 8 * * 1")] TimerInfo myTimer)
+            //public async Task Run([TimerTrigger("*/5 * * * * *")] TimerInfo myTimer)
         {
             _logger.LogInformation($"Newsletter test started at: {DateTime.Now}");
 
