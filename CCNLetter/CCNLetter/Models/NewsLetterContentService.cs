@@ -17,74 +17,74 @@ namespace CCNLetter.Models
         {
             var testArticles = new List<Article>
             {
-                new Article
-                {
-                    Id = 1,
-                    Title = "Sverige lanserar ny digital strategi för 2030",
-                    Slug = "sverige-digital-strategi-2030",
-                    Summary = "Regeringen presenterar idag en omfattande satsning på digitalisering med fokus på AI, cybersäkerhet och grön teknik.",
-                    CategoryName = "Nyheter",
-                    AuthorName = "Anna Johansson",
-                    ImageUrl = "https://picsum.photos/600/300?random=1",
-                    IsPremium = false,
-                    IsEditorsChoice = true,
-                    CreatedAt = DateTime.Now.AddDays(-1),
-                    ViewsCount = 1542
-                },
-                new Article
-                {
-                    Id = 2,
-                    Title = "AI-revolutionen: Så påverkas din arbetsplats",
-                    Slug = "ai-revolutionen-arbetsplats",
-                    Summary = "Experter spår att var tredje yrkesroll kommer att förändras radikalt inom fem år. Här är jobben som är säkrast.",
-                    CategoryName = "Teknik",
-                    AuthorName = "Erik Nilsson",
-                    ImageUrl = "https://picsum.photos/600/300?random=2",
-                    IsPremium = true,
-                    IsEditorsChoice = true,
-                    CreatedAt = DateTime.Now.AddDays(-2),
-                    ViewsCount = 2847
-                },
-                new Article
-                {
-                    Id = 3,
-                    Title = "Bostadsmarknaden: Trenden som överraskar alla",
-                    Slug = "bostadsmarknaden-trend",
-                    Summary = "Priserna fortsätter stiga i mindre städer medan storstäderna svalnar. Mäklarna ser ett nytt mönster.",
-                    CategoryName = "Ekonomi",
-                    AuthorName = "Maria Berg",
-                    ImageUrl = "https://picsum.photos/600/300?random=3",
-                    IsPremium = false,
-                    CreatedAt = DateTime.Now.AddDays(-3),
-                    ViewsCount = 932
-                },
-                new Article
-                {
-                    Id = 4,
-                    Title = "Premium: Hemligheten bakom världens bästa ledarskap",
-                    Slug = "hemligheten-basta-ledarskap",
-                    Summary = "Exklusiv intervju med forskaren som kartlagt 1000+ framgångsrika ledare. Lär dig deras tre gemensamma drag.",
-                    CategoryName = "Karriär",
-                    AuthorName = "Lisa Wikander",
-                    ImageUrl = "https://picsum.photos/600/300?random=4",
-                    IsPremium = true,
-                    CreatedAt = DateTime.Now.AddDays(-4),
-                    ViewsCount = 2156
-                },
-                new Article
-                {
-                    Id = 5,
-                    Title = "Hälsotrenden som förändrar allt: Så börjar du",
-                    Slug = "halsotrenden-sa-borjar-du",
-                    Summary = "Forskningen bakom den nya rörelseformen som experter kallar 'den tysta revolutionen'.",
-                    CategoryName = "Hälsa",
-                    AuthorName = "Peter Lund",
-                    ImageUrl = "https://picsum.photos/600/300?random=5",
-                    IsPremium = false,
-                    CreatedAt = DateTime.Now.AddDays(-5),
-                    ViewsCount = 743
-                }
-            };
+              new Article
+        {
+            Id = 1,
+            Title = "Sverige lanserar ny digital strategi för 2030",
+            Slug = "sverige-digital-strategi-2030",
+            Summary = "Regeringen presenterar idag en omfattande satsning på digitalisering med fokus på AI, cybersäkerhet och grön teknik.",
+            CategoryName = "Nyheter",
+            AuthorName = "Anna Johansson",
+            ImageUrl = "",  // No image - safe!
+            IsPremium = false,
+            IsEditorsChoice = true,
+            CreatedAt = DateTime.Now.AddDays(-1),
+            ViewsCount = 1542
+        },
+        new Article
+        {
+            Id = 2,
+            Title = "AI-revolutionen: Så påverkas din arbetsplats",
+            Slug = "ai-revolutionen-arbetsplats",
+            Summary = "Experter spår att var tredje yrkesroll kommer att förändras radikalt inom fem år. Här är jobben som är säkrast.",
+            CategoryName = "Teknik",
+            AuthorName = "Erik Nilsson",
+            ImageUrl = "",  // No image - safe!
+            IsPremium = true,
+            IsEditorsChoice = true,
+            CreatedAt = DateTime.Now.AddDays(-2),
+            ViewsCount = 2847
+        },
+        new Article
+        {
+            Id = 3,
+            Title = "Bostadsmarknaden: Trenden som överraskar alla",
+            Slug = "bostadsmarknaden-trend",
+            Summary = "Priserna fortsätter stiga i mindre städer medan storstäderna svalnar. Mäklarna ser ett nytt mönster.",
+            CategoryName = "Ekonomi",
+            AuthorName = "Maria Berg",
+            ImageUrl = "",  // No image - safe!
+            IsPremium = false,
+            CreatedAt = DateTime.Now.AddDays(-3),
+            ViewsCount = 932
+        },
+        new Article
+        {
+            Id = 4,
+            Title = "Premium: Hemligheten bakom världens bästa ledarskap",
+            Slug = "hemligheten-basta-ledarskap",
+            Summary = "Exklusiv intervju med forskaren som kartlagt 1000+ framgångsrika ledare. Lär dig deras tre gemensamma drag.",
+            CategoryName = "Karriär",
+            AuthorName = "Lisa Wikander",
+            ImageUrl = "",  // No image - safe!
+            IsPremium = true,
+            CreatedAt = DateTime.Now.AddDays(-4),
+            ViewsCount = 2156
+        },
+        new Article
+        {
+            Id = 5,
+            Title = "Hälsotrenden som förändrar allt: Så börjar du",
+            Slug = "halsotrenden-sa-borjar-du",
+            Summary = "Forskningen bakom den nya rörelseformen som experter kallar 'den tysta revolutionen'.",
+            CategoryName = "Hälsa",
+            AuthorName = "Peter Lund",
+            ImageUrl = "",  // No image - safe!
+            IsPremium = false,
+            CreatedAt = DateTime.Now.AddDays(-5),
+            ViewsCount = 743
+        }
+    };
 
             return Task.FromResult(testArticles.Take(count).ToList());
         }
