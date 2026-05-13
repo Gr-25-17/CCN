@@ -8,6 +8,10 @@
         public IEnumerable<CategoryViewModel> Categories { get; set; } = new List<CategoryViewModel>();
         public bool HasActiveSubscription { get; set; } = false;
         public WeatherViewModel? Weather { get; set; }
+        public IEnumerable<SearchArticleVM> SearchResults { get; set; } = new List<SearchArticleVM>();
+        public bool IsSearch { get; set; } = false;
+        public string? SearchTerm { get; set; }
+
 
         public IEnumerable<ArticleSummaryViewModel> PrioritizedArticles { get; set; } = new List<ArticleSummaryViewModel>();
     }

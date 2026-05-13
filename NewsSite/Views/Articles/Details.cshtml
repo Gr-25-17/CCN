@@ -95,20 +95,25 @@
                             <p class="card-text text-muted mb-4">
                                 Du har läst ditt gratis smakprov. Som prenumerant får du obegränsad tillgång till all vår journalistik och exklusiva reportage.
                             </p>
-                            
-                            <button type="button" class="btn btn-warning btn-lg fw-bold w-100 mb-3 shadow-sm px-5"
-                                    data-bs-toggle="offcanvas" data-bs-target="#subscribeOffcanvas" data-article-slug="@Model.Slug">
-                                    Bli Prenumerant – 99 kr/mån
-                            </button>
-                            
+                       
+
                             @if (User.Identity != null && User.Identity.IsAuthenticated)
-                            {
-                                <div class="border-top pt-3 mt-2">
-                                    <small class="text-muted">Inloggad som @User.Identity.Name. Saknar aktiv prenumeration.</small>
-                                </div>
-                            }
-                            else
-                            {
+                                @if (User.Identity?.IsAuthenticated == true)
+                                {
+                                    <div class="border-top pt-3 mt-2">
+                                        <small class="text-muted">Inloggad som @User.Identity.Name. Saknar aktiv prenumeration.</small>
+                                    </div>
+                                    <button type="button" class="btn btn-warning btn-lg fw-bold w-100 mb-3 shadow-sm"
+                                            data-bs-toggle="offcanvas" data-bs-target="#loginOffcanvas">
+                                        Logga in för att prenumerera
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-warning btn-lg fw-bold w-100 mb-3 shadow-sm"
+                                            data-bs-toggle="offcanvas" data-bs-target="#subscribeOffcanvas">
+                                        Bli Prenumerant – 99 kr/mån
+                                    </button>
                                 <div class="border-top pt-3 mt-2">
                                     <p class="mb-0 text-muted">
                                         Redan prenumerant? <a href="#" class="text-primary fw-bold text-decoration-none" data-bs-toggle="offcanvas" data-bs-target="#loginOffcanvas">Logga in här</a>
@@ -136,46 +141,96 @@
 </div>
 
 @section Scripts {
-    <script>
-        function navigateBack() {
-            if (document.referrer && document.referrer.includes(window.location.hostname)) {
-                window.history.back();
-            } else {
-                window.location.href = '/';
-            }
-        }
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="subscribeOffcanvas" aria-labelledby="subscribeOffcanvasLabel">
+        <div class="offcanvas-header border-bottom">
+            <h5 class="offcanvas-title fw-bold" id="subscribeOffcanvasLabel">⭐ Prenumerera</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <h4 class="mb-3">Slutför din betalning</h4>
+            <p class="text-muted small mb-4">Få omedelbar tillgång till @Model.Title och alla andra premiumartiklar.</p>
 
-        document.addEventListener("DOMContentLoaded", function () {
-            const likeForm = document.getElementById("likeForm");
-            if (likeForm) {
-                likeForm.addEventListener("submit", async function (e) {
-                    e.preventDefault();
-                    const btn = document.getElementById("likeBtn");
-                    const countText = document.getElementById("likesCountText");
-                    const formData = new FormData(likeForm);
-                    
-                    try {
-                        const response = await fetch(likeForm.action, {
-                            method: "POST",
-                            body: formData
-                        });
-                        
-                        if (response.ok) {
-                            const data = await response.json();
-                            if (data.success) {
-                                countText.innerText = data.likesCount;
-                                if (data.isLiked) {
-                                    btn.classList.replace("btn-outline-danger", "btn-danger");
-                                } else {
-                                    btn.classList.replace("btn-danger", "btn-outline-danger");
-                                }
-                            }
-                        }
-                    } catch (error) {
-                        console.error("Gick inte att gilla:", error);
-                    }
-                });
-            }
-        });
-    </script>
+            <form asp-controller="Subscription" asp-action="Index" method="post">
+                <input type="hidden" name="ArticleSlug" value="@Model.Slug" />
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Namn på kortet</label>
+                    <input name="CardName" class="form-control" placeholder="Förnamn Efternamn" required />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Kortnummer</label>
+                    <input name="CardNumber" class="form-control" placeholder="1234 5678 1234 5678" required />
+                </div>
+
+                <div class="row">
+                    <div class="col-7 mb-3">
+                        <label class="form-label small fw-bold">Giltighetstid</label>
+                        <input name="ExpirationDate" class="form-control" placeholder="MM/ÅÅ" required />
+                    </div>
+                    <div class="col-5 mb-3">
+                        <label class="form-label small fw-bold">CVV</label>
+                        <input name="CVV" class="form-control" placeholder="123" required />
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-warning btn-lg w-100 shadow-sm mt-3 fw-bold">
+                    Betala 99 kr / mån
+                </button>
+
+                <p class="text-center mt-4 small text-muted">
+                    Ingen bindningstid. Avsluta när du vill.
+                </p>
+            </form>
+        </div>
+        <p class="text-center mt-3 small text-muted">
+            Redan medlem?
+            <button type="button" class="btn btn-link p-0 text-decoration-none small"
+                    data-bs-toggle="offcanvas" data-bs-target="#loginOffcanvas">
+                Logga in istället
+            </button>
+        </p>
+    </div>
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="loginOffcanvas" aria-labelledby="loginOffcanvasLabel">
+        <div class="offcanvas-header border-bottom">
+            <h5 class="offcanvas-title fw-bold" id="loginOffcanvasLabel"> Logga in</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <h4 class="mb-3">Välkommen tillbaka</h4>
+            <p class="text-muted small mb-4">Logga in för att låsa upp @Model.Title och se dina prenumerationer.</p>
+
+            <form asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Context.Request.Path" method="post">
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">E-postadress</label>
+                    <input name="Input.Email" type="email" class="form-control" placeholder="namn@exempel.se" required />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Lösenord</label>
+                    <input name="Input.Password" type="password" class="form-control" placeholder="********" required />
+                </div>
+
+                <div class="form-check mb-4">
+                    <input class="form-check-input" type="checkbox" name="Input.RememberMe" id="rememberMe">
+                    <label class="form-check-label small" for="rememberMe">
+                        Kom ihåg mig
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm fw-bold">
+                    Logga in
+                </button>
+
+                <p class="text-center mt-4 small text-muted">
+                    Saknar du konto?
+                    <button type="button" class="btn btn-link p-0 text-primary fw-bold text-decoration-none small"
+                            data-bs-toggle="offcanvas" data-bs-target="#subscribeOffcanvas">
+                        Skapa konto & prenumerera här
+                    </button>
+                </p>
+            </form>
+        </div>
+    </div>
+}
 }

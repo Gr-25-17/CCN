@@ -58,6 +58,12 @@
                                         document.getElementById('weatherWidget').innerHTML = html;
                                     }
                 </script>
+                <form class="d-flex mx-auto" asp-controller="Articles" asp-action="Search" method="get" style="max-width: 400px;">
+                    <div class="input-group">
+                        <input name="searchTerm" class="form-control" type="search" placeholder="Sök artiklar..." aria-label="Search">
+                        <button class="btn btn-primary" type="submit">🔍</button>
+                    </div>
+                </form>
             </div>
         </nav>
     </header>
