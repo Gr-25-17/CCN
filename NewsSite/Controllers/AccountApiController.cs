@@ -64,6 +64,47 @@ namespace NewsSite.Controllers
             return BadRequest(new { error = "Ogiltigt e-postadress eller lösenord." });
         }
 
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                var error = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .FirstOrDefault() ?? "Ogiltiga uppgifter.";
+
+                return BadRequest(new { error });
+            }
+
+            if (await _userManager.FindByEmailAsync(request.Email) is not null)
+            {
+                return BadRequest(new { error = "En användare med denna e-postadress finns redan." });
+            }
+
+            var user = new ApplicationUser
+            {
+                UserName = request.Email,
+                Email = request.Email,
+                EmailConfirmed = true
+            };
+
+            var createResult = await _userManager.CreateAsync(user, request.Password);
+
+            if (!createResult.Succeeded)
+            {
+                var error = createResult.Errors.FirstOrDefault()?.Description ?? "Registreringen misslyckades.";
+                return BadRequest(new { error });
+            }
+
+            await _userManager.AddToRoleAsync(user, "Reader");
+            await _signInManager.SignInAsync(user, isPersistent: false);
+
+            _logger.LogInformation("User registered via AJAX.");
+
+            return Ok(new { success = true, message = "Kontot har skapats och du är nu inloggad." });
+        }
+
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
         {
@@ -76,13 +117,28 @@ namespace NewsSite.Controllers
         {
             [Required]
             [EmailAddress]
-            public string Email { get; set; }
+            public string Email { get; set; } = string.Empty;
 
             [Required]
             [DataType(DataType.Password)]
-            public string Password { get; set; }
+            public string Password { get; set; } = string.Empty;
 
             public bool RememberMe { get; set; }
+        }
+
+        public class RegisterRequest
+        {
+            [Required]
+            [EmailAddress]
+            public string Email { get; set; } = string.Empty;
+
+            [Required]
+            [MinLength(6)]
+            public string Password { get; set; } = string.Empty;
+
+            [Required]
+            [Compare(nameof(Password))]
+            public string ConfirmPassword { get; set; } = string.Empty;
         }
     }
 }
