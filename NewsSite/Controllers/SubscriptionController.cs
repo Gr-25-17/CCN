@@ -13,6 +13,10 @@ namespace NewsSite.Controllers
         {
             return View(new PaymentViewModel
             {
+                CardName = string.Empty,
+                CardNumber = string.Empty,
+                ExpirationDate = string.Empty,
+                CVV = string.Empty,
                 ReturnUrl = returnUrl
             });
         }
