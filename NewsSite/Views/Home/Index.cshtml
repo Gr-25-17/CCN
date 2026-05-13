@@ -42,7 +42,6 @@
         </div>
 
         <div class="col-md-4">
-            
             <div class="card mb-4 shadow-sm">
                 <div class="card-header bg-warning">
                     <strong>⭐ Editor's Choice</strong>
@@ -62,14 +61,13 @@
                                         @article.Title
                                     </a>
                                 </h6>
-                                    <small class="text-muted">@article.CategoryName</small>
+                                <small class="text-muted">@article.CategoryName</small>
                             </div>
                         }
                     }
                 </div>
             </div>
 
-            
             <div class="card mb-4 shadow-sm">
                 <div class="card-header bg-danger text-white">
                     <strong>🔥 Most Popular</strong>
@@ -96,7 +94,6 @@
                 </div>
             </div>
 
-          
             <div class="card shadow-sm">
                 <div class="card-header bg-info text-white">
                     <strong>📂 Categories</strong>
@@ -120,7 +117,6 @@
     </div>
 </div>
 
-
 @if (!Model.HasActiveSubscription)
 {
     <div id="subscribeBanner" class="alert alert-warning shadow-lg mb-0 d-none"
@@ -133,7 +129,13 @@
                     <p class="mb-0 small">Få tillgång till alla premiumartiklar och exklusiva reportage.</p>
                 </div>
                 <div class="d-flex align-items-center">
-                    <button type="button" class="btn btn-dark btn-sm fw-bold me-3" data-bs-toggle="offcanvas" data-bs-target="#subscribeOffcanvas">Prenumerera</button>
+                    <button type="button"
+                            class="btn btn-dark btn-sm fw-bold me-3"
+                            data-bs-toggle="offcanvas"
+                            data-bs-target="#loginOffcanvas"
+                            data-auth-mode="subscribe">
+                        Prenumerera
+                    </button>
                     <button type="button" id="maybeLaterBtn" class="btn btn-outline-secondary btn-sm border-0 text-dark">Kanske senare...</button>
                 </div>
             </div>
@@ -145,7 +147,7 @@
             const isAuthenticated = @(User.Identity.IsAuthenticated ? "true" : "false");
             const banner = document.getElementById('subscribeBanner');
             const dismissBtn = document.getElementById('maybeLaterBtn');
-            
+
             let clickCount = 0;
             const messages = [
                 "Click here if you're sure...",
@@ -154,12 +156,10 @@
                 "Fine.... I wouldn't sell you one anyway..."
             ];
 
-
             dismissBtn.addEventListener('click', function (e) {
                 e.stopPropagation();
                 if (clickCount < messages.length) {
-                    dismissBtn.textContent = messages[clickCount];
-                    clickCount++;
+                    dismissBtn.textContent = messages[clickCount++];
                 } else {
                     hideBanner();
                 }
@@ -173,12 +173,11 @@
 
             function hideBanner() {
                 if (!isAuthenticated) {
-
                     localStorage.setItem('bannerCooldown', Date.now() + (5 * 60 * 1000));
                 }
                 banner.classList.add('d-none');
                 clickCount = 0;
-                dismissBtn.textContent = "Kanske senare...";
+                dismissBtn.textContent = 'Kanske senare...';
             }
 
             function shouldShow() {
@@ -193,7 +192,6 @@
                 }
             }
 
-
             if (isAuthenticated) {
                 showBanner();
             } else {
@@ -207,6 +205,4 @@
             }
         });
     </script>
-}
-    }
 }
