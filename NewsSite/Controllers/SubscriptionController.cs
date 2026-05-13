@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using NewsSite.Models.ViewModels;
 using NewsSite.Services.Interfaces;
 using System.Security.Claims;
 
 namespace NewsSite.Controllers
 {
+    [Authorize]
     public class SubscriptionController(ISubscriptionService subscriptionService) : Controller
     {
         public IActionResult Index()
@@ -23,17 +25,14 @@ namespace NewsSite.Controllers
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            // Om användaren inte är inloggad kan vi inte skapa en prenumeration
-            if (string.IsNullOrEmpty(userId))
+            if (string.IsNullOrWhiteSpace(userId))
             {
                 return Challenge();
             }
 
-            var success = await subscriptionService.HasActiveSubscriptionAsync(userId);
+            await subscriptionService.CreateOrRenewAsync(userId);
 
-            // Här simulerar vi att vi skapar prenumerationen om den inte finns
-            // (Du kan utöka ISubscriptionService med en Create-metod om det behövs)
-            return RedirectToAction("Success");
+            return RedirectToAction(nameof(Success));
         }
 
         public IActionResult Success()
