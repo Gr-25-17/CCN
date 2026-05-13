@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NewsSite.Models.ViewModels;
 using NewsSite.Services.Interfaces;
@@ -9,9 +9,12 @@ namespace NewsSite.Controllers
     [Authorize]
     public class SubscriptionController(ISubscriptionService subscriptionService) : Controller
     {
-        public IActionResult Index()
+        public IActionResult Index(string? returnUrl = null)
         {
-            return View();
+            return View(new PaymentViewModel
+            {
+                ReturnUrl = returnUrl
+            });
         }
 
         [HttpPost]
@@ -32,12 +35,12 @@ namespace NewsSite.Controllers
 
             await subscriptionService.CreateOrRenewAsync(userId);
 
-            return RedirectToAction(nameof(Success));
-        }
+            if (!string.IsNullOrWhiteSpace(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
+            {
+                return LocalRedirect(model.ReturnUrl);
+            }
 
-        public IActionResult Success()
-        {
-            return View();
+            return RedirectToAction("Index", "Home");
         }
     }
 }
