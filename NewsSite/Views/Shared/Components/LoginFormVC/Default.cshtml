@@ -2,144 +2,172 @@
 @using NewsSite.Models.Entities
 @inject SignInManager<ApplicationUser> SignInManager
 
-<section>
-    <form id="loginOffcanvasForm">
-        <h3 class="mb-3 fw-bold">Logga in</h3>
-        <hr />
+<section id="authOffcanvasContent">
+    <div id="loginView">
+        <form id="loginOffcanvasForm">
+            <h3 class="mb-3 fw-bold">Logga in</h3>
+            <hr />
 
-        <div id="loginErrorAlert" class="alert alert-danger d-none mb-3"></div>
-        <div id="loginSuccessAlert" class="alert alert-success d-none mb-3"></div>
+            <div id="loginErrorAlert" class="alert alert-danger d-none mb-3"></div>
+            <div id="loginSuccessAlert" class="alert alert-success d-none mb-3"></div>
 
-        <div class="form-floating mb-3">
-            <input id="loginEmail" name="email" type="email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-            <label for="loginEmail" class="form-label">Email</label>
-            <span class="text-danger" id="emailError"></span>
-        </div>
+            <div class="form-floating mb-3">
+                <input id="loginEmail" name="email" type="email" class="form-control" placeholder="name@example.com" />
+                <label for="loginEmail">Email</label>
+            </div>
 
-        <div class="form-floating mb-3">
-            <input id="loginPassword" name="password" type="password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
-            <label for="loginPassword" class="form-label">Lösenord</label>
-            <span class="text-danger" id="passwordError"></span>
-        </div>
+            <div class="form-floating mb-3">
+                <input id="loginPassword" name="password" type="password" class="form-control" placeholder="password" />
+                <label for="loginPassword">Lösenord</label>
+            </div>
 
-        <div class="checkbox mb-3">
-            <label class="form-label">
-                <input id="rememberMe" type="checkbox" class="form-check-input" name="rememberMe" />
-                Kom ihåg mig
-            </label>
-        </div>
+            <div class="form-check mb-3">
+                <input id="rememberMe" type="checkbox" class="form-check-input" />
+                <label for="rememberMe" class="form-check-label">Kom ihåg mig</label>
+            </div>
 
-        <div>
-            <button id="login-submit" type="button" class="w-100 btn btn-lg btn-primary" onclick="submitLoginForm()">Logga in</button>
-        </div>
+            <button id="login-submit" type="button" class="w-100 btn btn-lg btn-primary" onclick="submitLoginForm()">
+                Logga in
+            </button>
 
-        <div class="mt-3">
-            <p>
-                <a asp-area="Identity" asp-page="/Account/ForgotPassword" class="text-decoration-none">Glömt lösenord?</a>
-            </p>
-            <p>
-                <a href="#" class="text-decoration-none" onclick="showRegisterInLoginOffcanvas(event)">Registrera dig som ny användare</a>
-            </p>
-            <p>
-                <a asp-area="Identity" asp-page="/Account/ResendEmailConfirmation" class="text-decoration-none">Skicka bekräftelse på nytt</a>
-            </p>
-        </div>
-    </form>
+            <div class="mt-3">
+                <a href="#" class="text-decoration-none" onclick="showRegisterInLoginOffcanvas(event)">
+                    Registrera dig som ny användare
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <div id="registerView" class="d-none">
+        <form id="registerOffcanvasForm">
+            <h3 class="mb-3 fw-bold">Registrera dig</h3>
+            <hr />
+
+            <div id="registerErrorAlert" class="alert alert-danger d-none mb-3"></div>
+            <div id="registerSuccessAlert" class="alert alert-success d-none mb-3"></div>
+
+            <div class="form-floating mb-3">
+                <input id="registerEmail" type="email" class="form-control" placeholder="name@example.com" />
+                <label for="registerEmail">Email</label>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input id="registerPassword" type="password" class="form-control" placeholder="password" />
+                <label for="registerPassword">Lösenord</label>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input id="registerConfirmPassword" type="password" class="form-control" placeholder="password" />
+                <label for="registerConfirmPassword">Bekräfta lösenord</label>
+            </div>
+
+            <button id="register-submit" type="button" class="w-100 btn btn-lg btn-primary" onclick="submitRegisterForm()">
+                Registrera
+            </button>
+
+            <div class="mt-3">
+                <a href="#" class="text-decoration-none" onclick="showLoginInLoginOffcanvas(event)">
+                    Har du redan ett konto? Logga in
+                </a>
+            </div>
+        </form>
+    </div>
 </section>
 
 <script>
+    function showLoginInLoginOffcanvas(event) {
+        if (event) event.preventDefault();
+        document.getElementById('loginOffcanvasLabel').textContent = 'Logga in';
+        document.getElementById('loginView').classList.remove('d-none');
+        document.getElementById('registerView').classList.add('d-none');
+    }
+
     function showRegisterInLoginOffcanvas(event) {
-        event.preventDefault();
-
-        const offcanvasTitle = document.getElementById('loginOffcanvasLabel');
-        const offcanvasBody = document.querySelector('#loginOffcanvas .offcanvas-body');
-
-        if (offcanvasTitle) {
-            offcanvasTitle.textContent = 'Registrera dig';
-        }
-
-        if (offcanvasBody) {
-            offcanvasBody.innerHTML = `
-                <iframe
-                    src="/Identity/Account/Register"
-                    style="width:100%; height:85vh; border:0;"
-                    title="Registrera dig">
-                </iframe>`;
-        }
+        if (event) event.preventDefault();
+        document.getElementById('loginOffcanvasLabel').textContent = 'Registrera dig';
+        document.getElementById('loginView').classList.add('d-none');
+        document.getElementById('registerView').classList.remove('d-none');
     }
 
     async function submitLoginForm() {
-        const email = document.getElementById('loginEmail').value.trim();
-        const password = document.getElementById('loginPassword').value.trim();
-        const rememberMe = document.getElementById('rememberMe').checked;
+        await submitAuthForm('/api/accountapi/login', {
+            email: document.getElementById('loginEmail').value.trim(),
+            password: document.getElementById('loginPassword').value,
+            rememberMe: document.getElementById('rememberMe').checked
+        }, 'login');
+    }
 
-        const errorAlert = document.getElementById('loginErrorAlert');
-        const successAlert = document.getElementById('loginSuccessAlert');
-        const emailError = document.getElementById('emailError');
-        const passwordError = document.getElementById('passwordError');
+    async function submitRegisterForm() {
+        await submitAuthForm('/api/accountapi/register', {
+            email: document.getElementById('registerEmail').value.trim(),
+            password: document.getElementById('registerPassword').value,
+            confirmPassword: document.getElementById('registerConfirmPassword').value
+        }, 'register');
+    }
+
+    async function submitAuthForm(url, payload, mode) {
+        const errorAlert = document.getElementById(`${mode}ErrorAlert`);
+        const successAlert = document.getElementById(`${mode}SuccessAlert`);
+        const submitButton = document.getElementById(`${mode}-submit`);
 
         errorAlert.classList.add('d-none');
         successAlert.classList.add('d-none');
-        emailError.textContent = '';
-        passwordError.textContent = '';
 
-        if (!email) {
-            emailError.textContent = 'E-post krävs';
-            return;
-        }
-
-        if (!password) {
-            passwordError.textContent = 'Lösenord krävs';
-            return;
-        }
-
-        const submitBtn = document.getElementById('login-submit');
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Loggar in...';
+        submitButton.disabled = true;
 
         try {
-            const response = await fetch('/api/accountapi/login', {
+            const response = await fetch(url, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    email: email,
-                    password: password,
-                    rememberMe: rememberMe
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
             });
 
             const data = await response.json();
 
-            if (response.ok) {
-                successAlert.textContent = data.message || 'Inloggning lyckades!';
-                successAlert.classList.remove('d-none');
-
-                setTimeout(() => {
-                    const loginOffcanvas = bootstrap.Offcanvas.getInstance(document.getElementById('loginOffcanvas'));
-                    if (loginOffcanvas) {
-                        loginOffcanvas.hide();
-                    }
-                    location.reload();
-                }, 1000);
-            } else {
-                errorAlert.textContent = data.error || 'Inloggning misslyckades';
+            if (!response.ok) {
+                errorAlert.textContent = data.error || 'Ett fel uppstod.';
                 errorAlert.classList.remove('d-none');
+                return;
             }
-        } catch (error) {
+
+            successAlert.textContent = data.message || 'Klart.';
+            successAlert.classList.remove('d-none');
+
+            setTimeout(() => {
+                const element = document.getElementById('loginOffcanvas');
+                const instance = bootstrap.Offcanvas.getInstance(element);
+                if (instance) {
+                    instance.hide();
+                }
+                window.location.reload();
+            }, 500);
+        }
+        catch {
             errorAlert.textContent = 'Ett fel uppstod. Försök igen senare.';
             errorAlert.classList.remove('d-none');
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Logga in';
+        }
+        finally {
+            submitButton.disabled = false;
         }
     }
 
-    document.getElementById('loginOffcanvasForm').addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            submitLoginForm();
-        }
+    document.addEventListener('DOMContentLoaded', () => {
+        const loginOffcanvas = document.getElementById('loginOffcanvas');
+        if (!loginOffcanvas) return;
+
+        loginOffcanvas.addEventListener('show.bs.offcanvas', event => {
+            const trigger = event.relatedTarget;
+            const mode = trigger?.getAttribute('data-auth-mode') || 'login';
+
+            if (mode === 'register') {
+                showRegisterInLoginOffcanvas();
+            } else {
+                showLoginInLoginOffcanvas();
+            }
+        });
+
+        loginOffcanvas.addEventListener('hidden.bs.offcanvas', () => {
+            showLoginInLoginOffcanvas();
+        });
     });
 </script>
