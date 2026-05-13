@@ -39,6 +39,17 @@ namespace NewsSite.Controllers
 
             await subscriptionService.CreateOrRenewAsync(userId);
 
+            if (Request.Headers.XRequestedWith == "XMLHttpRequest")
+            {
+                return Json(new
+                {
+                    success = true,
+                    returnUrl = !string.IsNullOrWhiteSpace(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl)
+                        ? model.ReturnUrl
+                        : Url.Action("Index", "Home")
+                });
+            }
+
             if (!string.IsNullOrWhiteSpace(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
             {
                 return LocalRedirect(model.ReturnUrl);
