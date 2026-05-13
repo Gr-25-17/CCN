@@ -34,20 +34,13 @@
                         </li>
 
                         <li class="nav-item">
-                            @if (User.Identity?.IsAuthenticated == true)
-                            {
-                                <a class="nav-link text-dark" href="#" data-bs-toggle="offcanvas" data-bs-target="#subscribeOffcanvas">Subscribe</a>
-                            }
-                            else
-                            {
-                                <button type="button"
-                                        class="nav-link btn btn-link text-dark border-0 p-0"
-                                        data-bs-toggle="offcanvas"
-                                        data-bs-target="#loginOffcanvas"
-                                        data-auth-mode="login">
-                                    Subscribe
-                                </button>
-                            }
+                            <button type="button"
+                                    class="nav-link text-dark btn btn-link border-0 p-0"
+                                    data-bs-toggle="offcanvas"
+                                    data-bs-target="#loginOffcanvas"
+                                    data-auth-mode="subscribe">
+                                Subscribe
+                            </button>
                         </li>
                     </ul>
 
@@ -94,32 +87,28 @@
 
     @await RenderSectionAsync("Scripts", required: false)
 
+    <template id="loginOffcanvasTemplate">
+        @await Component.InvokeAsync("LoginFormVC")
+    </template>
+
+    <template id="subscribeOffcanvasTemplate">
+        <partial name="~/Views/Subscription/Index.cshtml"
+                 model="new PaymentViewModel
+                 {
+                     CardName = string.Empty,
+                     CardNumber = string.Empty,
+                     ExpirationDate = string.Empty,
+                     CVV = string.Empty,
+                     ReturnUrl = Context.Request.Path + Context.Request.QueryString
+                 }" />
+    </template>
+
     <div class="offcanvas offcanvas-end" tabindex="-1" id="loginOffcanvas" aria-labelledby="loginOffcanvasLabel">
         <div class="offcanvas-header border-bottom">
             <h5 class="offcanvas-title fw-bold" id="loginOffcanvasLabel">Logga in</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
-        <div class="offcanvas-body">
-            @await Component.InvokeAsync("LoginFormVC")
-        </div>
-    </div>
-
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="subscribeOffcanvas" aria-labelledby="subscribeOffcanvasLabel">
-        <div class="offcanvas-header border-bottom">
-            <h5 class="offcanvas-title fw-bold" id="subscribeOffcanvasLabel">⭐ Prenumerera</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        <div class="offcanvas-body">
-            <partial name="~/Views/Subscription/Index.cshtml"
-                     model="new PaymentViewModel
-                     {
-                         CardName = string.Empty,
-                         CardNumber = string.Empty,
-                         ExpirationDate = string.Empty,
-                         CVV = string.Empty,
-                         ReturnUrl = Context.Request.Path + Context.Request.QueryString
-                     }" />
-        </div>
+        <div class="offcanvas-body" id="loginOffcanvasBody"></div>
     </div>
 </body>
 </html>
