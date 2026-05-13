@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+@using NewsSite.Models.ViewModels
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -96,7 +97,14 @@
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body">
-            @await Component.InvokeAsync("SubscriptionFormVC")
+            <partial name="~/Views/Subscription/Index.cshtml"
+                     model="new PaymentViewModel
+                     {
+                         CardName = string.Empty,
+                         CardNumber = string.Empty,
+                         ExpirationDate = string.Empty,
+                         CVV = string.Empty
+                     }" />
         </div>
     </div>
 </body>
