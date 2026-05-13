@@ -38,7 +38,7 @@
                 <a asp-area="Identity" asp-page="/Account/ForgotPassword" class="text-decoration-none">Glömt lösenord?</a>
             </p>
             <p>
-                <a asp-area="Identity" asp-page="/Account/Register" class="text-decoration-none">Registrera dig som ny användare</a>
+                <a href="#" class="text-decoration-none" onclick="showRegisterInLoginOffcanvas(event)">Registrera dig som ny användare</a>
             </p>
             <p>
                 <a asp-area="Identity" asp-page="/Account/ResendEmailConfirmation" class="text-decoration-none">Skicka bekräftelse på nytt</a>
@@ -48,6 +48,26 @@
 </section>
 
 <script>
+    function showRegisterInLoginOffcanvas(event) {
+        event.preventDefault();
+
+        const offcanvasTitle = document.getElementById('loginOffcanvasLabel');
+        const offcanvasBody = document.querySelector('#loginOffcanvas .offcanvas-body');
+
+        if (offcanvasTitle) {
+            offcanvasTitle.textContent = 'Registrera dig';
+        }
+
+        if (offcanvasBody) {
+            offcanvasBody.innerHTML = `
+                <iframe
+                    src="/Identity/Account/Register"
+                    style="width:100%; height:85vh; border:0;"
+                    title="Registrera dig">
+                </iframe>`;
+        }
+    }
+
     async function submitLoginForm() {
         const email = document.getElementById('loginEmail').value.trim();
         const password = document.getElementById('loginPassword').value.trim();
