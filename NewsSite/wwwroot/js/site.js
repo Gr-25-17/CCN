@@ -71,92 +71,69 @@ function showToast(message, type = 'info') {
 
     document.getElementById('toastContainer').appendChild(toastEl);
 
-    setTimeout(() => {
-        toastEl.remove();
-    }, 5000);
+    setTimeout(() => toastEl.remove(), 5000);
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-    const offcanvasElement = document.getElementById('loginOffcanvas');
-    const titleElement = document.getElementById('loginOffcanvasLabel');
-    const bodyElement = document.getElementById('loginOffcanvasBody');
+document.addEventListener('DOMContentLoaded', () => {
+    const offcanvas = document.getElementById('loginOffcanvas');
+    const title = document.getElementById('loginOffcanvasLabel');
 
-    if (!offcanvasElement || !titleElement || !bodyElement) {
+    if (!offcanvas || !title) {
         return;
     }
 
-    const loginTemplate = document.getElementById('loginOffcanvasTemplate');
-    const subscribeTemplate = document.getElementById('subscribeOffcanvasTemplate');
-
-    offcanvasElement.addEventListener('show.bs.offcanvas', function (event) {
+    offcanvas.addEventListener('show.bs.offcanvas', event => {
         const trigger = event.relatedTarget;
         const mode = trigger?.getAttribute('data-auth-mode') ?? 'login';
 
+        const loginView = document.getElementById('loginView');
+        const registerView = document.getElementById('registerView');
+        const subscribeView = document.getElementById('subscribeView');
+        const isAuthenticated = document.body.classList.contains('authenticated');
+
+        if (!loginView || !registerView || !subscribeView) {
+            return;
+        }
+
+        loginView.classList.add('d-none');
+        registerView.classList.add('d-none');
+        subscribeView.classList.add('d-none');
+
         switch (mode) {
             case 'register':
-                loadLoginTemplate(); 
-                titleElement.textContent = 'Registrera';
-                clickRegisterLink(); 
+                title.textContent = 'Registrera dig';
+                registerView.classList.remove('d-none');
                 break;
 
             case 'subscribe':
-                if (document.body.classList.contains('authenticated')) {
-                    loadSubscribeTemplate(); 
-                    titleElement.textContent = '⭐ Prenumerera';
+                if (isAuthenticated) {
+                    title.textContent = '⭐ Prenumerera';
+                    subscribeView.classList.remove('d-none');
                 } else {
-                    loadLoginTemplate(); 
-                    titleElement.textContent = 'Logga in';
+                    title.textContent = 'Logga in';
+                    loginView.classList.remove('d-none');
                 }
                 break;
 
             default:
-                loadLoginTemplate(); 
-                titleElement.textContent = 'Logga in';
+                title.textContent = 'Logga in';
+                loginView.classList.remove('d-none');
                 break;
         }
     });
 
-    function loadLoginTemplate() {
-        if (!loginTemplate) return;
-        bodyElement.innerHTML = loginTemplate.innerHTML;
-        wireDynamicLinks(); 
-    }
+    offcanvas.addEventListener('hidden.bs.offcanvas', () => {
+        const loginView = document.getElementById('loginView');
+        const registerView = document.getElementById('registerView');
+        const subscribeView = document.getElementById('subscribeView');
 
-    function loadSubscribeTemplate() {
-        if (!subscribeTemplate) return;
-        bodyElement.innerHTML = subscribeTemplate.innerHTML;
-
-        const returnUrlInput = bodyElement.querySelector('input[name="ReturnUrl"]');
-        if (returnUrlInput) {
-            returnUrlInput.value = window.location.pathname + window.location.search + window.location.hash;
+        if (!loginView || !registerView || !subscribeView) {
+            return;
         }
-    }
 
-    function wireDynamicLinks() {
-        bodyElement.querySelectorAll('[data-auth-mode]').forEach(element => {
-            element.addEventListener('click', function (e) {
-                e.preventDefault();
-                const nextMode = this.getAttribute('data-auth-mode');
-
-                if (nextMode === 'register') {
-                    loadLoginTemplate(); 
-                    titleElement.textContent = 'Registrera';
-                    clickRegisterLink(); 
-                } else if (nextMode === 'login') {
-                    loadLoginTemplate(); 
-                    titleElement.textContent = 'Logga in';
-                } else if (nextMode === 'subscribe') {
-                    loadSubscribeTemplate(); 
-                    titleElement.textContent = '⭐ Prenumerera';
-                }
-            });
-        });
-    }
-
-    function clickRegisterLink() {
-        const registerLink = bodyElement.querySelector('#register-link');
-        if (registerLink) {
-            registerLink.click(); 
-        }
-    }
+        title.textContent = 'Logga in';
+        loginView.classList.remove('d-none');
+        registerView.classList.add('d-none');
+        subscribeView.classList.add('d-none');
+    });
 });
