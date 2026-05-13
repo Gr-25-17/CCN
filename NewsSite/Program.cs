@@ -51,6 +51,9 @@ namespace NewsSite
 
             builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
             builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
+            builder.Services.AddScoped<IArticleArchiveService, ArticleArchiveService>();
+            builder.Services.AddScoped<ISubscriptionReminderService, SubscriptionReminderService>();
+            builder.Services.AddScoped<IWeeklyNewsletterService, WeeklyNewsletterService>();
 
             builder.Services.AddSingleton(x =>
             {
@@ -97,7 +100,6 @@ namespace NewsSite
             else
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
