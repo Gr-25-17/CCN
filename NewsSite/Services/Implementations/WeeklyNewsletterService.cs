@@ -29,9 +29,12 @@ public class WeeklyNewsletterService(
                 continue;
             }
 
+            var categoryIds = ParseIntList(preference.SelectedCategoryIds);
+            var authorIds = ParseStringList(preference.SelectedAuthIds);
+
             var articles = (await articleService.GetAllArticlesSortedByPreferencesAsync(
-                preference.SelectedCategoryIds ?? string.Empty,
-                preference.SelectedAuthIds ?? string.Empty,
+                categoryIds,
+                authorIds,
                 10)).ToList();
 
             if (articles.Count == 0)
@@ -50,6 +53,34 @@ public class WeeklyNewsletterService(
         }
 
         return sentCount;
+    }
+
+    private static List<int> ParseIntList(string? csv)
+    {
+        if (string.IsNullOrWhiteSpace(csv))
+        {
+            return [];
+        }
+
+        return csv
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(value => int.TryParse(value, out var parsed) ? parsed : (int?)null)
+            .Where(value => value.HasValue)
+            .Select(value => value!.Value)
+            .ToList();
+    }
+
+    private static List<string> ParseStringList(string? csv)
+    {
+        if (string.IsNullOrWhiteSpace(csv))
+        {
+            return [];
+        }
+
+        return csv
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(value => !string.IsNullOrWhiteSpace(value))
+            .ToList();
     }
 
     private static string BuildHtmlBody(IEnumerable<string> titles)
