@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NewsSite.Data;
@@ -9,7 +10,7 @@ using NewsSite.Services.Implementations;
 using NewsSite.Services.Interfaces;
 
 var host = new HostBuilder()
-    .ConfigureFunctionsWorkerDefaults()
+    .ConfigureFunctionsWebApplication()
     .ConfigureServices((context, services) =>
     {
         var connectionString = context.Configuration.GetConnectionString("DefaultConnection")
