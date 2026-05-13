@@ -170,19 +170,4 @@
             submitButton.disabled = false;
         }
     }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        const loginOffcanvas = document.getElementById('loginOffcanvas');
-        if (!loginOffcanvas) return;
-
-        loginOffcanvas.addEventListener('show.bs.offcanvas', event => {
-            const trigger = event.relatedTarget;
-            const mode = trigger?.getAttribute('data-auth-mode') || 'login';
-            if (mode === 'register') showRegisterInLoginOffcanvas(); else showLoginInLoginOffcanvas(); 
-        });
-
-        loginOffcanvas.addEventListener('hidden.bs.offcanvas', () => {
-            showLoginInLoginOffcanvas(); 
-        });
-    });
 </script>
