@@ -34,7 +34,20 @@
                         </li>
 
                         <li class="nav-item">
-                            <a class="nav-link text-dark" href="#" data-bs-toggle="offcanvas" data-bs-target="#subscribeOffcanvas">Subscribe</a>
+                            @if (User.Identity?.IsAuthenticated == true)
+                            {
+                                <a class="nav-link text-dark" href="#" data-bs-toggle="offcanvas" data-bs-target="#subscribeOffcanvas">Subscribe</a>
+                            }
+                            else
+                            {
+                                <button type="button"
+                                        class="nav-link btn btn-link text-dark border-0 p-0"
+                                        data-bs-toggle="offcanvas"
+                                        data-bs-target="#loginOffcanvas"
+                                        data-auth-mode="login">
+                                    Subscribe
+                                </button>
+                            }
                         </li>
                     </ul>
 
@@ -103,7 +116,8 @@
                          CardName = string.Empty,
                          CardNumber = string.Empty,
                          ExpirationDate = string.Empty,
-                         CVV = string.Empty
+                         CVV = string.Empty,
+                         ReturnUrl = Context.Request.Path + Context.Request.QueryString
                      }" />
         </div>
     </div>
