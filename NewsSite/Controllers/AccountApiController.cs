@@ -27,16 +27,12 @@ namespace NewsSite.Controllers
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             if (!ModelState.IsValid)
-            {
                 return BadRequest(ModelState);
-            }
 
             var user = await _userManager.FindByEmailAsync(request.Email);
 
             if (user != null && user.IsDeleted)
-            {
                 return BadRequest(new { error = "Detta konto är inaktiverat eller raderat." });
-            }
 
             var result = await _signInManager.PasswordSignInAsync(
                 request.Email,
@@ -45,21 +41,16 @@ namespace NewsSite.Controllers
                 lockoutOnFailure: false);
 
             if (result.Succeeded)
-            {
-                _logger.LogInformation("User logged in via AJAX.");
                 return Ok(new { success = true, message = "Du har loggats in framgångsrikt!" });
-            }
 
             if (result.RequiresTwoFactor)
-            {
                 return BadRequest(new { error = "Two-factor authentication is required." });
-            }
 
             if (result.IsLockedOut)
-            {
-                _logger.LogWarning("User account locked out.");
                 return BadRequest(new { error = "Ditt konto är låst. Försök igen senare." });
-            }
+
+            if (user is not null && !await _userManager.IsEmailConfirmedAsync(user))
+                return BadRequest(new { error = "Du måste bekräfta din e-postadress innan du kan logga in." });
 
             return BadRequest(new { error = "Ogiltigt e-postadress eller lösenord." });
         }
@@ -78,15 +69,15 @@ namespace NewsSite.Controllers
             }
 
             if (await _userManager.FindByEmailAsync(request.Email) is not null)
-            {
                 return BadRequest(new { error = "En användare med denna e-postadress finns redan." });
-            }
 
             var user = new ApplicationUser
             {
                 UserName = request.Email,
                 Email = request.Email,
-                EmailConfirmed = true
+                FirstName = request.FirstName,
+                LastName = request.LastName,
+                DateOfBirth = request.DateOfBirth
             };
 
             var createResult = await _userManager.CreateAsync(user, request.Password);
@@ -98,29 +89,22 @@ namespace NewsSite.Controllers
             }
 
             await _userManager.AddToRoleAsync(user, "Reader");
-            await _signInManager.SignInAsync(user, isPersistent: false);
 
             _logger.LogInformation("User registered via AJAX.");
 
-            return Ok(new { success = true, message = "Kontot har skapats och du är nu inloggad." });
-        }
-
-        [HttpPost("logout")]
-        public async Task<IActionResult> Logout()
-        {
-            await _signInManager.SignOutAsync();
-            _logger.LogInformation("User logged out via AJAX.");
-            return Ok(new { success = true, message = "Du har loggats ut." });
+            return Ok(new
+            {
+                success = true,
+                message = "Kontot har skapats. Bekräfta din e-postadress innan du loggar in."
+            });
         }
 
         public class LoginRequest
         {
-            [Required]
-            [EmailAddress]
+            [Required, EmailAddress]
             public string Email { get; set; } = string.Empty;
 
-            [Required]
-            [DataType(DataType.Password)]
+            [Required, DataType(DataType.Password)]
             public string Password { get; set; } = string.Empty;
 
             public bool RememberMe { get; set; }
@@ -128,16 +112,22 @@ namespace NewsSite.Controllers
 
         public class RegisterRequest
         {
-            [Required]
-            [EmailAddress]
+            [Required, EmailAddress]
             public string Email { get; set; } = string.Empty;
 
             [Required]
-            [MinLength(6)]
-            public string Password { get; set; } = string.Empty;
+            public string FirstName { get; set; } = string.Empty;
 
             [Required]
-            [Compare(nameof(Password))]
+            public string LastName { get; set; } = string.Empty;
+
+            [Required]
+            public DateTime DateOfBirth { get; set; }
+
+            [Required, MinLength(6)]
+            public string Password { get; set; } = string.Empty;
+
+            [Required, Compare(nameof(Password))]
             public string ConfirmPassword { get; set; } = string.Empty;
         }
     }
