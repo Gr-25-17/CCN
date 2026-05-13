@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NewsSite.Data;
+using NewsSite.Models.Entities;
 using NewsSite.Repositories.Interfaces;
 
 namespace NewsSite.Repositories.Implementations
@@ -16,7 +17,29 @@ namespace NewsSite.Repositories.Implementations
         public async Task<bool> HasActiveSubscriptionAsync(string userId)
         {
             return await _context.Subscriptions
-                .AnyAsync(s => s.UserId == userId && s.EndDate > DateTime.Now && s.PaymentComplete == true);
+                .AnyAsync(s => s.UserId == userId && s.EndDate > DateTime.UtcNow && s.PaymentComplete);
+        }
+
+        public async Task<Subscription?> GetLatestByUserIdAsync(string userId)
+        {
+            return await _context.Subscriptions
+                .Where(s => s.UserId == userId)
+                .OrderByDescending(s => s.EndDate)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task SaveAsync(Subscription subscription)
+        {
+            if (subscription.Id == 0)
+            {
+                _context.Subscriptions.Add(subscription);
+            }
+            else
+            {
+                _context.Subscriptions.Update(subscription);
+            }
+
+            await _context.SaveChangesAsync();
         }
     }
 }
