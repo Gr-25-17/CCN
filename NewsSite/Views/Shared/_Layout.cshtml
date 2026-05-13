@@ -34,13 +34,7 @@
                         </li>
 
                         <li class="nav-item">
-                            <button type="button"
-                                    class="nav-link text-dark btn btn-link border-0 p-0"
-                                    data-bs-toggle="offcanvas"
-                                    data-bs-target="#loginOffcanvas"
-                                    data-auth-mode="subscribe">
-                                Subscribe
-                            </button>
+                            <a class="nav-link text-dark" href="#" data-bs-toggle="offcanvas" data-bs-target="#subscribeOffcanvas">Subscribe</a>
                         </li>
                     </ul>
 
@@ -55,6 +49,13 @@
                         ⇆
                     </button>
                 </div>
+
+                <form class="d-flex mx-auto" asp-controller="Articles" asp-action="Search" method="get" style="max-width: 400px;">
+                    <div class="input-group">
+                        <input name="searchTerm" class="form-control" type="search" placeholder="Sök artiklar..." aria-label="Search">
+                        <button class="btn btn-primary" type="submit">🔍</button>
+                    </div>
+                </form>
             </div>
         </nav>
     </header>
@@ -87,28 +88,59 @@
 
     @await RenderSectionAsync("Scripts", required: false)
 
-    <template id="loginOffcanvasTemplate">
-        @await Component.InvokeAsync("LoginFormVC")
-    </template>
-
-    <template id="subscribeOffcanvasTemplate">
-        <partial name="~/Views/Subscription/Index.cshtml"
-                 model="new PaymentViewModel
-                 {
-                     CardName = string.Empty,
-                     CardNumber = string.Empty,
-                     ExpirationDate = string.Empty,
-                     CVV = string.Empty,
-                     ReturnUrl = Context.Request.Path + Context.Request.QueryString
-                 }" />
-    </template>
-
     <div class="offcanvas offcanvas-end" tabindex="-1" id="loginOffcanvas" aria-labelledby="loginOffcanvasLabel">
         <div class="offcanvas-header border-bottom">
             <h5 class="offcanvas-title fw-bold" id="loginOffcanvasLabel">Logga in</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
-        <div class="offcanvas-body" id="loginOffcanvasBody"></div>
+        <div class="offcanvas-body">
+            @await Component.InvokeAsync("LoginFormVC")
+        </div>
+    </div>
+
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="subscribeOffcanvas" aria-labelledby="subscribeOffcanvasLabel">
+        <div class="offcanvas-header border-bottom">
+            <h5 class="offcanvas-title fw-bold" id="subscribeOffcanvasLabel">⭐ Prenumerera</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <h4 class="mb-3">Slutför din betalning</h4>
+            <p class="text-muted small mb-4">Få omedelbar tillgång till alla premiumartiklar.</p>
+
+            <form asp-controller="Subscription" asp-action="Index" method="post">
+                @Html.AntiForgeryToken()
+                <input name="ReturnUrl" type="hidden" value="@(Context.Request.Path + Context.Request.QueryString)" />
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold" for="subscriptionCardName">Namn på kortet</label>
+                    <input id="subscriptionCardName" name="CardName" class="form-control" placeholder="Förnamn Efternamn" required />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold" for="subscriptionCardNumber">Kortnummer</label>
+                    <input id="subscriptionCardNumber" name="CardNumber" class="form-control" placeholder="1234 5678 1234 5678" required />
+                </div>
+
+                <div class="row">
+                    <div class="col-7 mb-3">
+                        <label class="form-label small fw-bold" for="subscriptionExpirationDate">Giltighetstid</label>
+                        <input id="subscriptionExpirationDate" name="ExpirationDate" class="form-control" placeholder="MM/ÅÅ" required />
+                    </div>
+                    <div class="col-5 mb-3">
+                        <label class="form-label small fw-bold" for="subscriptionCvv">CVV</label>
+                        <input id="subscriptionCvv" name="CVV" class="form-control" placeholder="123" required />
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-warning btn-lg w-100 shadow-sm mt-3 fw-bold">
+                    Betala 99 kr / mån
+                </button>
+
+                <p class="text-center mt-4 small text-muted">
+                    Ingen bindningstid. Avsluta när du vill.
+                </p>
+            </form>
+        </div>
     </div>
 </body>
 </html>
