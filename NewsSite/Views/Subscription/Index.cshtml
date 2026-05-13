@@ -1,10 +1,12 @@
-﻿@using NewsSite.Models.ViewModels
+@using NewsSite.Models.ViewModels
 @model PaymentViewModel
 
 <h2>Subscribe</h2>
 
 <form asp-action="Index" method="post">
     <div asp-validation-summary="All" class="text-danger"></div>
+
+    <input asp-for="ReturnUrl" type="hidden" />
 
     <div class="mb-3">
         <label asp-for="CardName"></label>
