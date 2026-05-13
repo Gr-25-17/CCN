@@ -133,5 +133,60 @@
             </form>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedScrollPosition = sessionStorage.getItem('subscriptionScrollPosition');
+            if (savedScrollPosition !== null) {
+                sessionStorage.removeItem('subscriptionScrollPosition');
+                window.scrollTo(0, parseInt(savedScrollPosition, 10));
+            }
+
+            const subscribeOffcanvas = document.getElementById('subscribeOffcanvas');
+            const form = subscribeOffcanvas?.querySelector('form');
+            const returnUrlInput = form?.querySelector('input[name="ReturnUrl"]');
+
+            if (!form || !returnUrlInput) {
+                return;
+            }
+
+            subscribeOffcanvas.addEventListener('show.bs.offcanvas', () => {
+                returnUrlInput.value = window.location.pathname + window.location.search + window.location.hash;
+            });
+
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
+
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form),
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                const contentType = response.headers.get('content-type') || '';
+                if (!response.ok || !contentType.includes('application/json')) {
+                    form.submit(); // fallback to standard post if validation fails or server returns HTML
+                    return;
+                }
+
+                const result = await response.json();
+                if (!result.success) {
+                    form.submit();
+                    return;
+                }
+
+                sessionStorage.setItem('subscriptionScrollPosition', window.scrollY.toString());
+
+                const offcanvas = bootstrap.Offcanvas.getOrCreateInstance(subscribeOffcanvas);
+                subscribeOffcanvas.addEventListener('hidden.bs.offcanvas', () => {
+                    window.location.reload();
+                }, { once: true });
+
+                offcanvas.hide();
+            });
+        });
+    </script>
 </body>
 </html>
