@@ -1,9 +1,7 @@
 using System.Text;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using NewsSite.Data;
-using NewsSite.Models.Entities;
 using NewsSite.Services.Interfaces;
 
 namespace NewsSite.Services.Implementations;
@@ -17,7 +15,7 @@ public class WeeklyNewsletterService(
     {
         var preferences = await dbContext.NewsletterPreferences
             .Include(p => p.User)
-            .Where(p => p.IsEnabled)
+            .Where(p => p.ReceiveNewsletter)
             .ToListAsync();
 
         var sentCount = 0;
@@ -32,8 +30,8 @@ public class WeeklyNewsletterService(
             }
 
             var articles = (await articleService.GetAllArticlesSortedByPreferencesAsync(
-                preference.SelectedCategoryIds ?? [],
-                preference.SelectedAuthorIds ?? [],
+                preference.SelectedCategoryIds ?? string.Empty,
+                preference.SelectedAuthIds ?? string.Empty,
                 10)).ToList();
 
             if (articles.Count == 0)
