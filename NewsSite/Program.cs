@@ -18,7 +18,6 @@ namespace NewsSite
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
                 ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
@@ -30,16 +29,16 @@ namespace NewsSite
             else
             {
                 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                    options.UseSqlServer(builder.Configuration.GetConnectionString("AzureSqlConnection")));
+                    options.UseSqlServer(connectionString));
             }
-            builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+            builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
             builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
-            builder.Services.AddControllersWithViews();
 
+            builder.Services.AddControllersWithViews();
             builder.Services.AddTransient<IEmailSender, EmailSender>();
 
             builder.Services.AddScoped<IArticleService, ArticleService>();
@@ -48,23 +47,22 @@ namespace NewsSite
             builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IUserService, UserService>();
-
             builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
             builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
             builder.Services.AddScoped<IArticleArchiveService, ArticleArchiveService>();
             builder.Services.AddScoped<ISubscriptionReminderService, SubscriptionReminderService>();
             builder.Services.AddScoped<IWeeklyNewsletterService, WeeklyNewsletterService>();
 
-            builder.Services.AddSingleton(x =>
+            builder.Services.AddSingleton(_ =>
             {
-                var connectionString = builder.Configuration["AzureWebJobsStorage"];
+                var storageConnectionString = builder.Configuration["AzureWebJobsStorage"];
 
-                if (string.IsNullOrEmpty(connectionString))
+                if (string.IsNullOrWhiteSpace(storageConnectionString))
                 {
-                    throw new InvalidOperationException("Anslutningssträngen 'AzureWebJobsStorage' saknas i konfigurationen.");
+                    throw new InvalidOperationException("Configuration value 'AzureWebJobsStorage' is missing.");
                 }
 
-                return new BlobServiceClient(connectionString);
+                return new BlobServiceClient(storageConnectionString);
             });
 
             builder.Services.AddScoped<IBlobService, BlobService>();
@@ -76,7 +74,6 @@ namespace NewsSite
                     policy.WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
 
             builder.Services.AddScoped<IWeatherService, WeatherService>();
-
             builder.Services.AddScoped<IGoldService, GoldService>();
             builder.Services.AddScoped<INewsletterService, NewsletterService>();
             builder.Services.AddScoped<INewsletterPreferenceRepository, NewsletterPreferenceRepository>();
@@ -92,7 +89,6 @@ namespace NewsSite
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseMigrationsEndPoint();
@@ -105,7 +101,6 @@ namespace NewsSite
 
             app.UseHttpsRedirection();
             app.UseRouting();
-
             app.UseAuthorization();
 
             app.MapStaticAssets();
@@ -113,8 +108,8 @@ namespace NewsSite
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}")
                 .WithStaticAssets();
-            app.MapRazorPages()
-               .WithStaticAssets();
+            app.MapRazorPages().WithStaticAssets();
+
             using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
@@ -123,7 +118,6 @@ namespace NewsSite
                 context.Database.Migrate();
 
                 await DbInitializer.SeedRolesAndAdminAsync(services);
-
                 await SeedData.InitializeAsync(services);
             }
 
