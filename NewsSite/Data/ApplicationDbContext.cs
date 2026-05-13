@@ -13,14 +13,28 @@ namespace NewsSite.Data
         public DbSet<ArticleLike> ArticleLikes { get; set; }
 
         public DbSet<NewsletterPreference> NewsletterPreferences { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
-            
             builder.Entity<NewsletterPreference>()
                 .HasIndex(n => n.UserId)
                 .IsUnique();
+
+            builder.Entity<SubscriptionType>().HasData(
+                new SubscriptionType
+                {
+                    Id = 1,
+                    Name = "Monthly",
+                    Price = 99m
+                },
+                new SubscriptionType
+                {
+                    Id = 2,
+                    Name = "Yearly",
+                    Price = 999m
+                });
         }
     }
 }
