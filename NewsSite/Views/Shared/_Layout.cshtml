@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/NewsSite.styles.css" asp-append-version="true" />
 </head>
-<body class="@((User.Identity?.IsAuthenticated ?? false) ? "authenticated" : string.Empty)">
+<body class="@(((User.Identity?.IsAuthenticated ?? false) ? "authenticated " : string.Empty) + (User.IsInRole("Subscriber") ? "has-active-subscription" : string.Empty))">
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
@@ -33,15 +33,18 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
 
-                        <li class="nav-item">
-                            <a href="#"
-                               class="nav-link text-dark"
-                               data-bs-toggle="offcanvas"
-                               data-bs-target="#loginOffcanvas"
-                               data-auth-mode="subscribe">
-                                Subscribe
-                            </a>
-                        </li>
+                        @if (!User.IsInRole("Subscriber"))
+                        {
+                            <li class="nav-item">
+                                <a href="#"
+                                   class="nav-link text-dark"
+                                   data-bs-toggle="offcanvas"
+                                   data-bs-target="#loginOffcanvas"
+                                   data-auth-mode="subscribe">
+                                    Subscribe
+                                </a>
+                            </li>
+                        }
                     </ul>
 
                     <partial name="_LoginPartial" />
