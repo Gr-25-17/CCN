@@ -52,21 +52,6 @@ async function uploadImageAjax() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-    const subscribeOffcanvasEl = document.getElementById('subscribeOffcanvas');
-
-    if (subscribeOffcanvasEl) {
-        subscribeOffcanvasEl.addEventListener('show.bs.offcanvas', function () {
-            const form = subscribeOffcanvasEl.querySelector('form');
-            const returnUrlInput = form?.querySelector('input[name="ReturnUrl"]');
-
-            if (returnUrlInput) {
-                returnUrlInput.value = window.location.pathname + window.location.search + window.location.hash;
-            }
-        });
-    }
-});
-
 function showToast(message, type = 'info') {
     const toastContainer = document.getElementById('toastContainer');
     if (!toastContainer) {
@@ -90,3 +75,88 @@ function showToast(message, type = 'info') {
         toastEl.remove();
     }, 5000);
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+    const offcanvasElement = document.getElementById('loginOffcanvas');
+    const titleElement = document.getElementById('loginOffcanvasLabel');
+    const bodyElement = document.getElementById('loginOffcanvasBody');
+
+    if (!offcanvasElement || !titleElement || !bodyElement) {
+        return;
+    }
+
+    const loginTemplate = document.getElementById('loginOffcanvasTemplate');
+    const subscribeTemplate = document.getElementById('subscribeOffcanvasTemplate');
+
+    offcanvasElement.addEventListener('show.bs.offcanvas', function (event) {
+        const trigger = event.relatedTarget;
+        const mode = trigger?.getAttribute('data-auth-mode') ?? 'login';
+
+        switch (mode) {
+            case 'register':
+                loadLoginTemplate(); 
+                titleElement.textContent = 'Registrera';
+                clickRegisterLink(); 
+                break;
+
+            case 'subscribe':
+                if (document.body.classList.contains('authenticated')) {
+                    loadSubscribeTemplate(); 
+                    titleElement.textContent = '⭐ Prenumerera';
+                } else {
+                    loadLoginTemplate(); 
+                    titleElement.textContent = 'Logga in';
+                }
+                break;
+
+            default:
+                loadLoginTemplate(); 
+                titleElement.textContent = 'Logga in';
+                break;
+        }
+    });
+
+    function loadLoginTemplate() {
+        if (!loginTemplate) return;
+        bodyElement.innerHTML = loginTemplate.innerHTML;
+        wireDynamicLinks(); 
+    }
+
+    function loadSubscribeTemplate() {
+        if (!subscribeTemplate) return;
+        bodyElement.innerHTML = subscribeTemplate.innerHTML;
+
+        const returnUrlInput = bodyElement.querySelector('input[name="ReturnUrl"]');
+        if (returnUrlInput) {
+            returnUrlInput.value = window.location.pathname + window.location.search + window.location.hash;
+        }
+    }
+
+    function wireDynamicLinks() {
+        bodyElement.querySelectorAll('[data-auth-mode]').forEach(element => {
+            element.addEventListener('click', function (e) {
+                e.preventDefault();
+                const nextMode = this.getAttribute('data-auth-mode');
+
+                if (nextMode === 'register') {
+                    loadLoginTemplate(); 
+                    titleElement.textContent = 'Registrera';
+                    clickRegisterLink(); 
+                } else if (nextMode === 'login') {
+                    loadLoginTemplate(); 
+                    titleElement.textContent = 'Logga in';
+                } else if (nextMode === 'subscribe') {
+                    loadSubscribeTemplate(); 
+                    titleElement.textContent = '⭐ Prenumerera';
+                }
+            });
+        });
+    }
+
+    function clickRegisterLink() {
+        const registerLink = bodyElement.querySelector('#register-link');
+        if (registerLink) {
+            registerLink.click(); 
+        }
+    }
+});
