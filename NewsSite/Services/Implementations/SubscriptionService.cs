@@ -8,6 +8,7 @@ namespace NewsSite.Services.Implementations
     public class SubscriptionService : ISubscriptionService
     {
         private const string SubscriberRole = "Subscriber";
+        private const string ReaderRole = "Reader";
         private static readonly TimeSpan DefaultDuration = TimeSpan.FromDays(30);
 
         private readonly ISubscriptionRepository _subscriptionRepository;
@@ -45,7 +46,7 @@ namespace NewsSite.Services.Implementations
             }
             else
             {
-                var subscriptionTypeId = await _subscriptionRepository.GetDefaultSubscriptionTypeIdAsync(); 
+                var subscriptionTypeId = await _subscriptionRepository.GetDefaultSubscriptionTypeIdAsync();
 
                 var subscription = new Subscription
                 {
@@ -63,13 +64,24 @@ namespace NewsSite.Services.Implementations
             var user = await _userManager.FindByIdAsync(userId)
                 ?? throw new InvalidOperationException($"User '{userId}' was not found.");
 
+            if (await _userManager.IsInRoleAsync(user, ReaderRole))
+            {
+                var removeResult = await _userManager.RemoveFromRoleAsync(user, ReaderRole);
+
+                if (!removeResult.Succeeded)
+                {
+                    var errors = string.Join(", ", removeResult.Errors.Select(x => x.Description));
+                    throw new InvalidOperationException($"Failed to remove Reader role: {errors}");
+                }
+            }
+
             if (!await _userManager.IsInRoleAsync(user, SubscriberRole))
             {
-                var result = await _userManager.AddToRoleAsync(user, SubscriberRole);
+                var addResult = await _userManager.AddToRoleAsync(user, SubscriberRole);
 
-                if (!result.Succeeded)
+                if (!addResult.Succeeded)
                 {
-                    var errors = string.Join(", ", result.Errors.Select(x => x.Description));
+                    var errors = string.Join(", ", addResult.Errors.Select(x => x.Description));
                     throw new InvalidOperationException($"Failed to assign Subscriber role: {errors}");
                 }
             }
