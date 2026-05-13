@@ -1,4 +1,4 @@
-﻿using NewsSite.Models.Entities;
+using NewsSite.Models.Entities;
 
 namespace NewsSite.Repositories.Interfaces
 {
@@ -6,6 +6,7 @@ namespace NewsSite.Repositories.Interfaces
     {
         Task<bool> HasActiveSubscriptionAsync(string userId);
         Task<Subscription?> GetLatestByUserIdAsync(string userId);
+        Task<int> GetDefaultSubscriptionTypeIdAsync();
         Task SaveAsync(Subscription subscription);
     }
 }
