@@ -1,5 +1,4 @@
-﻿using AngleSharp.Dom;
-using NewsSite.Mapping;
+﻿using NewsSite.Mapping;
 using NewsSite.Models.Entities;
 using NewsSite.Models.ViewModels;
 using NewsSite.Repositories.Implementations;
@@ -69,7 +68,7 @@ public class NewsletterService : INewsletterService
         var viewModel = preferences.ToNewsletterPreferencesViewModel(categories);
         viewModel.AvailableAuthors = authors;
 
-       
+
         if (!string.IsNullOrEmpty(preferences?.SelectedAuthIds))
         {
             viewModel.SelectedAuthorIds = preferences.SelectedAuthIds;
@@ -80,5 +79,13 @@ public class NewsletterService : INewsletterService
 
 
     public async Task SavePreferencesAsync(string userId, NewsletterPreferencesViewModel preferences)
-        => await _preferenceRepo.SaveAsync(preferences.ToNewsletterPreferenceEntity(userId));
+    {
+
+    var existing = await _preferenceRepo.GetByUserIdAsync(userId);
+
+    var entity = preferences.ToNewsletterPreferenceEntity(userId, existing?.UnsubscribeToken);
+
+    await _preferenceRepo.SaveAsync(entity);
+
+    }
 }

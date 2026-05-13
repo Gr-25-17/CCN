@@ -14,7 +14,10 @@ namespace NewsSite.Mapping
                     ReceiveNewsletter = false,
                     Frequency = "Weekly",
                     SelectedCategoryIds = null,
-                    AvailableCategories = availableCategories
+                    AvailableCategories = availableCategories,
+                    UnsubscribeToken = null,     
+                    IsUnsubscribed = false,       
+                    UnsubscribedAt = null         
                 };
             }
 
@@ -23,10 +26,13 @@ namespace NewsSite.Mapping
                 ReceiveNewsletter = prefs.ReceiveNewsletter,
                 Frequency = prefs.Frequency,
                 SelectedCategoryIds = prefs.SelectedCategoryIds,
-                AvailableCategories = availableCategories
+                AvailableCategories = availableCategories,
+                UnsubscribeToken = prefs.UnsubscribeToken,     
+                IsUnsubscribed = prefs.IsUnsubscribed,         
+                UnsubscribedAt = prefs.UnsubscribedAt          
             };
         }
-        public static NewsletterPreference ToNewsletterPreferenceEntity(this NewsletterPreferencesViewModel prefs, string userId)
+        public static NewsletterPreference ToNewsletterPreferenceEntity(this NewsletterPreferencesViewModel prefs, string userId, string? existingToken = null)
         {
             return new NewsletterPreference
             {
@@ -36,8 +42,19 @@ namespace NewsSite.Mapping
                 SelectedCategoryIds = prefs.SelectedCategoryIds,
                 SelectedAuthIds = prefs.SelectedAuthorIds,
                 UpdatedAt = DateTime.UtcNow,
-                UnsubscribeToken = Guid.NewGuid().ToString()
+
+                UnsubscribeToken = !string.IsNullOrEmpty(existingToken)
+                    ? existingToken
+                    : GenerateToken()
             };
+        }
+
+        private static string GenerateToken()
+        {
+            return Convert.ToBase64String(Guid.NewGuid().ToByteArray())
+                .Replace('+', '-')
+                .Replace('/', '_')
+                .TrimEnd('=');
         }
     }
 }

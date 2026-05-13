@@ -51,6 +51,7 @@ namespace NewsSite
 
             builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
             builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
+            builder.Services.AddScoped<IUnsubscribeTokenService, UnsubscribeTokenService>();
 
             builder.Services.AddSingleton(x =>
             {
