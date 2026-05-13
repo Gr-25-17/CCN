@@ -1,4 +1,4 @@
-﻿using NewsSite.Models.Entities;
+using NewsSite.Models.Entities;
 using NewsSite.Repositories.Interfaces;
 using NewsSite.Services.Interfaces;
 
@@ -35,12 +35,16 @@ namespace NewsSite.Services.Implementations
                 return;
             }
 
+            var subscriptionTypeId = await _subscriptionRepository.GetDefaultSubscriptionTypeIdAsync(); 
+
             var subscription = new Subscription
             {
                 UserId = userId,
+                SubscriptionTypeId = subscriptionTypeId,
                 StartDate = startDate,
                 EndDate = startDate.Add(DefaultDuration),
-                PaymentComplete = true
+                PaymentComplete = true,
+                RenewalReminderSentAt = null
             };
 
             await _subscriptionRepository.SaveAsync(subscription);
