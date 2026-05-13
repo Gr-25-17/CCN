@@ -4,7 +4,7 @@
 @inject UserManager<ApplicationUser> UserManager
 
 <ul class="navbar-nav">
-    @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+    @if ((User.Identity?.IsAuthenticated ?? false) && User.IsInRole("Admin"))
     {
         <li class="nav-item">
             <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="Index">Admin Dashboard</a>
@@ -31,8 +31,8 @@
             <form class="form-inline"
                   asp-area="Identity"
                   asp-page="/Account/Logout"
-                  asp-route-returnUrl="@(Context.Request.Path + Context.Request.QueryString)">
-                <button type="submit" class="nav-link btn btn-link text-dark border-0 p-0">Logout</button>
+                  asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                <button type="submit" class="nav-link btn btn-link text-dark">Logout</button>
             </form>
         </li>
     }
@@ -40,7 +40,7 @@
     {
         <li class="nav-item">
             <button type="button"
-                    class="nav-link btn btn-link text-dark border-0 p-0"
+                    class="nav-link btn btn-link text-dark border-0"
                     data-bs-toggle="offcanvas"
                     data-bs-target="#loginOffcanvas"
                     data-auth-mode="register">
@@ -49,7 +49,7 @@
         </li>
         <li class="nav-item">
             <button type="button"
-                    class="nav-link btn btn-link text-dark border-0 p-0"
+                    class="nav-link btn btn-link text-dark border-0"
                     data-bs-toggle="offcanvas"
                     data-bs-target="#loginOffcanvas"
                     data-auth-mode="login">
