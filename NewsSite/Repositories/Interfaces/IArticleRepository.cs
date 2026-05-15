@@ -30,5 +30,8 @@ namespace NewsSite.Repositories.Interfaces
         IQueryable<Article> GetQueryable();
 
         Task<IEnumerable<ArticleSummaryViewModel>> GetAllArticlesSortedByPreferencesAsync(List<int> preferredCategoryIds, List<string> preferredAuthorIds, int count);
+
+        Task<IEnumerable<Article>> GetArticlesToArchiveAsync(int days);
+        Task ArchiveArticlesAsync(List<int> ids);
     }
 }

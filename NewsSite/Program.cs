@@ -29,8 +29,18 @@ namespace NewsSite
             }
             else
             {
-                builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                    options.UseSqlServer(builder.Configuration.GetConnectionString("AzureSqlConnection")));
+                var azureSqlConnection = builder.Configuration.GetConnectionString("AzureSqlConnection");
+
+                if (string.IsNullOrEmpty(azureSqlConnection))
+                {
+                    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                        options.UseSqlite(connectionString));
+                }
+                else
+                {
+                    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                        options.UseSqlServer(azureSqlConnection));
+                }
             }
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -113,6 +123,7 @@ namespace NewsSite
                 .WithStaticAssets();
             app.MapRazorPages()
                .WithStaticAssets();
+            app.MapControllers();
             using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
