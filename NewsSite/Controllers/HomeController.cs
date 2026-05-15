@@ -26,7 +26,6 @@ namespace NewsSite.Controllers
             UserManager<ApplicationUser> userManager,
             INewsletterService newsletterService,
             IWeatherService weatherService)
-            
         {
             _articleService = articleService;
             _categoryService = categoryService;
@@ -34,33 +33,33 @@ namespace NewsSite.Controllers
             _userManager = userManager;
             _newsletterService = newsletterService;
             _weatherService = weatherService;
-
         }
 
         public async Task<IActionResult> Index()
         {
-
             var searchTerm = HttpContext.Request.Query["searchTerm"].ToString();
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
                 var searchResults = await _articleService.SearchArticlesAsync(searchTerm);
+                var weather = await _weatherService.GetWeatherAsync();
 
                 var searchVm = new HomeViewModel
                 {
                     SearchResults = searchResults,
                     IsSearch = true,
                     SearchTerm = searchTerm,
-                    Categories = await _categoryService.GetAllAsync()
+                    Categories = await _categoryService.GetAllAsync(),
+                    Weather = weather?.ToWeatherViewModel()
                 };
 
                 return View(searchVm);
             }
 
             var hasSubscription = false;
-            List<int> preferredCategoryIds = new List<int>();
-            List<string> preferredAuthorIds = new List<string>();
+            List<int> preferredCategoryIds = new();
+            List<string> preferredAuthorIds = new();
 
-            if (User.Identity.IsAuthenticated)
+            if (User.Identity?.IsAuthenticated == true)
             {
                 var userId = _userManager.GetUserId(User);
 
@@ -101,18 +100,17 @@ namespace NewsSite.Controllers
                     4)).ToList();
             }
 
-            var weather = await _weatherService.GetWeatherAsync();
+            var fullWeather = await _weatherService.GetWeatherAsync();
+
             var viewModel = new HomeViewModel
             {
                 LatestArticles = latestArticles,
                 MostPopularArticles = mostPopularArticles,
                 EditorChoiceArticles = editorChoiceArticles,
-
                 PrioritizedArticles = prioritizedArticles,
-
                 Categories = await _categoryService.GetAllAsync(),
                 HasActiveSubscription = hasSubscription,
-                Weather = weather?.ToWeatherViewModel()
+                Weather = fullWeather?.ToWeatherViewModel()
             };
 
             return View(viewModel);
