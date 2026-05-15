@@ -19,7 +19,12 @@ public class NewsletterPreferenceRepository : INewsletterPreferenceRepository
         return await _context.NewsletterPreferences
             .FirstOrDefaultAsync(p => p.UserId == userId);
     }
-
+    public async Task<NewsletterPreference?> GetByTokenAsync(string token)
+    {
+        return await _context.NewsletterPreferences
+            .Include(n => n.User)
+            .FirstOrDefaultAsync(n => n.UnsubscribeToken == token);
+    }
     public async Task SaveAsync(NewsletterPreference preference)
     {
         var existing = await GetByUserIdAsync(preference.UserId);
@@ -35,11 +40,11 @@ public class NewsletterPreferenceRepository : INewsletterPreferenceRepository
             existing.SelectedCategoryIds = preference.SelectedCategoryIds;
             existing.SelectedAuthIds = preference.SelectedAuthIds;
             existing.UpdatedAt = DateTime.UtcNow;
+            existing.UnsubscribeToken = preference.UnsubscribeToken;
+            existing.IsUnsubscribed = preference.IsUnsubscribed;
+            existing.UnsubscribedAt = preference.UnsubscribedAt;
+            existing.UnsubscribeReason = preference.UnsubscribeReason;
 
-            if (!string.IsNullOrEmpty(preference.UnsubscribeToken))
-            {
-                existing.UnsubscribeToken = preference.UnsubscribeToken;
-            }
             _context.Entry(existing).Property(x => x.SelectedAuthIds).IsModified = true;
         }
 

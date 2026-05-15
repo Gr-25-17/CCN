@@ -27,5 +27,9 @@ public class NewsletterPreference
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
+    public bool IsUnsubscribed { get; set; } = false;
+    public DateTime? UnsubscribedAt { get; set; }
+    public string? UnsubscribeReason { get; set; }
+
 
 }

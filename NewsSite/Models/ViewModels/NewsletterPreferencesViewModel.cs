@@ -25,4 +25,10 @@ public class NewsletterPreferencesViewModel
     public List<string> SelectedAuthorIdsList => SelectedAuthorIds?
         .Split(',', StringSplitOptions.RemoveEmptyEntries)
         .ToList() ?? new List<string>();
+
+    public string? UnsubscribeToken { get; set; }
+
+    public bool IsUnsubscribed { get; set; }
+
+    public DateTime? UnsubscribedAt { get; set; }
 }
