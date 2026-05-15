@@ -43,15 +43,17 @@ public class SubscriptionControllerTests
     }
 
     [Fact]
-    public async Task Index_Post_ShouldRedirectToSuccess_WhenValid()
+    public async Task Index_Post_ShouldRedirectToHomeIndex_WhenValid()
     {
         var model = CreateValidPaymentViewModel();
-        _subServiceMock.Setup(s => s.HasActiveSubscriptionAsync("user123")).ReturnsAsync(true);
 
         var result = await _controller.Index(model);
 
-        result.Should().BeOfType<RedirectToActionResult>()
-            .Which.ActionName.Should().Be("Success");
+        var redirectResult = result.Should().BeOfType<RedirectToActionResult>().Subject;
+        redirectResult.ActionName.Should().Be("Index");
+        redirectResult.ControllerName.Should().Be("Home");
+
+        _subServiceMock.Verify(s => s.CreateOrRenewAsync("user123"), Times.Once);
     }
 
     private static PaymentViewModel CreateValidPaymentViewModel()
