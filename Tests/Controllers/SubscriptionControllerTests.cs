@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FluentAssertions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Moq;
 using NewsSite.Controllers;
 using NewsSite.Models.ViewModels;
 using NewsSite.Services.Interfaces;
-using FluentAssertions;
 using System.Security.Claims;
 
 namespace Tests.Controllers;
@@ -19,7 +19,6 @@ public class SubscriptionControllerTests
         _subServiceMock = new Mock<ISubscriptionService>();
         _controller = new SubscriptionController(_subServiceMock.Object);
 
-        // Mocka HttpContext och User
         var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
         {
             new Claim(ClaimTypes.NameIdentifier, "user123")
@@ -34,7 +33,7 @@ public class SubscriptionControllerTests
     [Fact]
     public async Task Index_Post_ShouldReturnView_WhenModelStateIsInvalid()
     {
-        var model = new PaymentViewModel { CardName = "Test" };
+        var model = CreateValidPaymentViewModel();
         _controller.ModelState.AddModelError("CardNumber", "Required");
 
         var result = await _controller.Index(model);
@@ -46,12 +45,23 @@ public class SubscriptionControllerTests
     [Fact]
     public async Task Index_Post_ShouldRedirectToSuccess_WhenValid()
     {
-        var model = new PaymentViewModel { CardName = "Valid User" };
+        var model = CreateValidPaymentViewModel();
         _subServiceMock.Setup(s => s.HasActiveSubscriptionAsync("user123")).ReturnsAsync(true);
 
         var result = await _controller.Index(model);
 
         result.Should().BeOfType<RedirectToActionResult>()
             .Which.ActionName.Should().Be("Success");
+    }
+
+    private static PaymentViewModel CreateValidPaymentViewModel()
+    {
+        return new PaymentViewModel
+        {
+            CardName = "Test User",
+            CardNumber = "4111111111111111",
+            ExpirationDate = "12/30",
+            CVV = "123"
+        };
     }
 }
