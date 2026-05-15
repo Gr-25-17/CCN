@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
-using NewsSite.Models;
+using NewsSite.Models.Entities;
 using NewsSite.Repositories.Interfaces;
 using NewsSite.Services.Implementations;
 
