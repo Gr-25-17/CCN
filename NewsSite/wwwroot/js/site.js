@@ -78,3 +78,28 @@
             });
         }
     });
+
+    // Toast notification system
+    function showToast(message, type = 'info') {
+        const toastContainer = document.getElementById('toastContainer');
+        if (!toastContainer) {
+            const container = document.createElement('div');
+            container.id = 'toastContainer';
+            container.style.position = 'fixed';
+            container.style.top = '20px';
+            container.style.right = '20px';
+            container.style.zIndex = '9999';
+            document.body.appendChild(container);
+        }
+
+        const toastEl = document.createElement('div');
+        toastEl.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show`;
+        toastEl.textContent = message;
+        toastEl.innerHTML += '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+
+        document.getElementById('toastContainer').appendChild(toastEl);
+
+        setTimeout(() => {
+            toastEl.remove();
+        }, 5000);
+    }

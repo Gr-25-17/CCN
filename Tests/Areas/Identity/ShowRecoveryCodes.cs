@@ -7,7 +7,7 @@ namespace Tests.Areas.Identity;
 
 public class ShowRecoveryCodesTests
 {
-    /*[Fact]
+    [Fact]
     public void OnGet_ShouldRedirect_WhenNoCodesInTempData()
     {
         var pageModel = new ShowRecoveryCodesModel();
@@ -28,5 +28,5 @@ public class ShowRecoveryCodesTests
         var result = pageModel.OnGet();
 
         result.Should().BeOfType<PageResult>();
-    }*/
+    }
 }

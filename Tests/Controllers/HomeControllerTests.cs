@@ -48,7 +48,7 @@ public class HomeControllerTests
         };
     }
 
-    /*[Fact]
+    [Fact]
     public async Task Index_ShouldReturnViewWithModel()
     {
         _articleServiceMock.Setup(s => s.GetLatestAsync(It.IsAny<int>())).ReturnsAsync(new List<ArticleSummaryViewModel>());
@@ -62,5 +62,5 @@ public class HomeControllerTests
 
         var viewResult = result.Should().BeOfType<ViewResult>().Subject;
         viewResult.Model.Should().BeOfType<HomeViewModel>();
-    }*/
+    }
 }

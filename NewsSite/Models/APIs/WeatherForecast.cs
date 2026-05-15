@@ -4,17 +4,12 @@ namespace NewsSite.Models.APIs
 {
     public class WeatherForecast
     {
-        [JsonProperty("summary")]
-        public string CurrentWeather { get; set; } //Called "summary" before
-        public string City { get; set; }
-        public string Lang { get; set; }
-        public int TemperatureC { get; set; }
-        public int TemperatureF { get; set; }
-        public int Humidity { get; set; }
-        public int WindSpeed { get; set; }
+        public string City { get; set; } = string.Empty;
+        public double TemperatureC { get; set; }
+        public double Humidity { get; set; }
+        public double WindSpeed { get; set; }
         public DateTime Date { get; set; }
-        public int UnixTime { get; set; }
-        public Icon Icon { get; set; }
+        public Icon? Icon { get; set; }
     }
 
     public class Icon

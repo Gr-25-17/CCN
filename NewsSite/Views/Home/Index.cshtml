@@ -7,37 +7,64 @@
 <div class="container">
     <div class="row">
         <div class="col-md-8">
-            @if (Model.PrioritizedArticles.Any())
+            @* Show search results if in search mode *@
+            @if (Model.IsSearch)
             {
-                <div class="mb-5">
-                    <h2 class="mb-3">Preferences</h2>
+                <h2 class="mb-4">Sökresultat för "@Model.SearchTerm"</h2>
+
+                @if (Model.SearchResults.Any())
+                {
                     <div class="row">
-                        @foreach (var article in Model.PrioritizedArticles)
+                        @foreach (var article in Model.SearchResults)
                         {
-                            <div class="col-md-3 mb-3">
+                            <div class="col-12 mb-4">
+                                <partial name="Partials/_SearchResult" model="article" />
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info">Inga artiklar hittades för "@Model.SearchTerm".</div>
+                }
+            }
+            else
+            {
+                @* Show prioritized articles if user has preferences *@
+                @if (Model.PrioritizedArticles.Any())
+                {
+                    <div class="mb-5">
+                        <h2 class="mb-3">Personliga favoriter</h2>
+                        <div class="row">
+                            @foreach (var article in Model.PrioritizedArticles)
+                            {
+                                <div class="col-md-3 mb-3">
+                                    <partial name="Partials/_ArticleCard" model="article" />
+                                </div>
+                            }
+                        </div>
+                        <hr />
+                    </div>
+                }
+
+                @* Show latest articles *@
+                <h2 class="mb-4">Senaste nytt</h2>
+
+                @if (Model.LatestArticles.Any())
+                {
+                    <div class="row">
+                        @foreach (var article in Model.LatestArticles)
+                        {
+                            <div class="col-12 mb-4">
                                 <partial name="Partials/_ArticleCard" model="article" />
                             </div>
                         }
                     </div>
-                    <hr />
-                </div>
-            }
-            <h2 class="mb-4">Latest News</h2>
-
-            @if (Model.LatestArticles.Any())
-            {
-                <div class="row">
-                    @foreach (var article in Model.LatestArticles)
-                    {
-                        <div class="col-12 mb-4">
-                            <partial name="Partials/_ArticleCard" model="article" />
-                        </div>
-                    }
-                </div>
-            }
-            else
-            {
-                <div class="alert alert-info">No articles yet. Check back soon!</div>
+                }
+                else
+                {
+                    <div class="alert alert-info">Inga artiklar ännu. Kom tillbaka senare!</div>
+                }
             }
         </div>
 
@@ -121,50 +148,92 @@
 </div>
 
 
-@if (!User.Identity.IsAuthenticated && !Model.HasActiveSubscription)
+@if (!(User.Identity?.IsAuthenticated ?? false) || !(Model?.HasActiveSubscription ?? false))
 {
-    <div class="modal fade" id="subscribeModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Subscribe Now!!!</h5>
-
+    <div id="subscribeBanner" class="alert alert-warning shadow-lg mb-0 d-none"
+         role="alert"
+         style="position: fixed; top: 70px; left: 0; right: 0; margin: 15px; z-index: 1050; border: 2px solid #ffc107;">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="alert-heading mb-1">⭐ Prenumerera nu!</h5>
+                    <p class="mb-0 small">Få tillgång till alla premiumartiklar och exklusiva reportage.</p>
                 </div>
-                <div class="modal-body">
-                    <p>BUY SUBSCRIPTION NOW OR LATER!?</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" id="maybeLaterBtn">Later</button>
-                    <a asp-controller="Subscription" asp-action="Index" class="btn btn-primary">Subscribe</a>
+                <div class="d-flex align-items-center">
+                    <button type="button" class="btn btn-dark btn-sm fw-bold me-3" data-bs-toggle="offcanvas" data-bs-target="#subscribeOffcanvas">Prenumerera</button>
+                    <button type="button" id="maybeLaterBtn" class="btn btn-outline-secondary btn-sm border-0 text-dark">Kanske senare...</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const isAuthenticated = @(User.Identity.IsAuthenticated ? "true" : "false");
+            const banner = document.getElementById('subscribeBanner');
+            const dismissBtn = document.getElementById('maybeLaterBtn');
+            
+            let clickCount = 0;
+            const messages = [
+                "Click here if you're sure...",
+                "No subscription?!!!",
+                "NO SUBSCRIPTION!=!?!!!!!!!!!!!!!",
+                "Fine.... I wouldn't sell you one anyway..."
+            ];
 
-    // kan ta bort delar eller hela
-<script>
-    window.onload = function () {
-    var modal = new bootstrap.Modal(document.getElementById('subscribeModal'));
-    modal.show();
 
-    var clicks = 0;
-    var btn = document.getElementById('maybeLaterBtn');
+            dismissBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                if (clickCount < messages.length) {
+                    dismissBtn.textContent = messages[clickCount];
+                    clickCount++;
+                } else {
+                    hideBanner();
+                }
+            });
 
-        btn.addEventListener('click', function () {
-        clicks++;
-        if (clicks == 1) {
-            btn.textContent = "Click here if you're sure you don't to buy subscription.";
-            } else if (clicks == 2) {
-                btn.textContent = "No subscription?!!!";
-            } else if (clicks == 3) {
-                btn.textContent = "NO SUBSCRIPTION!=!?!!!!!!!!!!!!!";
-            } else if (clicks == 4) {
-                btn.textContent = "Fine.... I wouldn't sell you a subscription anyway...";
+            document.addEventListener('click', function (event) {
+                if (!banner.classList.contains('d-none') && !banner.contains(event.target)) {
+                    hideBanner();
+                }
+            });
+
+            function hideBanner() {
+                if (!isAuthenticated) {
+
+                    localStorage.setItem('bannerCooldown', Date.now() + (5 * 60 * 1000));
+                }
+                banner.classList.add('d-none');
+                clickCount = 0;
+                dismissBtn.textContent = "Kanske senare...";
+            }
+
+            function shouldShow() {
+                if (isAuthenticated) return true;
+                const cooldown = localStorage.getItem('bannerCooldown');
+                return !cooldown || Date.now() > parseInt(cooldown);
+            }
+
+            function showBanner() {
+                if (shouldShow()) {
+                    banner.classList.remove('d-none');
+                }
+            }
+
+
+            if (isAuthenticated) {
+                showBanner();
             } else {
-                modal.hide();
+                let triggered = false;
+                setTimeout(() => { if (!triggered) { showBanner(); triggered = true; } }, 12000);
+                window.addEventListener('scroll', () => {
+                    if (triggered) return;
+                    const scrollPct = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+                    if (scrollPct >= 60) { showBanner(); triggered = true; }
+                });
             }
         });
-        }
     </script>
+}
+    }
 }
