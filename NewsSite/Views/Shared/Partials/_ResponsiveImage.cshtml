@@ -1,0 +1,21 @@
+@model NewsSite.Models.ViewModels.ResponsiveImageViewModel
+
+@if (!string.IsNullOrWhiteSpace(Model?.ImageUrl))
+{
+    var loading = string.IsNullOrWhiteSpace(Model.Loading) ? "lazy" : Model.Loading;
+    var size = string.IsNullOrWhiteSpace(Model.Size) ? "med" : Model.Size;
+    var cssClass = string.IsNullOrWhiteSpace(Model.CssClass) ? string.Empty : Model.CssClass;
+    var style = string.IsNullOrWhiteSpace(Model.Style) ? string.Empty : Model.Style;
+
+    <picture>
+        <source srcset="@Model.ImageUrl.ResolveImageUrl(\"min\", Configuration)" media="(max-width: 576px)">
+        <source srcset="@Model.ImageUrl.ResolveImageUrl(\"med\", Configuration)" media="(max-width: 992px)">
+        <img src="@Model.ImageUrl.ResolveImageUrl(size, Configuration)"
+             class="@cssClass"
+             style="@style"
+             alt="@Model.Alt"
+             loading="@loading"
+             decoding="async"
+             fetchpriority="@(loading == "eager" ? "high" : "auto")">
+    </picture>
+}
