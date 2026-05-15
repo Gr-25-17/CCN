@@ -5,82 +5,252 @@
     ViewData["ActivePage"] = ManageNavPages.Index;
 }
 
-<h3>@ViewData["Title"]</h3>
-<partial name="_StatusMessage" for="StatusMessage" />
+<div class="container">
+    <h3 class="mb-4">@ViewData["Title"]</h3>
+    <partial name="_StatusMessage" for="StatusMessage" />
 
-<div class="row">
-    <div class="col-md-6">
-        <form id="profile-form" method="post">
-            <div class="form-group mb-3">
-                <label asp-for="Input.FirstName" class="form-label"></label>
-                <input asp-for="Input.FirstName" class="form-control" />
-                <span asp-validation-for="Input.FirstName" class="text-danger"></span>
-            </div>
-            <div class="form-group mb-3">
-                <label asp-for="Input.LastName" class="form-label"></label>
-                <input asp-for="Input.LastName" class="form-control" />
-                <span asp-validation-for="Input.LastName" class="text-danger"></span>
-            </div>
-            <div class="form-group mb-3">
-                <label asp-for="Input.DateOfBirth" class="form-label"></label>
-                <input asp-for="Input.DateOfBirth" class="form-control" type="date" />
-                <span asp-validation-for="Input.DateOfBirth" class="text-danger"></span>
-            </div>
-            <div class="form-group mb-3">
-                <label asp-for="Input.PhoneNumber" class="form-label"></label>
-                <input asp-for="Input.PhoneNumber" class="form-control" />
-                <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
-            </div>
+    <div class="row">
+        <div class="col-md-6">
+            <form id="profile-form" method="post">
+                <!-- Personal Information Card -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">👤 Personal Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group mb-3">
+                            <label asp-for="Input.FirstName" class="form-label fw-semibold"></label>
+                            <input asp-for="Input.FirstName" class="form-control" />
+                            <span asp-validation-for="Input.FirstName" class="text-danger"></span>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label asp-for="Input.LastName" class="form-label fw-semibold"></label>
+                            <input asp-for="Input.LastName" class="form-control" />
+                            <span asp-validation-for="Input.LastName" class="text-danger"></span>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label asp-for="Input.DateOfBirth" class="form-label fw-semibold"></label>
+                            <input asp-for="Input.DateOfBirth" class="form-control" type="date" />
+                            <span asp-validation-for="Input.DateOfBirth" class="text-danger"></span>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label asp-for="Input.PhoneNumber" class="form-label fw-semibold"></label>
+                            <input asp-for="Input.PhoneNumber" class="form-control" />
+                            <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
 
-           
-            <div class="form-group mb-3">
-                <label class="form-label fw-bold">Prefered Categorys</label>
-                <div class="row">
-                    @foreach (var category in Model.ContentPreferences.AvailableCategories)
-                    {
-                        <div class="col-6 col-md-4 mb-2">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input"
-                                       name="ContentPreferences.SelectedCategoryIdsTemp"
-                                       value="@category.Id"
-                                @(Model.ContentPreferences.SelectedCategoryIdsTemp.Contains(category.Id) ? "checked" : "") />
-                                <label class="form-check-label">@category.Name</label>
+                <!-- Newsletter Subscription Card -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">📧 Newsletter Subscription</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.ContentPreferences.ReceiveNewsletter && !Model.ContentPreferences.IsUnsubscribed)
+                        {
+                            <div class="alert alert-success">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-grow-1">
+                                        <strong>✅ You are subscribed!</strong><br />
+                                        <span class="small">Frequency: <strong>@Model.ContentPreferences.Frequency</strong></span>
+                                    </div>
+                                    <div>
+                                        <i class="bi bi-envelope-check fs-3"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2 mt-3">
+                                <button type="button" class="btn btn-outline-danger btn-sm"
+                                        data-bs-toggle="modal" data-bs-target="#unsubscribeModal">
+                                    <i class="bi bi-bell-slash"></i> Unsubscribe
+                                </button>
+                                <a href="/Identity/Account/Manage/Preferences" class="btn btn-outline-secondary btn-sm">
+                                    <i class="bi bi-gear"></i> Change Frequency
+                                </a>
+                            </div>
+                        }
+                        else if (Model.ContentPreferences.IsUnsubscribed)
+                        {
+                            <div class="alert alert-warning">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-grow-1">
+                                        <strong>⚠️ You have unsubscribed</strong><br />
+                                        <span class="small">You will no longer receive newsletters.</span>
+                                    </div>
+                                    <div>
+                                        <i class="bi bi-envelope-slash fs-3"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <a href="/Identity/Account/Manage/Preferences" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-arrow-repeat"></i> Subscribe Again
+                                </a>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-secondary">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-grow-1">
+                                        <strong>⭕ Not subscribed</strong><br />
+                                        <span class="small">Get the latest news directly in your inbox.</span>
+                                    </div>
+                                    <div>
+                                        <i class="bi bi-envelope fs-3"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <a href="/Identity/Account/Manage/Preferences" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-envelope-plus"></i> Subscribe to Newsletter
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Content Preferences Card -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">📂 Content Preferences</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group mb-4">
+                            <label class="form-label fw-semibold">Preferred Categories</label>
+                            <div class="row">
+                                @foreach (var category in Model.ContentPreferences.AvailableCategories)
+                                {
+                                    <div class="col-6 col-md-4 mb-2">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input"
+                                                   name="ContentPreferences.SelectedCategoryIdsTemp"
+                                                   value="@category.Id"
+                                                   id="cat_@category.Id"
+                                            @(Model.ContentPreferences.SelectedCategoryIdsTemp.Contains(category.Id) ? "checked" : "") />
+                                            <label class="form-check-label" for="cat_@category.Id">
+                                                @category.Name
+                                            </label>
+                                        </div>
+                                    </div>
+                                }
                             </div>
                         </div>
-                    }
-                </div>
-            </div>
 
-            
-            <div class="form-group mb-3">
-                <label class="form-label fw-bold">Favorite Authors</label>
-                <div class="row">
-                    @foreach (var author in Model.ContentPreferences.AvailableAuthors)
-                    {
-                        <div class="col-6 col-md-4 mb-2">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input"
-                                       name="ContentPreferences.SelectedAuthorIdsTemp"
-                                       value="@author.Id"
-                                @(Model.ContentPreferences.SelectedAuthorIdsTemp.Contains(author.Id) ? "checked" : "") />
-                                <label class="form-check-label">
-                                    @author.Name
-                                    @if (author.ArticleCount > 0)
-                                    {
-                                        <small class="text-muted">(@author.ArticleCount)</small>
-                                    }
-                                </label>
+                        <div class="form-group">
+                            <label class="form-label fw-semibold">✍️ Favorite Authors</label>
+                            <div class="row">
+                                @foreach (var author in Model.ContentPreferences.AvailableAuthors)
+                                {
+                                    <div class="col-6 col-md-4 mb-2">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input"
+                                                   name="ContentPreferences.SelectedAuthorIdsTemp"
+                                                   value="@author.Id"
+                                                   id="author_@author.Id"
+                                            @(Model.ContentPreferences.SelectedAuthorIdsTemp.Contains(author.Id) ? "checked" : "") />
+                                            <label class="form-check-label" for="author_@author.Id">
+                                                @author.Name
+                                                @if (author.ArticleCount > 0)
+                                                {
+                                                    <span class="badge bg-secondary rounded-pill ms-1">@author.ArticleCount</span>
+                                                }
+                                            </label>
+                                        </div>
+                                    </div>
+                                }
                             </div>
                         </div>
-                    }
+                    </div>
+                    <div class="card-footer bg-white">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Save Profile
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Unsubscribe Modal -->
+<div class="modal fade" id="unsubscribeModal" tabindex="-1" aria-labelledby="unsubscribeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="unsubscribeModalLabel">
+                    <i class="bi bi-bell-slash"></i> Unsubscribe from Newsletter
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="fw-semibold">Are you sure you want to unsubscribe from our newsletter?</p>
+                <p class="text-muted small">You will no longer receive updates about news and articles.</p>
+                
+                <div class="mb-3">
+                    <label class="form-label">Why are you leaving? <span class="text-muted">(optional)</span></label>
+                    <select id="unsubscribeReason" class="form-select">
+                        <option value="">Select a reason...</option>
+                        <option value="Too many emails">📧 Too many emails</option>
+                        <option value="Not relevant">🎯 Content not relevant</option>
+                        <option value="Never signed up">❓ I never signed up for this</option>
+                        <option value="Other">💬 Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="pauseInstead" />
+                    <label class="form-check-label" for="pauseInstead">
+                        ⏸️ Pause for 30 days instead <span class="text-muted">(I might come back)</span>
+                    </label>
                 </div>
             </div>
-
-            <button type="submit" class="btn btn-primary">Spara profil</button>
-        </form>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Cancel
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmUnsubscribeBtn">
+                    <i class="bi bi-check-circle"></i> Yes, Unsubscribe
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    
+    <script>
+        document.getElementById('confirmUnsubscribeBtn')?.addEventListener('click', async function() {
+            const token = '@Model.ContentPreferences.UnsubscribeToken';
+            const reason = document.getElementById('unsubscribeReason')?.value;
+            const pauseInstead = document.getElementById('pauseInstead')?.checked;
+            const action = pauseInstead ? 'Suspend30Days' : 'UnsubscribeAll';
+            
+            if (!token) {
+                alert('Unable to unsubscribe. Please try again later.');
+                return;
+            }
+        
+            try {
+                const response = await fetch('/Unsubscribe', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token, action, unsubscribeReason: reason })
+                });
+            
+                if (response.ok) {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('unsubscribeModal'));
+                    modal.hide();
+                    location.reload();
+                } else {
+                    alert('Something went wrong. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            }
+        });
+    </script>
 }

@@ -28,8 +28,18 @@ namespace NewsSite
             }
             else
             {
-                builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                    options.UseSqlServer(connectionString));
+                var azureSqlConnection = builder.Configuration.GetConnectionString("AzureSqlConnection");
+
+                if (string.IsNullOrEmpty(azureSqlConnection))
+                {
+                    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                        options.UseSqlite(connectionString));
+                }
+                else
+                {
+                    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                        options.UseSqlServer(azureSqlConnection));
+                }
             }
 
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
@@ -49,9 +59,7 @@ namespace NewsSite
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
             builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
-            builder.Services.AddScoped<IArticleArchiveService, ArticleArchiveService>();
-            builder.Services.AddScoped<ISubscriptionReminderService, SubscriptionReminderService>();
-            builder.Services.AddScoped<IWeeklyNewsletterService, WeeklyNewsletterService>();
+            builder.Services.AddScoped<IUnsubscribeTokenService, UnsubscribeTokenService>();
 
             builder.Services.AddSingleton(_ =>
             {
@@ -108,8 +116,9 @@ namespace NewsSite
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}")
                 .WithStaticAssets();
-            app.MapRazorPages().WithStaticAssets();
-
+            app.MapRazorPages()
+               .WithStaticAssets();
+            app.MapControllers();
             using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;

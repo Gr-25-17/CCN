@@ -88,13 +88,22 @@
                             </button>
 
                             @if (User.Identity != null && User.Identity.IsAuthenticated)
-                            {
-                                <div class="border-top pt-3 mt-2">
-                                    <small class="text-muted">Inloggad som @User.Identity.Name. Saknar aktiv prenumeration.</small>
-                                </div>
-                            }
-                            else
-                            {
+                                @if (User.Identity?.IsAuthenticated == true)
+                                {
+                                    <div class="border-top pt-3 mt-2">
+                                        <small class="text-muted">Inloggad som @User.Identity.Name. Saknar aktiv prenumeration.</small>
+                                    </div>
+                                    <button type="button" class="btn btn-warning btn-lg fw-bold w-100 mb-3 shadow-sm"
+                                            data-bs-toggle="offcanvas" data-bs-target="#loginOffcanvas">
+                                        Logga in för att prenumerera
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-warning btn-lg fw-bold w-100 mb-3 shadow-sm"
+                                            data-bs-toggle="offcanvas" data-bs-target="#subscribeOffcanvas">
+                                        Bli Prenumerant – 99 kr/mån
+                                    </button>
                                 <div class="border-top pt-3 mt-2">
                                     <p class="mb-0 text-muted">
                                         Redan prenumerant? <a href="#" class="text-primary fw-bold text-decoration-none" data-bs-toggle="offcanvas" data-bs-target="#loginOffcanvas">Logga in här</a>

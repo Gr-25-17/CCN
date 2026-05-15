@@ -8,7 +8,8 @@
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/NewsSite.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/NewsSite.styles.css" asp-append-version="true" />  
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body class="@(((User.Identity?.IsAuthenticated ?? false) ? "authenticated " : string.Empty) + (User.IsInRole("Subscriber") ? "has-active-subscription" : string.Empty))">
     <header>
@@ -58,6 +59,22 @@
                         ⇆
                     </button>
                 </div>
+
+                <script>
+                                    let isDetailed = false;
+                                    async function toggleWeather() {
+                                        isDetailed = !isDetailed;
+                                        const response = await fetch(`/Home/WeatherWidget?detailed=${isDetailed}`);
+                                        const html = await response.text();
+                                        document.getElementById('weatherWidget').innerHTML = html;
+                                    }
+                </script>
+                <form class="d-flex mx-auto" asp-controller="Articles" asp-action="Search" method="get" style="max-width: 400px;">
+                    <div class="input-group">
+                        <input name="searchTerm" class="form-control" type="search" placeholder="Sök artiklar..." aria-label="Search">
+                        <button class="btn btn-primary" type="submit">🔍</button>
+                    </div>
+                </form>
             </div>
         </nav>
     </header>

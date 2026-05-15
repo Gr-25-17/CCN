@@ -11,12 +11,14 @@ namespace NewsSite.Data
         public DbSet<Subscription> Subscriptions { get; set; }
         public DbSet<SubscriptionType> SubscriptionTypes { get; set; }
         public DbSet<ArticleLike> ArticleLikes { get; set; }
+        public DbSet<UnsubscribeLog> UnsubscribeLogs { get; set; }
 
         public DbSet<NewsletterPreference> NewsletterPreferences { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
 
             builder.Entity<NewsletterPreference>()
                 .HasIndex(n => n.UserId)
@@ -35,6 +37,10 @@ namespace NewsSite.Data
                     Name = "Yearly",
                     Price = 999m
                 });
+            builder.Entity<UnsubscribeLog>()
+                   .HasIndex(l => l.UserId);
+            builder.Entity<UnsubscribeLog>()
+                   .HasIndex(l => l.UnsubscribedAt);
         }
     }
 }

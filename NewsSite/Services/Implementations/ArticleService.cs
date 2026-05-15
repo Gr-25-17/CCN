@@ -172,7 +172,11 @@ namespace NewsSite.Services.Implementations
             var likesCount = await _articleRepository.GetLikesCountAsync(articleId);
             return (!hasLiked, likesCount);
         }
-
+        public async Task<IEnumerable<SearchArticleVM>> SearchArticlesAsync(string searchTerm)
+        {
+            var articles = await _articleRepository.SearchArticlesAsync(searchTerm);
+            return articles.Select(a => a.MapToSearchViewModel());
+        }
         public async Task<IEnumerable<ArticleSummaryViewModel>> GetAllArticlesSortedByPreferencesAsync(List<int> preferredCategoryIds, List<string> preferredAuthorIds, int count)
     => await _articleRepository.GetAllArticlesSortedByPreferencesAsync(preferredCategoryIds, preferredAuthorIds, count);
 
