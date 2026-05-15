@@ -3,5 +3,6 @@
     public interface ISubscriptionService
     {
         Task<bool> HasActiveSubscriptionAsync(string userId);
+        Task CreateOrRenewAsync(string userId);
     }
 }

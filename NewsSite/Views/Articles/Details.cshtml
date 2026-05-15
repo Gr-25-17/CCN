@@ -20,11 +20,12 @@
 
             <div class="d-flex justify-content-between align-items-center text-muted mb-4 border-bottom pb-3">
                 <small>Skriven av @Model.AuthorName | @Model.CreatedAt.ToString("yyyy-MM-dd")</small>
-                
+
                 <div class="d-flex align-items-center gap-3">
                     <span title="Visningar">👁️ @Model.ViewsCount</span>
-                    
+
                     <form asp-action="ToggleLike" method="post" class="m-0" id="likeForm">
+                        @Html.AntiForgeryToken()
                         <input type="hidden" name="articleId" value="@Model.Id" />
                         @if (User.Identity != null && User.Identity.IsAuthenticated)
                         {
@@ -45,31 +46,15 @@
             @if (!string.IsNullOrEmpty(Model.ImageUrl))
             {
                 <div class="mb-4">
-                    @* <img src="@Model.ImageUrl" class="img-fluid rounded shadow-sm" alt="@Model.Title"
-                         style="width: 100%; max-height: 450px; object-fit: cover;"> *@
-                    @* <picture class="article-hero">
-                        <source srcset="@Model.ImageUrl.ResolveImageUrl("med", Configuration)" media="(max-width: 992px)">
-                        <img src="@Model.ImageUrl.ResolveImageUrl("full", Configuration)"
-                             class="img-fluid rounded shadow"
-                             alt="@Model.Title"
-                             loading="eager"
-                             decoding="async">
-                    </picture> *@
                     <picture class="article-hero mb-4 d-block">
-                        <!-- Mobiler och mindre tablets får 'med' -->
                         <source srcset="@Model.ImageUrl.ResolveImageUrl("med", Configuration)" media="(max-width: 992px)">
-    
-                        <!-- Stora skärmar får 'full' -->
                         <source srcset="@Model.ImageUrl.ResolveImageUrl("full", Configuration)" media="(min-width: 993px)">
-    
-                        <!-- Fallback-img måste alltid finnas -->
                         <img src="@Model.ImageUrl.ResolveImageUrl("full", Configuration)"
                              class="img-fluid rounded shadow-sm w-100"
                              alt="@Model.Title"
                              loading="eager"
                              decoding="async">
                     </picture>
-
                 </div>
             }
 
@@ -79,23 +64,28 @@
                     <div class="mb-4 text-muted fst-italic border-start border-4 border-warning ps-3">
                         <p>@Model.Summary</p>
                     </div>
-                    
+
                     <div class="position-relative mb-5" style="max-height: 300px; overflow: hidden;">
-                        
                         @Html.Raw(Model.Content)
-                        
                         <div class="position-absolute bottom-0 start-0 w-100"
                              style="height: 150px; background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%); pointer-events: none;">
                         </div>
                     </div>
-                    
+
                     <div class="card border-warning shadow-lg text-center p-4 mx-auto" style="max-width: 550px; background-color: #fffdf5;">
                         <div class="card-body">
                             <h3 class="card-title text-warning fw-bold mb-3">⭐ Lås upp hela artikeln</h3>
                             <p class="card-text text-muted mb-4">
                                 Du har läst ditt gratis smakprov. Som prenumerant får du obegränsad tillgång till all vår journalistik och exklusiva reportage.
                             </p>
-                       
+
+                            <button type="button" class="btn btn-warning btn-lg fw-bold w-100 mb-3 shadow-sm px-5"
+                                    data-bs-toggle="offcanvas"
+                                    data-bs-target="#loginOffcanvas"
+                                    data-auth-mode="subscribe"
+                                    data-article-slug="@Model.Slug">
+                                Bli Prenumerant – 99 kr/mån
+                            </button>
 
                             @if (User.Identity != null && User.Identity.IsAuthenticated)
                                 @if (User.Identity?.IsAuthenticated == true)
@@ -131,7 +121,7 @@
                     @Html.Raw(Model.Content)
                 }
             </div>
-            
+
             <hr />
             <div class="mb-5 mt-4">
                 <button type="button" onclick="navigateBack()" class="btn btn-outline-secondary">← Tillbaka</button>
@@ -141,96 +131,57 @@
 </div>
 
 @section Scripts {
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="subscribeOffcanvas" aria-labelledby="subscribeOffcanvasLabel">
-        <div class="offcanvas-header border-bottom">
-            <h5 class="offcanvas-title fw-bold" id="subscribeOffcanvasLabel">⭐ Prenumerera</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        <div class="offcanvas-body">
-            <h4 class="mb-3">Slutför din betalning</h4>
-            <p class="text-muted small mb-4">Få omedelbar tillgång till @Model.Title och alla andra premiumartiklar.</p>
+    <script>
+        function navigateBack() {
+            if (document.referrer && document.referrer.includes(window.location.hostname)) {
+                window.history.back();
+            } else {
+                window.location.href = '/';
+            }
+        }
 
-            <form asp-controller="Subscription" asp-action="Index" method="post">
-                <input type="hidden" name="ArticleSlug" value="@Model.Slug" />
+        document.addEventListener('DOMContentLoaded', () => {
+            const likeForm = document.getElementById('likeForm');
+            const likeButton = document.getElementById('likeBtn');
+            const likesCountText = document.getElementById('likesCountText');
 
-                <div class="mb-3">
-                    <label class="form-label small fw-bold">Namn på kortet</label>
-                    <input name="CardName" class="form-control" placeholder="Förnamn Efternamn" required />
-                </div>
+            if (!likeForm || !likeButton || !likesCountText) {
+                return;
+            }
 
-                <div class="mb-3">
-                    <label class="form-label small fw-bold">Kortnummer</label>
-                    <input name="CardNumber" class="form-control" placeholder="1234 5678 1234 5678" required />
-                </div>
+            likeForm.addEventListener('submit', async event => {
+                event.preventDefault();
 
-                <div class="row">
-                    <div class="col-7 mb-3">
-                        <label class="form-label small fw-bold">Giltighetstid</label>
-                        <input name="ExpirationDate" class="form-control" placeholder="MM/ÅÅ" required />
-                    </div>
-                    <div class="col-5 mb-3">
-                        <label class="form-label small fw-bold">CVV</label>
-                        <input name="CVV" class="form-control" placeholder="123" required />
-                    </div>
-                </div>
+                if (likeButton.disabled) {
+                    return;
+                }
 
-                <button type="submit" class="btn btn-warning btn-lg w-100 shadow-sm mt-3 fw-bold">
-                    Betala 99 kr / mån
-                </button>
+                likeButton.disabled = true;
 
-                <p class="text-center mt-4 small text-muted">
-                    Ingen bindningstid. Avsluta när du vill.
-                </p>
-            </form>
-        </div>
-        <p class="text-center mt-3 small text-muted">
-            Redan medlem?
-            <button type="button" class="btn btn-link p-0 text-decoration-none small"
-                    data-bs-toggle="offcanvas" data-bs-target="#loginOffcanvas">
-                Logga in istället
-            </button>
-        </p>
-    </div>
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="loginOffcanvas" aria-labelledby="loginOffcanvasLabel">
-        <div class="offcanvas-header border-bottom">
-            <h5 class="offcanvas-title fw-bold" id="loginOffcanvasLabel"> Logga in</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        <div class="offcanvas-body">
-            <h4 class="mb-3">Välkommen tillbaka</h4>
-            <p class="text-muted small mb-4">Logga in för att låsa upp @Model.Title och se dina prenumerationer.</p>
+                try {
+                    const response = await fetch(likeForm.action, {
+                        method: 'POST',
+                        body: new FormData(likeForm),
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
 
-            <form asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@Context.Request.Path" method="post">
-                <div class="mb-3">
-                    <label class="form-label small fw-bold">E-postadress</label>
-                    <input name="Input.Email" type="email" class="form-control" placeholder="namn@exempel.se" required />
-                </div>
+                    if (!response.ok) {
+                        throw new Error('Like kunde inte uppdateras.');
+                    }
 
-                <div class="mb-3">
-                    <label class="form-label small fw-bold">Lösenord</label>
-                    <input name="Input.Password" type="password" class="form-control" placeholder="********" required />
-                </div>
+                    const result = await response.json();
 
-                <div class="form-check mb-4">
-                    <input class="form-check-input" type="checkbox" name="Input.RememberMe" id="rememberMe">
-                    <label class="form-check-label small" for="rememberMe">
-                        Kom ihåg mig
-                    </label>
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm fw-bold">
-                    Logga in
-                </button>
-
-                <p class="text-center mt-4 small text-muted">
-                    Saknar du konto?
-                    <button type="button" class="btn btn-link p-0 text-primary fw-bold text-decoration-none small"
-                            data-bs-toggle="offcanvas" data-bs-target="#subscribeOffcanvas">
-                        Skapa konto & prenumerera här
-                    </button>
-                </p>
-            </form>
-        </div>
-    </div>
-}
+                    likesCountText.textContent = result.likesCount;
+                    likeButton.classList.toggle('btn-danger', result.hasLiked);
+                    likeButton.classList.toggle('btn-outline-danger', !result.hasLiked);
+                } catch {
+                    window.location.href = likeForm.action;
+                } finally {
+                    likeButton.disabled = false;
+                }
+            });
+        });
+    </script>
 }

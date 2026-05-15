@@ -1,0 +1,14 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+    "ConnectionStrings__DefaultConnection": "<SQL_SERVER_CONNECTION_STRING>",
+    "EmailSettings__SmtpServer": "<SMTP_SERVER>",
+    "EmailSettings__SmtpPort": "2525",
+    "EmailSettings__SmtpUser": "<SMTP_USER>",
+    "EmailSettings__SmtpPass": "<SMTP_PASSWORD>",
+    "EmailSettings__SenderEmail": "noreply@example.com",
+    "EmailSettings__SenderName": "NewsSite Support"
+  }
+}

@@ -1,4 +1,5 @@
 @model NewsSite.Models.ViewModels.HomeViewModel
+@using NewsSite.Models.ViewModels
 
 @{
     ViewData["Title"] = "Home";
@@ -11,45 +12,55 @@
         box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         margin-bottom: 2rem;
     }
-    
+
     .carousel-item {
         height: 500px;
-        background-size: cover;
-        background-position: center;
         position: relative;
     }
-    
+
+    .carousel-item picture,
+    .carousel-item picture img {
+        width: 100%; height: 100%;
+    }
+
+    .carousel-item picture img {
+        object-fit: cover;
+    }
+
     .carousel-item::before {
         content: '';
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
+        top: 0; left: 0; right: 0; bottom: 0;
         background: linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 100%);
+        z-index: 1;
     }
-    
+
     .carousel-caption {
         bottom: 20%;
         text-align: left;
-        left: 10%;
-        right: auto;
+        left: 10%; right: auto;
+        z-index: 2;
     }
-    
+
+    .carousel-control-prev,
+    .carousel-control-next {
+        z-index: 10;
+    }
+
     .carousel-caption h2 {
         font-size: 2.5rem;
         font-weight: 800;
         text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         animation: slideInUp 0.5s ease;
     }
-    
+
     .carousel-caption p {
         font-size: 1.1rem;
         text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
         margin-bottom: 1rem;
         max-width: 500px;
     }
-    
+
     .category-badge {
         display: inline-block;
         padding: 0.25rem 0.75rem;
@@ -60,7 +71,7 @@
         font-weight: 600;
         margin-bottom: 0.5rem;
     }
-    
+
     .preference-card {
         border: none;
         border-radius: 12px;
@@ -68,26 +79,24 @@
         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         overflow: hidden;
     }
-    
+
     .preference-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 8px 20px rgba(0,0,0,0.15);
     }
-    
+
     .preference-card .card-img-top {
         height: 200px;
         object-fit: cover;
         transition: transform 0.3s ease;
     }
-    
+
     .preference-card:hover .card-img-top {
         transform: scale(1.05);
     }
-    
-    .preference-card .card-body {
-        padding: 1rem;
-    }
-    
+
+    .preference-card .card-body { padding: 1rem; }
+
     .preference-card .card-title {
         font-size: 1rem;
         font-weight: 700;
@@ -98,7 +107,7 @@
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
-    
+
     .preference-card .card-text {
         font-size: 0.8rem;
         color: #666;
@@ -107,7 +116,7 @@
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
-    
+
     .latest-card {
         border: none;
         border-radius: 12px;
@@ -116,49 +125,49 @@
         overflow: hidden;
         margin-bottom: 1.5rem;
     }
-    
+
     .latest-card:hover {
         transform: translateX(5px);
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
-    
+
     .latest-card .card-img {
         height: 150px;
         object-fit: cover;
     }
-    
+
     .latest-card .card-title {
         font-size: 1.2rem;
         font-weight: 700;
         margin-bottom: 0.5rem;
     }
-    
+
     .side-card {
         border: none;
         border-radius: 12px;
         transition: all 0.3s ease;
         margin-bottom: 1.5rem;
     }
-    
+
     .category-btn {
         border-radius: 20px;
         transition: all 0.2s ease;
         font-weight: 500;
     }
-    
+
     .category-btn:hover {
         transform: translateY(-2px);
         background: #0d6efd;
         color: white !important;
     }
-    
+
     .section-title {
         font-weight: 800;
         margin-bottom: 1.5rem;
         position: relative;
         display: inline-block;
     }
-    
+
     .section-title::after {
         content: '';
         position: absolute;
@@ -169,21 +178,14 @@
         background: linear-gradient(90deg, #0d6efd, #0dcaf0);
         border-radius: 2px;
     }
-    
+
     @@keyframes slideInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 </style>
 
 <div class="container">
-    <!-- Hero Carousel -->
     @if (Model.LatestArticles.Take(5).Any())
     {
         <div class="hero-carousel">
@@ -197,16 +199,14 @@
                 <div class="carousel-inner">
                     @foreach (var (article, index) in Model.LatestArticles.Take(5).Select((a, i) => (a, i)))
                     {
-                        <div class="carousel-item @(index == 0 ? "active" : "")"
-                             style="background-image: url('@(string.IsNullOrEmpty(article.ImageUrl) ? "/images/default-hero.jpg" : article.ImageUrl)')">
+                        <div class="carousel-item @(index == 0 ? "active" : "")">
+                            <partial name="Partials/_ResponsiveImage"
+                                     model='new ResponsiveImageViewModel { ImageUrl = article.ImageUrl, Alt = article.Title, Size = "full", Loading = index == 0 ? "eager" : "lazy" }' />
                             <div class="carousel-caption">
                                 <span class="category-badge">@article.CategoryName</span>
                                 <h2>@article.Title</h2>
                                 <p>@(article.Summary?.Length > 120 ? article.Summary.Substring(0, 120) + "..." : article.Summary)</p>
-                                <a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug"
-                                   class="btn btn-light btn-lg rounded-pill px-4">
-                                    Read More →
-                                </a>
+                                <a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug" class="btn btn-light btn-lg rounded-pill px-4">Read More →</a>
                             </div>
                         </div>
                     }
@@ -225,11 +225,9 @@
 
     <div class="row">
         <div class="col-lg-8">
-            <!-- Show search results if in search mode -->
             @if (Model.IsSearch)
             {
                 <h2 class="section-title">🔍 Search Results for "@Model.SearchTerm"</h2>
-
                 @if (Model.SearchResults.Any())
                 {
                     <div class="row">
@@ -239,30 +237,14 @@
                                 <div class="card latest-card">
                                     <div class="row g-0">
                                         <div class="col-md-4">
-                                            @if (!string.IsNullOrEmpty(article.ImageUrl))
-                                            {
-                                                <img src="@article.ImageUrl" class="card-img h-100 w-100" alt="@article.Title" style="object-fit: cover;">
-                                            }
-                                            else
-                                            {
-                                                <div class="bg-secondary h-100 d-flex align-items-center justify-content-center">
-                                                    <i class="bi bi-newspaper fs-1 text-white-50"></i>
-                                                </div>
-                                            }
+                                            <partial name="Partials/_ResponsiveImage"
+                                                     model='new ResponsiveImageViewModel { ImageUrl = article.ImageUrl, Alt = article.Title, Size = "med", CssClass = "card-img h-100 w-100", Style = "object-fit: cover;" }' />
                                         </div>
                                         <div class="col-md-8">
                                             <div class="card-body">
-                                                <h5 class="card-title">
-                                                    <a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug"
-                                                       class="text-decoration-none text-dark">
-                                                        @article.Title
-                                                    </a>
-                                                </h5>
+                                                <h5 class="card-title"><a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug" class="text-decoration-none text-dark">@article.Title</a></h5>
                                                 <p class="card-text">@(article.Summary?.Length > 150 ? article.Summary.Substring(0, 150) + "..." : article.Summary)</p>
-                                                <small class="text-muted">
-                                                    <i class="bi bi-person"></i> @article.AuthorName | 
-                                                    <i class="bi bi-folder"></i> @article.CategoryName
-                                                </small>
+                                                <small class="text-muted"><i class="bi bi-person"></i> @article.AuthorName | <i class="bi bi-folder"></i> @article.CategoryName</small>
                                             </div>
                                         </div>
                                     </div>
@@ -271,17 +253,9 @@
                         }
                     </div>
                 }
-                else
-                {
-                    <div class="alert alert-info text-center py-5">
-                        <i class="bi bi-search fs-1"></i>
-                        <p class="mt-2 mb-0">No articles found for "@Model.SearchTerm".</p>
-                    </div>
-                }
             }
             else
             {
-                <!-- Personalized Feed Section -->
                 @if (Model.PrioritizedArticles.Any())
                 {
                     <div class="mb-5">
@@ -291,24 +265,13 @@
                             {
                                 <div class="col-md-6 col-lg-6">
                                     <div class="card preference-card h-100">
-                                        @if (!string.IsNullOrEmpty(article.ImageUrl))
-                                        {
-                                            <img src="@article.ImageUrl" class="card-img-top" alt="@article.Title">
-                                        }
-                                        else
-                                        {
-                                            <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 200px;">
-                                                <i class="bi bi-image fs-1 text-white-50"></i>
-                                            </div>
-                                        }
+                                        <partial name="Partials/_ResponsiveImage"
+                                                 model='new ResponsiveImageViewModel { ImageUrl = article.ImageUrl, Alt = article.Title, Size = "med", CssClass = "card-img-top" }' />
                                         <div class="card-body">
                                             <small class="text-muted">@article.CategoryName</small>
                                             <h5 class="card-title">@article.Title</h5>
                                             <p class="card-text">@(article.Summary?.Length > 100 ? article.Summary.Substring(0, 100) + "..." : article.Summary)</p>
-                                            <a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug"
-                                               class="btn btn-sm btn-outline-primary rounded-pill">
-                                                Read More →
-                                            </a>
+                                            <a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug" class="btn btn-sm btn-outline-primary rounded-pill">Read More →</a>
                                         </div>
                                     </div>
                                 </div>
@@ -318,7 +281,6 @@
                     </div>
                 }
 
-                <!-- Latest News Section -->
                 <div>
                     <h2 class="section-title">📰 Latest News</h2>
                     @if (Model.LatestArticles.Any())
@@ -328,37 +290,19 @@
                             <div class="card latest-card">
                                 <div class="row g-0">
                                     <div class="col-md-4">
-                                        @if (!string.IsNullOrEmpty(article.ImageUrl))
-                                        {
-                                            <img src="@article.ImageUrl" class="card-img h-100 w-100" alt="@article.Title" style="object-fit: cover;">
-                                        }
-                                        else
-                                        {
-                                            <div class="bg-secondary h-100 d-flex align-items-center justify-content-center">
-                                                <i class="bi bi-newspaper fs-1 text-white-50"></i>
-                                            </div>
-                                        }
+                                        <partial name="Partials/_ResponsiveImage"
+                                                 model='new ResponsiveImageViewModel { ImageUrl = article.ImageUrl, Alt = article.Title, Size = "med", CssClass = "card-img h-100 w-100", Style = "object-fit: cover;" }' />
                                     </div>
                                     <div class="col-md-8">
                                         <div class="card-body">
                                             <div class="d-flex justify-content-between align-items-start mb-2">
                                                 <span class="badge bg-primary rounded-pill">@article.CategoryName</span>
                                             </div>
-                                            <h5 class="card-title">
-                                                <a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug"
-                                                   class="text-decoration-none text-dark">
-                                                    @article.Title
-                                                </a>
-                                            </h5>
+                                            <h5 class="card-title"><a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug" class="text-decoration-none text-dark">@article.Title</a></h5>
                                             <p class="card-text">@(article.Summary?.Length > 150 ? article.Summary.Substring(0, 150) + "..." : article.Summary)</p>
                                             <div class="d-flex justify-content-between align-items-center">
-                                                <small class="text-muted">
-                                                    <i class="bi bi-person"></i> @article.AuthorName
-                                                </small>
-                                                <a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug"
-                                                   class="btn btn-sm btn-link text-decoration-none">
-                                                    Read full article →
-                                                </a>
+                                                <small class="text-muted"><i class="bi bi-person"></i> @article.AuthorName</small>
+                                                <a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug" class="btn btn-sm btn-link text-decoration-none">Read full article →</a>
                                             </div>
                                         </div>
                                     </div>
@@ -366,19 +310,11 @@
                             </div>
                         }
                     }
-                    else
-                    {
-                        <div class="alert alert-info text-center py-5">
-                            <i class="bi bi-newspaper fs-1"></i>
-                            <p class="mt-2 mb-0">No articles yet. Check back soon!</p>
-                        </div>
-                    }
                 </div>
             }
         </div>
 
         <div class="col-lg-4">
-            <!-- Editor's Choice -->
             <div class="card side-card shadow-sm border-0">
                 <div class="card-header" style="background: linear-gradient(135deg, #ffc107, #ff9800);">
                     <strong><i class="bi bi-star-fill"></i> Editor's Choice</strong>
@@ -393,22 +329,14 @@
                         @foreach (var article in Model.EditorChoiceArticles)
                         {
                             <div class="mb-3 pb-2 border-bottom">
-                                <h6 class="mb-1">
-                                    <a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug"
-                                       class="text-decoration-none text-dark fw-semibold">
-                                        @article.Title
-                                    </a>
-                                </h6>
-                                <small class="text-muted">
-                                    <i class="bi bi-folder"></i> @article.CategoryName
-                                </small>
+                                <h6 class="mb-1"><a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug" class="text-decoration-none text-dark fw-semibold">@article.Title</a></h6>
+                                <small class="text-muted"><i class="bi bi-folder"></i> @article.CategoryName</small>
                             </div>
                         }
                     }
                 </div>
             </div>
 
-            <!-- Most Popular -->
             <div class="card side-card shadow-sm border-0">
                 <div class="card-header" style="background: linear-gradient(135deg, #dc3545, #c82333); color: white;">
                     <strong><i class="bi bi-fire"></i> Most Popular</strong>
@@ -423,13 +351,10 @@
                         <div class="list-group list-group-flush">
                             @foreach (var article in Model.MostPopularArticles.Take(5))
                             {
-                                <a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug"
-                                   class="list-group-item list-group-item-action border-0 px-0 py-2">
-                                    <div class="d-flex justify-content-between align-items-start">
-                                        <div class="flex-grow-1">
-                                            <h6 class="mb-1">@article.Title</h6>
-                                            <small class="text-muted">@article.CategoryName</small>
-                                        </div>
+                                <a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug" class="list-group-item list-group-item-action border-0 px-0 py-2">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">@article.Title</h6>
+                                        <small class="text-muted">@article.CategoryName</small>
                                     </div>
                                 </a>
                             }
@@ -438,7 +363,6 @@
                 </div>
             </div>
 
-            <!-- Categories -->
             <div class="card side-card shadow-sm border-0">
                 <div class="card-header" style="background: linear-gradient(135deg, #0dcaf0, #0aa5c0); color: white;">
                     <strong><i class="bi bi-grid"></i> Categories</strong>
@@ -448,40 +372,30 @@
                         @foreach (var category in Model.Categories)
                         {
                             <div class="col-6">
-                                <a asp-controller="Category" asp-action="Index" asp-route-slug="@category.Name"
-                                   class="btn btn-outline-secondary btn-sm category-btn w-100 text-start">
-                                    <i class="bi bi-tag"></i> @category.Name
-                                </a>
+                                <a asp-controller="Category" asp-action="Index" asp-route-slug="@category.Name" class="btn btn-outline-secondary btn-sm category-btn w-100 text-start"><i class="bi bi-tag"></i> @category.Name</a>
                             </div>
                         }
                     </div>
                 </div>
             </div>
 
-            <!-- Weather Widget -->
             <partial name="Partials/_WeatherCard" model="Model.Weather" />
         </div>
     </div>
 </div>
 
-@if (!(User.Identity?.IsAuthenticated ?? false) || !(Model?.HasActiveSubscription ?? false))
+@if (!Model.HasActiveSubscription && (!(User.Identity?.IsAuthenticated ?? false) || User.IsInRole("Reader")))
 {
-    <div id="subscribeBanner" class="alert alert-warning shadow-lg mb-0 d-none"
-         role="alert"
-         style="position: fixed; top: 70px; left: 0; right: 0; margin: 15px; z-index: 1050; border: 2px solid #ffc107; border-radius: 12px;">
+    <div id="subscribeBanner" class="alert alert-warning shadow-lg mb-0 d-none" role="alert" style="position: fixed; top: 70px; left: 0; right: 0; margin: 15px; z-index: 1050; border: 2px solid #ffc107; border-radius: 12px;">
         <div class="container">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h5 class="alert-heading mb-1"><i class="bi bi-gem"></i> Subscribe Now!</h5>
-                    <p class="mb-0 small">Get access to all premium articles and exclusive reports.</p>
+                    <h5 class="alert-heading mb-1"><i class="bi bi-gem"></i> Prenumerera nu!</h5>
+                    <p class="mb-0 small">Få tillgång till alla premiumartiklar och exklusiva reportage.</p>
                 </div>
                 <div class="d-flex align-items-center gap-2">
-                    <button type="button" class="btn btn-dark btn-sm fw-bold" data-bs-toggle="offcanvas" data-bs-target="#subscribeOffcanvas">
-                        <i class="bi bi-trophy"></i> Subscribe
-                    </button>
-                    <button type="button" id="maybeLaterBtn" class="btn btn-outline-secondary btn-sm border-0">
-                        Maybe later...
-                    </button>
+                    <button type="button" id="subscribeBannerButton" class="btn btn-dark btn-sm fw-bold" data-bs-toggle="offcanvas" data-bs-target="#loginOffcanvas" data-auth-mode="subscribe"><i class="bi bi-trophy"></i> Prenumerera</button>
+                    <button type="button" id="maybeLaterBtn" class="btn btn-outline-secondary btn-sm border-0">Kanske senare...</button>
                 </div>
             </div>
         </div>
@@ -489,26 +403,37 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            const isAuthenticated = @(User.Identity.IsAuthenticated ? "true" : "false");
+            const isAuthenticated = @(User.Identity?.IsAuthenticated == true ? "true" : "false");
             const banner = document.getElementById('subscribeBanner');
             const dismissBtn = document.getElementById('maybeLaterBtn');
-            
+            const subscribeBtn = document.getElementById('subscribeBannerButton');
+
+            if (!banner || !dismissBtn) {
+                return;
+            }
+
             let clickCount = 0;
             const messages = [
-                "Are you really sure?",
-                "But you're missing out!",
-                "LAST CHANCE!",
-                "Fine... I give up 😢"
+                "Är du verkligen säker?",
+                "Men du missar ju allt det roliga!",
+                "SISTA CHANSEN!",
+                "Okej då... Jag ger upp 😢"
             ];
 
-            dismissBtn.addEventListener('click', function (e) {
-                e.stopPropagation();
+            dismissBtn.addEventListener('click', function (event) {
+                event.stopPropagation();
+
                 if (clickCount < messages.length) {
                     dismissBtn.innerHTML = `<i class="bi bi-emoji-frown"></i> ${messages[clickCount]}`;
                     clickCount++;
-                } else {
-                    hideBanner();
+                    return;
                 }
+
+                hideBanner();
+            });
+
+            subscribeBtn?.addEventListener('click', function () {
+                banner.classList.add('d-none');
             });
 
             document.addEventListener('click', function (event) {
@@ -519,17 +444,21 @@
 
             function hideBanner() {
                 if (!isAuthenticated) {
-                    localStorage.setItem('bannerCooldown', Date.now() + (5 * 60 * 1000));
+                    localStorage.setItem('bannerCooldown', String(Date.now() + (5 * 60 * 1000)));
                 }
+
                 banner.classList.add('d-none');
                 clickCount = 0;
                 dismissBtn.innerHTML = "Maybe later...";
             }
 
             function shouldShow() {
-                if (isAuthenticated) return true;
+                if (isAuthenticated) {
+                    return true;
+                }
+
                 const cooldown = localStorage.getItem('bannerCooldown');
-                return !cooldown || Date.now() > parseInt(cooldown);
+                return !cooldown || Date.now() > Number.parseInt(cooldown, 10);
             }
 
             function showBanner() {
@@ -540,15 +469,34 @@
 
             if (isAuthenticated) {
                 showBanner();
-            } else {
-                let triggered = false;
-                setTimeout(() => { if (!triggered) { showBanner(); triggered = true; } }, 12000);
-                window.addEventListener('scroll', () => {
-                    if (triggered) return;
-                    const scrollPct = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
-                    if (scrollPct >= 60) { showBanner(); triggered = true; }
-                });
+                return;
             }
+
+            let triggered = false;
+
+            setTimeout(function () {
+                if (!triggered) {
+                    showBanner();
+                    triggered = true;
+                }
+            }, 12000);
+
+            window.addEventListener('scroll', function () {
+                if (triggered) {
+                    return;
+                }
+
+                const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
+                if (scrollableHeight <= 0) {
+                    return;
+                }
+
+                const scrollPercentage = (window.scrollY / scrollableHeight) * 100;
+                if (scrollPercentage >= 60) {
+                    showBanner();
+                    triggered = true;
+                }
+            });
         });
     </script>
 }

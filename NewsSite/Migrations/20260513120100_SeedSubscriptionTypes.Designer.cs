@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NewsSite.Data;
 
@@ -10,9 +11,11 @@ using NewsSite.Data;
 namespace NewsSite.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260513120100_SeedSubscriptionTypes")]
+    partial class SeedSubscriptionTypes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.7");
@@ -350,9 +353,6 @@ namespace NewsSite.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("IsUnsubscribed")
-                        .HasColumnType("INTEGER");
-
                     b.Property<DateTime?>("LastSentDate")
                         .HasColumnType("TEXT");
 
@@ -365,13 +365,7 @@ namespace NewsSite.Migrations
                     b.Property<string>("SelectedCategoryIds")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("UnsubscribeReason")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("UnsubscribeToken")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime?>("UnsubscribedAt")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -453,40 +447,6 @@ namespace NewsSite.Migrations
                             Name = "Yearly",
                             Price = 999m
                         });
-                });
-
-            modelBuilder.Entity("NewsSite.Models.Entities.UnsubscribeLog", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime?>("ReactivatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Reason")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Token")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("UnsubscribedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("WasReactivated")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UnsubscribedAt");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UnsubscribeLogs");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -602,17 +562,6 @@ namespace NewsSite.Migrations
                         .IsRequired();
 
                     b.Navigation("Type");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("NewsSite.Models.Entities.UnsubscribeLog", b =>
-                {
-                    b.HasOne("NewsSite.Models.Entities.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
 
                     b.Navigation("User");
                 });

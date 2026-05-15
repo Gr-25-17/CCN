@@ -14,6 +14,7 @@ namespace NewsSite.Data
         public DbSet<UnsubscribeLog> UnsubscribeLogs { get; set; }
 
         public DbSet<NewsletterPreference> NewsletterPreferences { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -23,6 +24,19 @@ namespace NewsSite.Data
                 .HasIndex(n => n.UserId)
                 .IsUnique();
 
+            builder.Entity<SubscriptionType>().HasData(
+                new SubscriptionType
+                {
+                    Id = 1,
+                    Name = "Monthly",
+                    Price = 99m
+                },
+                new SubscriptionType
+                {
+                    Id = 2,
+                    Name = "Yearly",
+                    Price = 999m
+                });
             builder.Entity<UnsubscribeLog>()
                    .HasIndex(l => l.UserId);
             builder.Entity<UnsubscribeLog>()
