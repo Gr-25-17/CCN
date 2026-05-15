@@ -384,7 +384,7 @@
     </div>
 </div>
 
-@if (!(User.Identity?.IsAuthenticated ?? false) || !(Model?.HasActiveSubscription ?? false))
+@if (!Model.HasActiveSubscription && (!(User.Identity?.IsAuthenticated ?? false) || User.IsInRole("Reader")))
 {
     <div id="subscribeBanner" class="alert alert-warning shadow-lg mb-0 d-none" role="alert" style="position: fixed; top: 70px; left: 0; right: 0; margin: 15px; z-index: 1050; border: 2px solid #ffc107; border-radius: 12px;">
         <div class="container">
@@ -400,4 +400,103 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const isAuthenticated = @(User.Identity?.IsAuthenticated == true ? "true" : "false");
+            const banner = document.getElementById('subscribeBanner');
+            const dismissBtn = document.getElementById('maybeLaterBtn');
+            const subscribeBtn = document.getElementById('subscribeBannerButton');
+
+            if (!banner || !dismissBtn) {
+                return;
+            }
+
+            let clickCount = 0;
+            const messages = [
+                "Are you really sure?",
+                "But you're missing out!",
+                "LAST CHANCE!",
+                "Fine... I give up 😢"
+            ];
+
+            dismissBtn.addEventListener('click', function (event) {
+                event.stopPropagation();
+
+                if (clickCount < messages.length) {
+                    dismissBtn.innerHTML = `<i class="bi bi-emoji-frown"></i> ${messages[clickCount]}`;
+                    clickCount++;
+                    return;
+                }
+
+                hideBanner();
+            });
+
+            subscribeBtn?.addEventListener('click', function () {
+                banner.classList.add('d-none');
+            });
+
+            document.addEventListener('click', function (event) {
+                if (!banner.classList.contains('d-none') && !banner.contains(event.target)) {
+                    hideBanner();
+                }
+            });
+
+            function hideBanner() {
+                if (!isAuthenticated) {
+                    localStorage.setItem('bannerCooldown', String(Date.now() + (5 * 60 * 1000)));
+                }
+
+                banner.classList.add('d-none');
+                clickCount = 0;
+                dismissBtn.innerHTML = "Maybe later...";
+            }
+
+            function shouldShow() {
+                if (isAuthenticated) {
+                    return true;
+                }
+
+                const cooldown = localStorage.getItem('bannerCooldown');
+                return !cooldown || Date.now() > Number.parseInt(cooldown, 10);
+            }
+
+            function showBanner() {
+                if (shouldShow()) {
+                    banner.classList.remove('d-none');
+                }
+            }
+
+            if (isAuthenticated) {
+                showBanner();
+                return;
+            }
+
+            let triggered = false;
+
+            setTimeout(function () {
+                if (!triggered) {
+                    showBanner();
+                    triggered = true;
+                }
+            }, 12000);
+
+            window.addEventListener('scroll', function () {
+                if (triggered) {
+                    return;
+                }
+
+                const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
+                if (scrollableHeight <= 0) {
+                    return;
+                }
+
+                const scrollPercentage = (window.scrollY / scrollableHeight) * 100;
+                if (scrollPercentage >= 60) {
+                    showBanner();
+                    triggered = true;
+                }
+            });
+        });
+    </script>
 }
