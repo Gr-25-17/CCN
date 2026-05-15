@@ -63,7 +63,7 @@
                     {
                         <div class="carousel-item @(index == 0 ? "active" : "")">
                             <partial name="Partials/_ResponsiveImage"
-                                     model="new ResponsiveImageViewModel { ImageUrl = article.ImageUrl, Alt = article.Title, Size = \"full\", Loading = index == 0 ? \"eager\" : \"lazy\" }" />
+                                     model='new ResponsiveImageViewModel { ImageUrl = article.ImageUrl, Alt = article.Title, Size = "full", Loading = index == 0 ? "eager" : "lazy" }' />
                             <div class="carousel-caption">
                                 <span class="category-badge">@article.CategoryName</span>
                                 <h2>@article.Title</h2>
@@ -92,7 +92,7 @@
                                     <div class="row g-0">
                                         <div class="col-md-4">
                                             <partial name="Partials/_ResponsiveImage"
-                                                     model="new ResponsiveImageViewModel { ImageUrl = article.ImageUrl, Alt = article.Title, Size = \"med\", CssClass = \"card-img h-100 w-100\", Style = \"object-fit: cover;\" }" />
+                                                     model='new ResponsiveImageViewModel { ImageUrl = article.ImageUrl, Alt = article.Title, Size = "med", CssClass = "card-img h-100 w-100", Style = "object-fit: cover;" }' />
                                         </div>
                                         <div class="col-md-8"><div class="card-body"><h5 class="card-title"><a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug" class="text-decoration-none text-dark">@article.Title</a></h5></div></div>
                                     </div>
@@ -114,7 +114,7 @@
                                 <div class="col-md-6 col-lg-6">
                                     <div class="card preference-card h-100">
                                         <partial name="Partials/_ResponsiveImage"
-                                                 model="new ResponsiveImageViewModel { ImageUrl = article.ImageUrl, Alt = article.Title, Size = \"med\", CssClass = \"card-img-top\" }" />
+                                                 model='new ResponsiveImageViewModel { ImageUrl = article.ImageUrl, Alt = article.Title, Size = "med", CssClass = "card-img-top" }' />
                                         <div class="card-body"><small class="text-muted">@article.CategoryName</small><h5 class="card-title">@article.Title</h5></div>
                                     </div>
                                 </div>
@@ -131,7 +131,7 @@
                             <div class="row g-0">
                                 <div class="col-md-4">
                                     <partial name="Partials/_ResponsiveImage"
-                                             model="new ResponsiveImageViewModel { ImageUrl = article.ImageUrl, Alt = article.Title, Size = \"med\", CssClass = \"card-img h-100 w-100\", Style = \"object-fit: cover;\" }" />
+                                             model='new ResponsiveImageViewModel { ImageUrl = article.ImageUrl, Alt = article.Title, Size = "med", CssClass = "card-img h-100 w-100", Style = "object-fit: cover;" }' />
                                 </div>
                                 <div class="col-md-8"><div class="card-body"><span class="badge bg-primary rounded-pill">@article.CategoryName</span><h5 class="card-title"><a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug" class="text-decoration-none text-dark">@article.Title</a></h5></div></div>
                             </div>
