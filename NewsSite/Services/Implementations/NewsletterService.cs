@@ -88,4 +88,8 @@ public class NewsletterService : INewsletterService
     await _preferenceRepo.SaveAsync(entity);
 
     }
+    public async Task<List<NewsletterPreference>> GetWeeklySubscribersAsync()
+    {
+        return await _preferenceRepo.GetWeeklySubscribersAsync();
+    }
 }
