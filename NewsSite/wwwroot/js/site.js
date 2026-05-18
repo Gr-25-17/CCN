@@ -78,6 +78,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const offcanvas = document.getElementById('loginOffcanvas');
     const title = document.getElementById('loginOffcanvasLabel');
 
+    const logoutForm = document.querySelector('form[data-ajax-logout="true"]');
+    if (logoutForm) {
+        logoutForm.addEventListener('submit', async event => {
+            event.preventDefault();
+
+            try {
+                const response = await fetch(logoutForm.action, {
+                    method: 'POST',
+                    body: new FormData(logoutForm),
+                    credentials: 'same-origin'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Logout misslyckades.');
+                }
+
+                window.location.reload();
+            } catch {
+                window.location.href = '/';
+            }
+        });
+    }
+
     if (!offcanvas || !title) {
         return;
     }
