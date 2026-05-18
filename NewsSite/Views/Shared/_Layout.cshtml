@@ -103,6 +103,40 @@
             const html = await response.text();
             document.getElementById('weatherWidget').innerHTML = html;
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const expirationInput = document.querySelector('input[name="ExpirationDate"]');
+
+            if (!expirationInput) {
+                return;
+            }
+
+            const formatExpirationDate = (value) => {
+                const digits = value.replace(/\D/g, '').slice(0, 4);
+                const month = digits.slice(0, 2);
+                const year = digits.slice(2, 4);
+
+                return `${month}/${year}`;
+            };
+
+            const updateExpirationDate = () => {
+                expirationInput.value = formatExpirationDate(expirationInput.value);
+            };
+
+            expirationInput.addEventListener('input', updateExpirationDate);
+            expirationInput.addEventListener('focus', () => {
+                if (!expirationInput.value) {
+                    expirationInput.value = '/';
+                }
+            });
+            expirationInput.addEventListener('blur', () => {
+                if (expirationInput.value === '/') {
+                    expirationInput.value = string.Empty;
+                }
+            });
+
+            updateExpirationDate();
+        });
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)
@@ -125,22 +159,22 @@
 
                     <div class="mb-3">
                         <label class="form-label small fw-bold">Namn på kortet</label>
-                        <input name="CardName" class="form-control" required />
+                        <input name="CardName" class="form-control" placeholder="John Doe" required />
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label small fw-bold">Kortnummer</label>
-                        <input name="CardNumber" class="form-control" required />
+                        <input name="CardNumber" class="form-control" placeholder="1234 5678 9012 3456" required />
                     </div>
 
                     <div class="row">
                         <div class="col-7 mb-3">
                             <label class="form-label small fw-bold">Giltighetstid</label>
-                            <input name="ExpirationDate" class="form-control" required />
+                            <input name="ExpirationDate" class="form-control" placeholder="MM/YY" inputmode="numeric" maxlength="5" required />
                         </div>
                         <div class="col-5 mb-3">
                             <label class="form-label small fw-bold">CVV</label>
-                            <input name="CVV" class="form-control" required />
+                            <input name="CVV" class="form-control" placeholder="123" inputmode="numeric" maxlength="4" required />
                         </div>
                     </div>
 
