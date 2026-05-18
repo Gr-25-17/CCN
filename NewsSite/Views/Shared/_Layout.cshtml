@@ -119,8 +119,25 @@
                 return `${month}/${year}`;
             };
 
-            expirationInput.addEventListener('input', () => {
+            const updateExpirationDate = () => {
                 expirationInput.value = formatExpirationDate(expirationInput.value);
+                expirationInput.setSelectionRange(expirationInput.value.length, expirationInput.value.length);
+            };
+
+            expirationInput.value = '/';
+
+            expirationInput.addEventListener('focus', () => {
+                if (!expirationInput.value) {
+                    expirationInput.value = '/';
+                }
+            });
+
+            expirationInput.addEventListener('input', updateExpirationDate);
+
+            expirationInput.addEventListener('keydown', (event) => {
+                if (event.key === 'Backspace' && expirationInput.value === '/') {
+                    event.preventDefault();
+                }
             });
         });
     </script>
@@ -156,7 +173,7 @@
                     <div class="row">
                         <div class="col-7 mb-3">
                             <label class="form-label small fw-bold">Giltighetstid</label>
-                            <input name="ExpirationDate" class="form-control" placeholder="MM/YY" inputmode="numeric" maxlength="5" required />
+                            <input name="ExpirationDate" class="form-control" inputmode="numeric" maxlength="5" required />
                         </div>
                         <div class="col-5 mb-3">
                             <label class="form-label small fw-bold">CVV</label>
