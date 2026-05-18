@@ -42,44 +42,46 @@
     </div>
 
     <div id="registerView" class="d-none">
-        <form id="registerOffcanvasForm">
+        <form id="registerOffcanvasForm"
+              method="post"
+              asp-area="Identity"
+              asp-page="/Account/Register">
+            @Html.AntiForgeryToken()
+
             <h3 class="mb-3 fw-bold">Registrera dig</h3>
             <hr />
 
-            <div id="registerErrorAlert" class="alert alert-danger d-none mb-3"></div>
-            <div id="registerSuccessAlert" class="alert alert-success d-none mb-3"></div>
-
             <div class="form-floating mb-3">
-                <input id="registerEmail" type="email" class="form-control" placeholder="name@example.com" />
+                <input id="registerEmail" name="Input.Email" type="email" class="form-control" placeholder="name@example.com" required />
                 <label for="registerEmail">Email</label>
             </div>
 
             <div class="form-floating mb-3">
-                <input id="registerFirstName" type="text" class="form-control" placeholder="Förnamn" />
+                <input id="registerFirstName" name="Input.FirstName" type="text" class="form-control" placeholder="Förnamn" required />
                 <label for="registerFirstName">Förnamn</label>
             </div>
 
             <div class="form-floating mb-3">
-                <input id="registerLastName" type="text" class="form-control" placeholder="Efternamn" />
+                <input id="registerLastName" name="Input.LastName" type="text" class="form-control" placeholder="Efternamn" required />
                 <label for="registerLastName">Efternamn</label>
             </div>
 
             <div class="form-floating mb-3">
-                <input id="registerDateOfBirth" type="date" class="form-control" />
+                <input id="registerDateOfBirth" name="Input.DateOfBirth" type="date" class="form-control" required />
                 <label for="registerDateOfBirth">Födelsedatum</label>
             </div>
 
             <div class="form-floating mb-3">
-                <input id="registerPassword" type="password" class="form-control" placeholder="password" />
+                <input id="registerPassword" name="Input.Password" type="password" class="form-control" placeholder="password" required />
                 <label for="registerPassword">Lösenord</label>
             </div>
 
             <div class="form-floating mb-3">
-                <input id="registerConfirmPassword" type="password" class="form-control" placeholder="password" />
+                <input id="registerConfirmPassword" name="Input.ConfirmPassword" type="password" class="form-control" placeholder="password" required />
                 <label for="registerConfirmPassword">Bekräfta lösenord</label>
             </div>
 
-            <button id="register-submit" type="button" class="w-100 btn btn-lg btn-primary" onclick="submitRegisterForm()">
+            <button id="register-submit" type="submit" class="w-100 btn btn-lg btn-primary">
                 Registrera
             </button>
 
@@ -113,17 +115,6 @@
             password: document.getElementById('loginPassword').value,
             rememberMe: document.getElementById('rememberMe').checked
         }, 'login');
-    }
-
-    async function submitRegisterForm() {
-        await submitAuthForm('/api/accountapi/register', {
-            email: document.getElementById('registerEmail').value.trim(),
-            firstName: document.getElementById('registerFirstName').value.trim(),
-            lastName: document.getElementById('registerLastName').value.trim(),
-            dateOfBirth: document.getElementById('registerDateOfBirth').value,
-            password: document.getElementById('registerPassword').value,
-            confirmPassword: document.getElementById('registerConfirmPassword').value
-        }, 'register');
     }
 
     async function submitAuthForm(url, payload, mode) {
