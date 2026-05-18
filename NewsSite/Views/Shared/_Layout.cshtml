@@ -75,7 +75,9 @@
                 const digits = expirationInput.value.replace(/\D/g, '').slice(0, 4);
                 const month = digits.slice(0, 2);
                 const year = digits.slice(2);
-                expirationInput.value = `${month}${digits.length > 2 ? '/' : ''}${year}`;
+                expirationInput.value = digits.length > 0
+                    ? `${month}/${year}`
+                    : '';
             });
         });
     </script>
