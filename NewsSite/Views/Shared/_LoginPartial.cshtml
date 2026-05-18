@@ -29,10 +29,9 @@
                   class="form-inline"
                   asp-area="Identity"
                   asp-page="/Account/Logout"
-                  asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })"
                   data-ajax-logout="true">
                 @Html.AntiForgeryToken()
-                <button type="submit" class="nav-link btn btn-link text-dark">Logout</button>
+                <button type="button" class="nav-link btn btn-link text-dark" data-logout-button="true">Logout</button>
             </form>
         </li>
     }
