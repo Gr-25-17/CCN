@@ -16,6 +16,14 @@
         </div>
     }
 
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
     <div class="card shadow-sm">
         <div class="card-header bg-white py-3">
             <h5 class="card-title mb-0">Systemanvändare</h5>
@@ -128,14 +136,12 @@
         const feedback = document.getElementById('migrationFeedback');
         const statusText = document.getElementById('migrationStatus');
 
-        // Lås knappen och visa spinner
         btn.disabled = true;
         feedback.classList.replace('d-none', 'd-flex');
         statusText.innerText = "Migrering pågår... vänligen vänta.";
         statusText.className = "fw-bold text-primary";
 
         try {
-            // Anropar din AdminController
             const response = await fetch('/Admin/RunImageMigration', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' }
@@ -155,3 +161,18 @@
         }
     }
 </script>
+
+<div class="card shadow-sm border-danger mb-4">
+    <div class="card-body">
+        <h5 class="card-title text-danger"><i class="bi bi-database-up"></i> Systemverktyg: Datamigrering till extern SQL Server</h5>
+        <p class="card-text text-muted">
+            Kör en engångsmigrering av lokal SQLite-data till extern SQL Server (LexiconConnection).
+            Kör endast när du är säker på att anslutningssträngen är korrekt och målmiljön är redo.
+        </p>
+
+        <form asp-action="RunLocalToLexiconMigration" method="post" onsubmit="return confirm('Vill du starta datamigrering till extern SQL Server nu?');" class="d-inline">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-danger">Kör datamigrering nu</button>
+        </form>
+    </div>
+</div>
