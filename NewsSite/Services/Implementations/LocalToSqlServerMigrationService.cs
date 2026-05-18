@@ -29,7 +29,16 @@ public class LocalToSqlServerMigrationService(IConfiguration configuration, ILog
         await using var localDb = new ApplicationDbContext(localOptions);
         await using var remoteDb = new ApplicationDbContext(remoteOptions);
 
-        await remoteDb.Database.MigrateAsync(cancellationToken);
+        var remoteCanConnect = await remoteDb.Database.CanConnectAsync(cancellationToken);
+        if (!remoteCanConnect)
+        {
+            throw new InvalidOperationException("Cannot connect to Lexicon SQL Server with current connection configuration.");
+        }
+
+        if (!await remoteDb.Articles.AnyAsync(cancellationToken))
+        {
+            await remoteDb.Database.EnsureCreatedAsync(cancellationToken);
+        }
         await using var transaction = await remoteDb.Database.BeginTransactionAsync(cancellationToken);
 
         var total = 0;

@@ -125,7 +125,10 @@ namespace NewsSite
                 var services = scope.ServiceProvider;
                 var context = services.GetRequiredService<ApplicationDbContext>();
 
-                context.Database.Migrate();
+                if (context.Database.IsSqlite())
+                {
+                    await context.Database.MigrateAsync();
+                }
 
                 await DbInitializer.SeedRolesAndAdminAsync(services);
                 await SeedData.InitializeAsync(services);
