@@ -7,7 +7,12 @@ using Microsoft.EntityFrameworkCore;
 namespace NewsSite.Controllers
 {
     [Authorize(Roles = "Admin")]
-    public class AdminController(IUserService userService, IArticleRepository _articleRepository, IImageOrchestrationService _imageOrchestrationService) : Controller
+    public class AdminController(
+        IUserService userService,
+        IArticleRepository _articleRepository,
+        IImageOrchestrationService _imageOrchestrationService,
+        ILocalToSqlServerMigrationService localToSqlServerMigrationService,
+        ILogger<AdminController> logger) : Controller
     {
         [HttpGet]
         public async Task<IActionResult> Index()
@@ -93,6 +98,23 @@ namespace NewsSite.Controllers
             }
 
             return Ok("Migration slutförd. Azure Functions bearbetar bilderna asynkront.");
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> RunLocalToLexiconMigration(CancellationToken cancellationToken)
+        {
+            try
+            {
+                var migratedRows = await localToSqlServerMigrationService.MigrateAsync(cancellationToken);
+                TempData["Success"] = $"Datamigrering klar. {migratedRows} rader synkades till extern SQL Server.";
+            }
+            catch (InvalidOperationException ex)
+            {
+                logger.LogWarning(ex, "Datamigrering kunde inte starta på grund av konfiguration eller anslutning.");
+                TempData["Error"] = ex.Message;
+            }
+
+            return RedirectToAction(nameof(Index));
         }
     }
 }

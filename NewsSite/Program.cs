@@ -20,26 +20,17 @@ namespace NewsSite
 
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
                 ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+            var lexiconConnection = builder.Configuration.GetConnectionString("LexiconConnection");
 
-            if (builder.Environment.IsDevelopment())
+            if (!string.IsNullOrWhiteSpace(lexiconConnection))
             {
                 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                    options.UseSqlite(connectionString));
+                    options.UseSqlServer(lexiconConnection));
             }
             else
             {
-                var azureSqlConnection = builder.Configuration.GetConnectionString("AzureSqlConnection");
-
-                if (string.IsNullOrEmpty(azureSqlConnection))
-                {
-                    builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                        options.UseSqlite(connectionString));
-                }
-                else
-                {
-                    builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                        options.UseSqlServer(azureSqlConnection));
-                }
+                builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                    options.UseSqlite(connectionString));
             }
 
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
@@ -85,6 +76,7 @@ namespace NewsSite
             builder.Services.AddScoped<IGoldService, GoldService>();
             builder.Services.AddScoped<INewsletterService, NewsletterService>();
             builder.Services.AddScoped<INewsletterPreferenceRepository, NewsletterPreferenceRepository>();
+            builder.Services.AddScoped<ILocalToSqlServerMigrationService, LocalToSqlServerMigrationService>();
 
             builder.Services.AddAuthorization(options =>
             {
@@ -96,6 +88,15 @@ namespace NewsSite
             });
 
             var app = builder.Build();
+
+            if (args.Contains("--migrate-local-to-lexicon", StringComparer.OrdinalIgnoreCase))
+            {
+                using var migrationScope = app.Services.CreateScope();
+                var migrationService = migrationScope.ServiceProvider.GetRequiredService<ILocalToSqlServerMigrationService>();
+                var migratedRows = await migrationService.MigrateAsync();
+                Console.WriteLine($"Local SQLite data migration completed. Total rows upserted: {migratedRows}.");
+                return;
+            }
 
             if (app.Environment.IsDevelopment())
             {
@@ -124,7 +125,14 @@ namespace NewsSite
                 var services = scope.ServiceProvider;
                 var context = services.GetRequiredService<ApplicationDbContext>();
 
-                context.Database.Migrate();
+                if (context.Database.IsSqlite())
+                {
+                    await context.Database.MigrateAsync();
+                }
+                else
+                {
+                    await context.Database.EnsureCreatedAsync();
+                }
 
                 await DbInitializer.SeedRolesAndAdminAsync(services);
                 await SeedData.InitializeAsync(services);
