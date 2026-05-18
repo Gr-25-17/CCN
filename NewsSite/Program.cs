@@ -129,6 +129,10 @@ namespace NewsSite
                 {
                     await context.Database.MigrateAsync();
                 }
+                else
+                {
+                    await context.Database.EnsureCreatedAsync();
+                }
 
                 await DbInitializer.SeedRolesAndAdminAsync(services);
                 await SeedData.InitializeAsync(services);
