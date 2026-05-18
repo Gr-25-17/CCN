@@ -123,15 +123,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const loginView = document.getElementById('loginView');
         const registerView = document.getElementById('registerView');
         const subscribeView = document.getElementById('subscribeView');
+        const forgotPasswordView = document.getElementById('forgotPasswordView');
+        const resendConfirmationView = document.getElementById('resendConfirmationView');
         const isAuthenticated = document.body.classList.contains('authenticated');
 
-        if (!loginView || !registerView || !subscribeView) {
+        if (!loginView || !registerView || !subscribeView || !forgotPasswordView || !resendConfirmationView) {
             return;
         }
 
         loginView.classList.add('d-none');
         registerView.classList.add('d-none');
         subscribeView.classList.add('d-none');
+        forgotPasswordView.classList.add('d-none');
+        resendConfirmationView.classList.add('d-none');
 
         switch (mode) {
             case 'register':
@@ -160,8 +164,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const loginView = document.getElementById('loginView');
         const registerView = document.getElementById('registerView');
         const subscribeView = document.getElementById('subscribeView');
+        const forgotPasswordView = document.getElementById('forgotPasswordView');
+        const resendConfirmationView = document.getElementById('resendConfirmationView');
 
-        if (!loginView || !registerView || !subscribeView) {
+        if (!loginView || !registerView || !subscribeView || !forgotPasswordView || !resendConfirmationView) {
             return;
         }
 
@@ -169,5 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loginView.classList.remove('d-none');
         registerView.classList.add('d-none');
         subscribeView.classList.add('d-none');
+        forgotPasswordView.classList.add('d-none');
+        resendConfirmationView.classList.add('d-none');
     });
 });

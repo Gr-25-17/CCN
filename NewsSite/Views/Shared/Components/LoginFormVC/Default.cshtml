@@ -44,7 +44,10 @@
                 <a href="#" class="text-decoration-none" onclick="showRegisterInLoginOffcanvas(event)">
                     Registrera dig som ny användare
                 </a>
-                <a asp-area="Identity" asp-page="/Account/ResendEmailConfirmation" class="text-decoration-none">
+                <a href="#" class="text-decoration-none" onclick="showForgotPasswordInLoginOffcanvas(event)">
+                    Glömt lösenord?
+                </a>
+                <a href="#" class="text-decoration-none" onclick="showResendConfirmationInLoginOffcanvas(event)">
                     Skicka bekräftelsemail igen
                 </a>
             </div>
@@ -91,14 +94,65 @@
                 <label for="registerConfirmPassword">Bekräfta lösenord</label>
             </div>
 
-            <button id="register-submit" type="submit" class="w-100 btn btn-lg btn-primary">
+            <div id="registerErrorAlert" class="alert alert-danger d-none mb-3"></div>
+            <div id="registerSuccessAlert" class="alert alert-success d-none mb-3"></div>
+
+            <button id="register-submit" type="button" class="w-100 btn btn-lg btn-primary" onclick="submitRegisterForm()">
                 Registrera
             </button>
 
-            <div class="mt-3">
+            <div class="mt-3 d-flex flex-column gap-2">
                 <a href="#" class="text-decoration-none" onclick="showLoginInLoginOffcanvas(event)">
                     Har du redan ett konto? Logga in
                 </a>
+            </div>
+        </form>
+    </div>
+
+    <div id="forgotPasswordView" class="d-none">
+        <form id="forgotPasswordForm">
+            <h3 class="mb-3 fw-bold">Glömt lösenord</h3>
+            <hr />
+            <p class="text-muted small">Ange din e-post så skickar vi en återställningslänk.</p>
+
+            <div id="forgotPasswordErrorAlert" class="alert alert-danger d-none mb-3"></div>
+            <div id="forgotPasswordSuccessAlert" class="alert alert-success d-none mb-3"></div>
+
+            <div class="form-floating mb-3">
+                <input id="forgotPasswordEmail" name="email" type="email" class="form-control" placeholder="name@example.com" required />
+                <label for="forgotPasswordEmail">Email</label>
+            </div>
+
+            <button id="forgotPassword-submit" type="button" class="w-100 btn btn-lg btn-primary" onclick="submitForgotPasswordForm()">
+                Skicka återställningslänk
+            </button>
+
+            <div class="mt-3">
+                <a href="#" class="text-decoration-none" onclick="showLoginInLoginOffcanvas(event)">Tillbaka till inloggning</a>
+            </div>
+        </form>
+    </div>
+
+    <div id="resendConfirmationView" class="d-none">
+        <form id="resendConfirmationForm">
+            <h3 class="mb-3 fw-bold">Skicka bekräftelsemail igen</h3>
+            <hr />
+            <p class="text-muted small">Ange e-postadressen till ditt konto.</p>
+
+            <div id="resendConfirmationErrorAlert" class="alert alert-danger d-none mb-3"></div>
+            <div id="resendConfirmationSuccessAlert" class="alert alert-success d-none mb-3"></div>
+
+            <div class="form-floating mb-3">
+                <input id="resendConfirmationEmail" name="email" type="email" class="form-control" placeholder="name@example.com" required />
+                <label for="resendConfirmationEmail">Email</label>
+            </div>
+
+            <button id="resendConfirmation-submit" type="button" class="w-100 btn btn-lg btn-primary" onclick="submitResendConfirmationForm()">
+                Skicka bekräftelsemail
+            </button>
+
+            <div class="mt-3">
+                <a href="#" class="text-decoration-none" onclick="showLoginInLoginOffcanvas(event)">Tillbaka till inloggning</a>
             </div>
         </form>
     </div>
@@ -108,15 +162,37 @@
     function showLoginInLoginOffcanvas(event) {
         if (event) event.preventDefault();
         document.getElementById('loginOffcanvasLabel').textContent = 'Logga in';
+        hideAllAuthViews();
         document.getElementById('loginView').classList.remove('d-none');
+    }
+
+    function hideAllAuthViews() {
+        document.getElementById('loginView').classList.add('d-none');
         document.getElementById('registerView').classList.add('d-none');
+        document.getElementById('forgotPasswordView').classList.add('d-none');
+        document.getElementById('resendConfirmationView').classList.add('d-none');
     }
 
     function showRegisterInLoginOffcanvas(event) {
         if (event) event.preventDefault();
         document.getElementById('loginOffcanvasLabel').textContent = 'Registrera dig';
-        document.getElementById('loginView').classList.add('d-none');
+        hideAllAuthViews();
         document.getElementById('registerView').classList.remove('d-none');
+    }
+
+
+    function showForgotPasswordInLoginOffcanvas(event) {
+        if (event) event.preventDefault();
+        document.getElementById('loginOffcanvasLabel').textContent = 'Glömt lösenord';
+        hideAllAuthViews();
+        document.getElementById('forgotPasswordView').classList.remove('d-none');
+    }
+
+    function showResendConfirmationInLoginOffcanvas(event) {
+        if (event) event.preventDefault();
+        document.getElementById('loginOffcanvasLabel').textContent = 'Skicka bekräftelsemail igen';
+        hideAllAuthViews();
+        document.getElementById('resendConfirmationView').classList.remove('d-none');
     }
 
     async function submitLoginForm() {
@@ -125,6 +201,29 @@
             password: document.getElementById('loginPassword').value,
             rememberMe: document.getElementById('rememberMe').checked
         }, 'login');
+    }
+
+    async function submitRegisterForm() {
+        await submitAuthForm('/api/accountapi/register', {
+            email: document.getElementById('registerEmail').value.trim(),
+            firstName: document.getElementById('registerFirstName').value.trim(),
+            lastName: document.getElementById('registerLastName').value.trim(),
+            dateOfBirth: document.getElementById('registerDateOfBirth').value,
+            password: document.getElementById('registerPassword').value,
+            confirmPassword: document.getElementById('registerConfirmPassword').value
+        }, 'register');
+    }
+
+    async function submitForgotPasswordForm() {
+        await submitAuthForm('/api/accountapi/forgot-password', {
+            email: document.getElementById('forgotPasswordEmail').value.trim()
+        }, 'forgotPassword');
+    }
+
+    async function submitResendConfirmationForm() {
+        await submitAuthForm('/api/accountapi/resend-email-confirmation', {
+            email: document.getElementById('resendConfirmationEmail').value.trim()
+        }, 'resendConfirmation');
     }
 
     async function submitAuthForm(url, payload, mode) {

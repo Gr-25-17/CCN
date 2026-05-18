@@ -1,7 +1,11 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using NewsSite.Models.Entities;
 using System.ComponentModel.DataAnnotations;
+using System.Text;
+using System.Text.Encodings.Web;
 
 namespace NewsSite.Controllers
 {
@@ -12,15 +16,18 @@ namespace NewsSite.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<AccountApiController> _logger;
+        private readonly IEmailSender _emailSender;
 
         public AccountApiController(
             SignInManager<ApplicationUser> signInManager,
             UserManager<ApplicationUser> userManager,
-            ILogger<AccountApiController> logger)
+            ILogger<AccountApiController> logger,
+            IEmailSender emailSender)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _logger = logger;
+            _emailSender = emailSender;
         }
 
         [HttpPost("login")]
@@ -97,6 +104,67 @@ namespace NewsSite.Controllers
                 success = true,
                 message = "Kontot har skapats. Bekräfta din e-postadress innan du loggar in."
             });
+        }
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] EmailRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new { error = "Ange en giltig e-postadress." });
+
+            var user = await _userManager.FindByEmailAsync(request.Email);
+            if (user != null && await _userManager.IsEmailConfirmedAsync(user))
+            {
+                var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+                code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+
+                var callbackUrl = Url.Page(
+                    "/Account/ResetPassword",
+                    pageHandler: null,
+                    values: new { area = "Identity", code },
+                    protocol: Request.Scheme);
+
+                await _emailSender.SendEmailAsync(
+                    request.Email,
+                    "Reset Password",
+                    $"Please reset your password by <a href='{HtmlEncoder.Default.Encode(callbackUrl ?? string.Empty)}'>clicking here</a>.");
+            }
+
+            return Ok(new { success = true, message = "Om kontot finns skickar vi ett mail med instruktioner." });
+        }
+
+        [HttpPost("resend-email-confirmation")]
+        public async Task<IActionResult> ResendEmailConfirmation([FromBody] EmailRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new { error = "Ange en giltig e-postadress." });
+
+            var user = await _userManager.FindByEmailAsync(request.Email);
+            if (user != null)
+            {
+                var userId = await _userManager.GetUserIdAsync(user);
+                var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+
+                var callbackUrl = Url.Page(
+                    "/Account/ConfirmEmail",
+                    pageHandler: null,
+                    values: new { area = "Identity", userId, code },
+                    protocol: Request.Scheme);
+
+                await _emailSender.SendEmailAsync(
+                    request.Email,
+                    "Confirm your email",
+                    $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl ?? string.Empty)}'>clicking here</a>.");
+            }
+
+            return Ok(new { success = true, message = "Om kontot finns skickar vi ett nytt bekräftelsemail." });
+        }
+
+        public class EmailRequest
+        {
+            [Required, EmailAddress]
+            public string Email { get; set; } = string.Empty;
         }
 
         public class LoginRequest
