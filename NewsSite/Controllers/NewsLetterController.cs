@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using NewsSite.Repositories.Implementations;
 using NewsSite.Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -45,16 +46,18 @@ namespace NewsSite.Controllers
             }
 
             try
-            {
-                // This now connects properly to the service update below!
+            {          
                 var subscribers = await _newsletterService.GetWeeklySubscribersAsync();
                 if (subscribers == null || !subscribers.Any())
                 {
                     return Ok(new { message = "No active subscribers found." });
                 }
 
-                // 1. Fetch all articles from the past 7 days 
-                var allRecentArticles = await _articleService.GetArticlesPublishedInLastDaysAsync(7);
+              
+                var allRecentArticles = (await _articleService.GetMostPopularAsync(4)).ToList();
+
+                var latestArticles = await _articleService.GetLatestAsync(10);
+                allRecentArticles.AddRange(latestArticles);
 
                 int sentCount = 0;
 

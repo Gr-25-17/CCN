@@ -15,5 +15,8 @@
         public int LikesCount { get; set; }
 
         public bool IsEditorsChoice { get; set; }
+
+        public int CategoryId { get; set; }
+        public string AuthorId { get; set; } = string.Empty;
     }
 }

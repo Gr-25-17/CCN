@@ -54,7 +54,7 @@ public class NewsletterPreferenceRepository : INewsletterPreferenceRepository
     {
         return await _context.NewsletterPreferences
             .Include(p => p.User)
-            .Where(p => p.ReceiveNewsletter && !(p.IsUnsubscribed ?? false))
+            .Where(p => p.ReceiveNewsletter && !p.IsUnsubscribed)
             .ToListAsync();
     }
 }
