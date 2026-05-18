@@ -138,11 +138,10 @@ namespace NewsSite.Areas.Identity.Pages.Account
                 "Confirm your email",
                 $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
-            return RedirectToPage("RegisterConfirmation", new
-            {
-                email = Input.Email,
-                returnUrl
-            });
+            TempData["AuthSuccessMessage"] =
+                "Ett bekräftelsemail har skickats till din e-postadress.";
+
+            return LocalRedirect(returnUrl);
         }
 
         private IUserEmailStore<ApplicationUser> GetEmailStore()

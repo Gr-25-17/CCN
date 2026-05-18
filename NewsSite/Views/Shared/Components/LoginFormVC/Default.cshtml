@@ -3,6 +3,16 @@
 @inject SignInManager<ApplicationUser> SignInManager
 
 <section id="authOffcanvasContent">
+    @{
+        var authSuccessMessage = TempData["AuthSuccessMessage"] as string;
+    }
+
+    @if (!string.IsNullOrWhiteSpace(authSuccessMessage))
+    {
+        <div class="alert alert-success mb-3" role="alert">
+            @authSuccessMessage
+        </div>
+    }
     <div id="loginView">
         <form id="loginOffcanvasForm">
             <h3 class="mb-3 fw-bold">Logga in</h3>
@@ -148,8 +158,8 @@
                 setTimeout(() => {
                     const element = document.getElementById('loginOffcanvas');
                     const instance = bootstrap.Offcanvas.getInstance(element);
-                    if (instance) instance.hide(); else bootstrap.Offcanvas.getOrCreateInstance(element).hide(); 
-                    window.location.reload(); 
+                    if (instance) instance.hide(); else bootstrap.Offcanvas.getOrCreateInstance(element).hide();
+                    window.location.reload();
                 }, 500);
             }
         }
