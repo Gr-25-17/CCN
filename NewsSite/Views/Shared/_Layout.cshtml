@@ -119,23 +119,9 @@
                 return `${month}/${year}`;
             };
 
-            const updateExpirationDate = () => {
+            expirationInput.addEventListener('input', () => {
                 expirationInput.value = formatExpirationDate(expirationInput.value);
-            };
-
-            expirationInput.addEventListener('input', updateExpirationDate);
-            expirationInput.addEventListener('focus', () => {
-                if (!expirationInput.value) {
-                    expirationInput.value = '/';
-                }
             });
-            expirationInput.addEventListener('blur', () => {
-                if (expirationInput.value === '/') {
-                    expirationInput.value = string.Empty;
-                }
-            });
-
-            updateExpirationDate();
         });
     </script>
 
