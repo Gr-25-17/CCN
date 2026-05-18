@@ -90,6 +90,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     throw new Error('Logout misslyckades.');
                 }
 
+                const path = window.location.pathname;
+
+                const isProtectedPage =
+                    path.startsWith('/Admin') ||
+                    path.startsWith('/Writer') ||
+                    path.startsWith('/Identity/Account/Manage');
+
+                if (isProtectedPage) {
+                    window.location.href = '/';
+                    return;
+                }
+
                 window.location.reload();
             } catch {
                 window.location.href = '/';
