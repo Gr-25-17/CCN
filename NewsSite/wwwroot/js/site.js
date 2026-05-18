@@ -35,7 +35,6 @@ async function uploadImageAjax() {
         const data = await response.json();
 
         if (hiddenInput) hiddenInput.value = data.fileName;
-
         previewImg.src = data.temporaryUrl;
         previewContainer.style.display = 'block';
 
@@ -53,15 +52,16 @@ async function uploadImageAjax() {
 }
 
 function showToast(message, type = 'info') {
-    const toastContainer = document.getElementById('toastContainer');
+    let toastContainer = document.getElementById('toastContainer');
+
     if (!toastContainer) {
-        const container = document.createElement('div');
-        container.id = 'toastContainer';
-        container.style.position = 'fixed';
-        container.style.top = '20px';
-        container.style.right = '20px';
-        container.style.zIndex = '9999';
-        document.body.appendChild(container);
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toastContainer';
+        toastContainer.style.position = 'fixed';
+        toastContainer.style.top = '20px';
+        toastContainer.style.right = '20px';
+        toastContainer.style.zIndex = '9999';
+        document.body.appendChild(toastContainer);
     }
 
     const toastEl = document.createElement('div');
@@ -69,12 +69,46 @@ function showToast(message, type = 'info') {
     toastEl.textContent = message;
     toastEl.innerHTML += '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
 
-    document.getElementById('toastContainer').appendChild(toastEl);
-
+    toastContainer.appendChild(toastEl);
     setTimeout(() => toastEl.remove(), 5000);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    const logoutForm = document.querySelector('form[data-ajax-logout="true"]');
+    const logoutButton = document.querySelector('[data-logout-button="true"]');
+
+    if (logoutForm && logoutButton) {
+        logoutButton.addEventListener('click', async () => {
+            try {
+                const response = await fetch(logoutForm.action, {
+                    method: 'POST',
+                    body: new FormData(logoutForm),
+                    credentials: 'same-origin'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Logout misslyckades.');
+                }
+
+                const path = window.location.pathname;
+
+                const isProtectedPage =
+                    path.startsWith('/Admin') ||
+                    path.startsWith('/Writer') ||
+                    path.startsWith('/Identity/Account/Manage');
+
+                if (isProtectedPage) {
+                    window.location.href = '/';
+                    return;
+                }
+
+                window.location.reload();
+            } catch {
+                window.location.href = '/';
+            }
+        });
+    }
+
     const offcanvas = document.getElementById('loginOffcanvas');
     const title = document.getElementById('loginOffcanvasLabel');
 
