@@ -71,14 +71,79 @@
             const expirationInput = document.querySelector('#subscriptionExpirationDate');
             if (!expirationInput) return;
 
-            expirationInput.addEventListener('input', () => {
-                const digits = expirationInput.value.replace(/\D/g, '').slice(0, 4);
-                const month = digits.slice(0, 2);
-                const year = digits.slice(2);
-                expirationInput.value = digits.length > 0
-                    ? `${month}/${year}`
-                    : '';
+            const placeholder = 'MM/YY';
+            let digits = '';
+
+            const render = () => {
+                const chars = placeholder.split('');
+                for (let i = 0; i < digits.length; i++) {
+                    chars[i < 2 ? i : i + 1] = digits[i];
+                }
+                expirationInput.value = chars.join('');
+            };
+
+            expirationInput.addEventListener('focus', () => {
+                render();
+                const pos = digits.length < 2 ? digits.length : digits.length + 1;
+                expirationInput.setSelectionRange(pos, pos);
             });
+
+            expirationInput.addEventListener('keydown', (event) => {
+                const isDigit = event.key >= '0' && event.key <= '9';
+
+                if (isDigit) {
+                    event.preventDefault();
+                    if (digits.length >= 4) return;
+
+                    const caret = expirationInput.selectionStart ?? 0;
+                    const digitIndex = caret <= 2 ? caret : caret - 1;
+                    digits = digits.slice(0, digitIndex) + event.key + digits.slice(digitIndex);
+                    digits = digits.slice(0, 4);
+                    render(); 
+
+                    const nextIndex = Math.min(digitIndex + 1, digits.length);
+                    const nextCaret = nextIndex < 2 ? nextIndex : nextIndex + 1;
+                    expirationInput.setSelectionRange(nextCaret, nextCaret);
+                    return;
+                }
+
+                if (event.key === 'Backspace') {
+                    event.preventDefault();
+                    const caret = expirationInput.selectionStart ?? 0;
+                    const digitIndex = caret <= 2 ? caret : caret - 1;
+                    if (digitIndex <= 0) return;
+
+                    digits = digits.slice(0, digitIndex - 1) + digits.slice(digitIndex);
+                    render(); 
+
+                    const nextIndex = digitIndex - 1;
+                    const nextCaret = nextIndex < 2 ? nextIndex : nextIndex + 1;
+                    expirationInput.setSelectionRange(nextCaret, nextCaret);
+                    return;
+                }
+
+                if (event.key === 'Delete') {
+                    event.preventDefault();
+                    const caret = expirationInput.selectionStart ?? 0;
+                    const digitIndex = caret <= 2 ? caret : caret - 1;
+                    if (digitIndex >= digits.length) return;
+
+                    digits = digits.slice(0, digitIndex) + digits.slice(digitIndex + 1);
+                    render();
+
+                    const nextCaret = digitIndex < 2 ? digitIndex : digitIndex + 1;
+                    expirationInput.setSelectionRange(nextCaret, nextCaret);
+                    return;
+                }
+
+                if ([ 'Tab', 'ArrowLeft', 'ArrowRight', 'Home', 'End' ].includes(event.key)) {
+                    return;
+                }
+
+                event.preventDefault();
+            });
+
+            render();
         });
     </script>
 
