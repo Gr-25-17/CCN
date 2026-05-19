@@ -74,17 +74,23 @@ body {
     min-width: 0;
     flex-wrap: nowrap;
     max-width: 100%;
-    flex: 0 1 auto;
+    flex: 1 1 auto;
+    justify-content: flex-end;
+    gap: 0.35rem !important;
 }
 
 .navbar-search {
-    flex: 1 1 clamp(120px, 22vw, 360px);
+    flex: 1 1 clamp(140px, 28vw, 480px);
     min-width: 0;
-    max-width: 360px;
+    max-width: 520px;
 }
 
 .navbar-search .form-control {
     min-width: 0;
+}
+
+.navbar-search .input-group {
+    flex-wrap: nowrap;
 }
 
 .navbar-search .btn {
@@ -103,10 +109,12 @@ body {
     }
 
     .navbar-account .nav-link,
-    .navbar-account .btn.nav-link {
+    .navbar-account .btn.nav-link,
+    .navbar-nav .nav-link,
+    .navbar-nav .btn.nav-link {
         white-space: nowrap;
-        padding-left: 0.5rem;
-        padding-right: 0.5rem;
+        padding-left: 0.4rem;
+        padding-right: 0.4rem;
     }
 }
 
@@ -131,29 +139,19 @@ body {
         width: auto;
         overflow: visible;
         gap: 0.25rem !important;
+        flex: 0 1 auto;
     }
 
     .navbar-search {
-        flex: 1 1 clamp(76px, 22vw, 140px);
-        max-width: 140px;
+        flex: 1 1 clamp(86px, 24vw, 180px);
+        max-width: 180px;
     }
 
     .navbar-search .form-control,
     .navbar-search .btn {
-        padding-left: 0.375rem;
-        padding-right: 0.375rem;
-    }
-}
-
-
-@media (min-width: 992px) and (max-width: 1199.98px) {
-    .navbar-nav .nav-link,
-    .navbar-nav .btn.nav-link {
         padding-left: 0.35rem;
         padding-right: 0.35rem;
     }
-
-    .navbar-account .navbar-nav {
-        margin-left: 0.25rem;
-    }
 }
+
+
