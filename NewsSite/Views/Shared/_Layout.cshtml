@@ -45,6 +45,10 @@
                 </div>
 
                 <div class="navbar-utilities d-flex align-items-center ms-auto gap-2">
+                    <div class="navbar-account">
+                        <partial name="_LoginPartial" />
+                    </div>
+
                     <form class="navbar-search d-flex align-items-stretch" asp-controller="Articles" asp-action="Search" method="get">
                         <div class="input-group w-100">
                             <input name="searchTerm" class="form-control" type="search" placeholder="Sök artiklar..." aria-label="Search">
@@ -54,10 +58,6 @@
 
                     <div class="d-flex align-items-center navbar-weather">
                         <div id="weatherWidget">@await Component.InvokeAsync("WeatherCardVC", new { detailed = false })</div>
-                    </div>
-
-                    <div class="navbar-account">
-                        <partial name="_LoginPartial" />
                     </div>
                 </div>
             </div>
