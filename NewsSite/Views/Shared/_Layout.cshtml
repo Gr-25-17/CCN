@@ -1,6 +1,11 @@
 @using NewsSite.Models.ViewModels
 @using Microsoft.AspNetCore.Authorization
 @inject IAuthorizationService AuthorizationService
+@{
+    var path = Context.Request.Path.Value ?? string.Empty;
+    var isHomePage = path == "/";
+    var isPrivacyPage = path.Equals("/Home/Privacy", StringComparison.OrdinalIgnoreCase);
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,17 +20,21 @@
 </head>
 <body class="@(((User.Identity?.IsAuthenticated ?? false) ? "authenticated " : string.Empty) + (User.IsInRole("Subscriber") ? "has-active-subscription" : string.Empty))">
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-lg navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">NewsSite</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item"><a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
+                <div class="navbar-collapse collapse" id="mainNavbar">
+                    <ul class="navbar-nav me-lg-3 mb-2 mb-lg-0 flex-lg-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index" aria-current="@(isHomePage ? "page" : null)">Home</a>
+                        </li>
                         @await Component.InvokeAsync("NavbarCategory")
-                        <li class="nav-item"><a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a></li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy" aria-current="@(isPrivacyPage ? "page" : null)">Privacy</a>
+                        </li>
                         @if (!(await AuthorizationService.AuthorizeAsync(User, "PremiumContent")).Succeeded)
                         {
                             <li class="nav-item">
@@ -33,17 +42,23 @@
                             </li>
                         }
                     </ul>
-                    <partial name="_LoginPartial" />
                 </div>
-                <form class="d-flex mx-auto" asp-controller="Articles" asp-action="Search" method="get" style="max-width: 400px;">
-                    <div class="input-group">
-                        <input name="searchTerm" class="form-control" type="search" placeholder="Sök artiklar..." aria-label="Search">
-                        <button class="btn btn-primary" type="submit">🔍</button>
+
+                <div class="navbar-utilities d-flex align-items-center ms-auto gap-2">
+                    <div class="navbar-account">
+                        <partial name="_LoginPartial" />
                     </div>
-                </form>
-                <div class="d-flex align-items-center me-3">
-                    <div id="weatherWidget">@await Component.InvokeAsync("WeatherCardVC", new { detailed = false })</div>
-                    @*<button type="button" class="btn btn-sm btn-primary ms-2" onclick="toggleWeather()" title="Toggle weather view">⇆</button>*@
+
+                    <form class="navbar-search d-flex align-items-stretch" asp-controller="Articles" asp-action="Search" method="get">
+                        <div class="input-group w-100">
+                            <input name="searchTerm" class="form-control" type="search" placeholder="Sök artiklar..." aria-label="Search">
+                            <button class="btn btn-primary" type="submit">🔍</button>
+                        </div>
+                    </form>
+
+                    <div class="d-flex align-items-center navbar-weather">
+                        <div id="weatherWidget">@await Component.InvokeAsync("WeatherCardVC", new { detailed = false })</div>
+                    </div>
                 </div>
             </div>
         </nav>
