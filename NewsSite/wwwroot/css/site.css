@@ -78,7 +78,7 @@ body {
 }
 
 .navbar-search {
-    width: clamp(120px, 18vw, 220px);
+    width: clamp(100px, 14vw, 180px);
     min-width: 0;
 }
 
@@ -114,12 +114,6 @@ body {
     min-width: 0;
 }
 
-.navbar-weather #weatherWidget {
-    max-width: clamp(110px, 14vw, 180px);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
 
 .nav-link[aria-current="page"] {
     font-weight: 600;
@@ -130,15 +124,30 @@ body {
 @media (max-width: 991.98px) {
     .navbar-utilities {
         width: auto;
-        overflow: hidden;
+        overflow: visible;
+        gap: 0.25rem !important;
     }
 
     .navbar-search {
-        width: clamp(105px, 32vw, 160px);
+        width: clamp(88px, 26vw, 130px);
     }
 
-    .navbar-weather #weatherWidget {
-        max-width: clamp(90px, 24vw, 130px);
+    .navbar-search .form-control,
+    .navbar-search .btn {
+        padding-left: 0.375rem;
+        padding-right: 0.375rem;
     }
 }
 
+
+@media (min-width: 992px) and (max-width: 1199.98px) {
+    .navbar-nav .nav-link,
+    .navbar-nav .btn.nav-link {
+        padding-left: 0.35rem;
+        padding-right: 0.35rem;
+    }
+
+    .navbar-account .navbar-nav {
+        margin-left: 0.25rem;
+    }
+}
