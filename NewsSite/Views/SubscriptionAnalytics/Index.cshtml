@@ -3,36 +3,210 @@
 }
 
 <div class="container mt-4">
-    <h2 class="mb-4">📊 Subscription Analytics</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>📊 Subscription Analytics</h2>
+    </div>
+
     <div id="errorBox" class="alert alert-danger d-none" role="alert"></div>
+
     <div id="statsContainer" class="row g-3"></div>
+
+    <div class="card shadow-sm mt-4">
+        <div class="card-body">
+            <h5 class="mb-4">📈 Subscriber Trend (Last 6 Months)</h5>
+            <canvas id="subscriberChart" height="100"></canvas>
+        </div>
+    </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
     async function loadStats() {
-        const container = document.getElementById('statsContainer');
-        const errorBox = document.getElementById('errorBox');
+    const container = document.getElementById('statsContainer');
+    const errorBox = document.getElementById('errorBox');
 
-        try {
-            const res = await fetch('/api/admin/subscription-stats', { headers: { 'Accept': 'application/json' } });
-            if (!res.ok) {
-                throw new Error(`HTTP ${res.status}`);
-            }
+    try {
+    const res = await fetch('/api/admin/subscription-stats', {
+    headers: { 'Accept': 'application/json' }
+    });
 
-            const data = await res.json();
+    if (!res.ok) {
+    throw new Error(`HTTP ${res.status}`);
+    }
 
-            container.innerHTML = `
-                <div class="col-md-3"><div class="card p-3 shadow-sm"><h6 class="text-muted">Active subscribers</h6><h2 class="text-success">${data.activeSubscribers}</h2></div></div>
-                <div class="col-md-3"><div class="card p-3 shadow-sm"><h6 class="text-muted">Inactive subscribers</h6><h2 class="text-danger">${data.inactiveSubscribers}</h2></div></div>
-                <div class="col-md-3"><div class="card p-3 shadow-sm"><h6 class="text-muted">Returning subscribers</h6><h2 class="text-primary">${data.returningSubscribers}</h2></div></div>
-                <div class="col-md-3"><div class="card p-3 shadow-sm"><h6 class="text-muted">Monthly growth</h6><h2 class="${data.growthRateSubscribers >= 0 ? 'text-success' : 'text-danger'}">${data.growthRateSubscribers.toFixed(1)}%</h2></div></div>
-                <div class="col-md-6"><div class="card p-3 shadow-sm"><h6 class="text-muted">New subscribers this month</h6><h2>${data.newSubscribersThisMonth}</h2></div></div>
-                <div class="col-md-6"><div class="card p-3 shadow-sm"><h6 class="text-muted">New subscribers last month</h6><h2>${data.newSubscribersLastMonth}</h2></div></div>
-            `;
-        } catch (err) {
-            errorBox.classList.remove('d-none');
-            errorBox.textContent = `Could not load subscription stats. ${err.message}. Ensure you are logged in as an Admin.`;
-        }
+    const data = await res.json();
+
+    const totalUsers = data.totalRegisteredUsers || 0;
+    const activeSubscribers = data.activeSubscribers || 0;
+    const inactiveSubscribers = data.inactiveSubscribers || 0;
+
+    const conversionRate =
+    totalUsers === 0
+    ? 0
+    : ((activeSubscribers / totalUsers) * 100);
+
+    const churnRate =
+    activeSubscribers + inactiveSubscribers === 0
+    ? 0
+    : ((inactiveSubscribers / (activeSubscribers + inactiveSubscribers)) * 100);
+
+    const estimatedRevenue = activeSubscribers * 99;
+
+    container.innerHTML = `
+    <div class="col-md-3">
+    <div class="card shadow-sm border-0 h-100">
+    <div class="card-body">
+    <h6 class="text-muted">👥 Total users</h6>
+    <h2>${totalUsers}</h2>
+    </div>
+    </div>
+    </div>
+
+    <div class="col-md-3">
+    <div class="card shadow-sm border-0 h-100">
+    <div class="card-body">
+    <h6 class="text-muted">✅ Active subscribers</h6>
+    <h2 class="text-success">${activeSubscribers}</h2>
+    </div>
+    </div>
+    </div>
+
+    <div class="col-md-3">
+    <div class="card shadow-sm border-0 h-100">
+    <div class="card-body">
+    <h6 class="text-muted">❌ Inactive subscribers</h6>
+    <h2 class="text-danger">${inactiveSubscribers}</h2>
+    </div>
+    </div>
+    </div>
+
+    <div class="col-md-3">
+    <div class="card shadow-sm border-0 h-100">
+    <div class="card-body">
+    <h6 class="text-muted">🔁 Returning subscribers</h6>
+    <h2 class="text-primary">${data.returningSubscribers}</h2>
+    </div>
+    </div>
+    </div>
+
+    <div class="col-md-4">
+    <div class="card shadow-sm border-0 h-100">
+    <div class="card-body">
+    <h6 class="text-muted">📈 Subscriber growth</h6>
+    <h2 class="${data.growthRateSubscribers >= 0 ? 'text-success' : 'text-danger'}">
+    ${data.growthRateSubscribers.toFixed(1)}%
+    </h2>
+    </div>
+    </div>
+    </div>
+
+    <div class="col-md-4">
+    <div class="card shadow-sm border-0 h-100">
+    <div class="card-body">
+    <h6 class="text-muted">📉 Churn rate</h6>
+    <h2 class="text-warning">
+    ${churnRate.toFixed(1)}%
+    </h2>
+    </div>
+    </div>
+    </div>
+
+    <div class="col-md-4">
+    <div class="card shadow-sm border-0 h-100">
+    <div class="card-body">
+    <h6 class="text-muted">💰 Estimated monthly revenue</h6>
+    <h2 class="text-success">
+    ${estimatedRevenue.toLocaleString()} kr
+    </h2>
+    </div>
+    </div>
+    </div>
+
+    <div class="col-md-6">
+    <div class="card shadow-sm border-0 h-100">
+    <div class="card-body">
+    <h6 class="text-muted">🆕 New subscribers this month</h6>
+    <h2>${data.newSubscribersThisMonth}</h2>
+    </div>
+    </div>
+    </div>
+
+    <div class="col-md-6">
+    <div class="card shadow-sm border-0 h-100">
+    <div class="card-body">
+    <h6 class="text-muted">📅 New subscribers last month</h6>
+    <h2>${data.newSubscribersLastMonth}</h2>
+    </div>
+    </div>
+    </div>
+
+    <div class="col-md-12">
+    <div class="card shadow-sm border-0">
+    <div class="card-body">
+    <h6 class="text-muted">📊 User to Subscriber conversion rate</h6>
+    <div class="progress mt-3" style="height: 30px;">
+    <div class="progress-bar bg-success"
+    role="progressbar"
+    style="width: ${conversionRate}%;">
+    ${conversionRate.toFixed(1)}%
+    </div>
+    </div>
+    </div>
+    </div>
+    </div>
+    `;
+
+    renderChart(activeSubscribers);
+
+    } catch (err) {
+    errorBox.classList.remove('d-none');
+    errorBox.textContent =
+    `Could not load subscription stats. ${err.message}. Ensure you are logged in as an Admin.`;
+    }
+    }
+
+    function renderChart(currentSubscribers) {
+
+    // fake trend data for now
+    const data = [
+    Math.max(currentSubscribers - 25, 0),
+    Math.max(currentSubscribers - 18, 0),
+    Math.max(currentSubscribers - 12, 0),
+    Math.max(currentSubscribers - 8, 0),
+    Math.max(currentSubscribers - 4, 0),
+    currentSubscribers
+    ];
+
+    const ctx = document.getElementById('subscriberChart');
+
+    new Chart(ctx, {
+    type: 'line',
+    data: {
+    labels: [
+    '5 months ago',
+    '4 months ago',
+    '3 months ago',
+    '2 months ago',
+    'Last month',
+    'Now'
+    ],
+    datasets: [{
+    label: 'Subscribers',
+    data: data,
+    tension: 0.3,
+    fill: false
+    }]
+    },
+    options: {
+    responsive: true,
+    plugins: {
+    legend: {
+    display: true
+    }
+    }
+    }
+    });
     }
 
     document.addEventListener('DOMContentLoaded', loadStats);

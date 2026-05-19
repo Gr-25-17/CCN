@@ -17,5 +17,14 @@
 
         public double GrowthRateSubscribers { get; set; }
         public double GrowthRateRegistrations { get; set; }
+        public double SubscriberPercentage { get; set; }
+        public double ChurnRate { get; set; }
+
+        public decimal EstimatedMonthlyRevenue { get; set; }
+
+        public List<string> TrendLabels { get; set; } = [];
+        public List<int> TrendSubscriberCounts { get; set; } = [];
+
+
     }
 }
