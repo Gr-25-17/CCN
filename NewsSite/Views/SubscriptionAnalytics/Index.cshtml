@@ -41,10 +41,12 @@
     const activeSubscribers = data.activeSubscribers || 0;
     const inactiveSubscribers = data.inactiveSubscribers || 0;
 
-    const conversionRate =
+    const rawConversionRate =
     totalUsers === 0
     ? 0
     : ((activeSubscribers / totalUsers) * 100);
+
+    const conversionRate = Math.min(Math.max(rawConversionRate, 0), 100);
 
     const churnRate =
     activeSubscribers + inactiveSubscribers === 0
