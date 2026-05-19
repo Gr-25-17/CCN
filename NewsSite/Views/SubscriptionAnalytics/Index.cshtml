@@ -1,63 +1,38 @@
-﻿@{
+@{
     ViewData["Title"] = "Subscription Analytics";
 }
 
 <div class="container mt-4">
     <h2 class="mb-4">📊 Subscription Analytics</h2>
-
+    <div id="errorBox" class="alert alert-danger d-none" role="alert"></div>
     <div id="statsContainer" class="row g-3"></div>
 </div>
 
 <script>
     async function loadStats() {
-        const res = await fetch('/api/admin/subscription-stats');
-        const data = await res.json();
-
         const container = document.getElementById('statsContainer');
+        const errorBox = document.getElementById('errorBox');
 
-        container.innerHTML = `
-            <div class="col-md-3">
-                <div class="card p-3 shadow-sm">
-                    <h5>Total Users</h5>
-                    <h2>${data.totalUsers}</h2>
-                </div>
-            </div>
+        try {
+            const res = await fetch('/api/admin/subscription-stats', { headers: { 'Accept': 'application/json' } });
+            if (!res.ok) {
+                throw new Error(`HTTP ${res.status}`);
+            }
 
-            <div class="col-md-3">
-                <div class="card p-3 shadow-sm">
-                    <h5>Active Subs</h5>
-                    <h2 class="text-success">${data.activeSubscribers}</h2>
-                </div>
-            </div>
+            const data = await res.json();
 
-            <div class="col-md-3">
-                <div class="card p-3 shadow-sm">
-                    <h5>Inactive Subs</h5>
-                    <h2 class="text-danger">${data.inactiveSubscribers}</h2>
-                </div>
-            </div>
-
-            <div class="col-md-3">
-                <div class="card p-3 shadow-sm">
-                    <h5>Returning Subs</h5>
-                    <h2 class="text-primary">${data.returningSubscribers}</h2>
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <div class="card p-3 shadow-sm">
-                    <h5>New This Month</h5>
-                    <h2>${data.newSubscribersThisMonth}</h2>
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <div class="card p-3 shadow-sm">
-                    <h5>Last Month</h5>
-                    <h2>${data.newSubscribersLastMonth}</h2>
-                </div>
-            </div>
-        `;
+            container.innerHTML = `
+                <div class="col-md-3"><div class="card p-3 shadow-sm"><h6 class="text-muted">Active subscribers</h6><h2 class="text-success">${data.activeSubscribers}</h2></div></div>
+                <div class="col-md-3"><div class="card p-3 shadow-sm"><h6 class="text-muted">Inactive subscribers</h6><h2 class="text-danger">${data.inactiveSubscribers}</h2></div></div>
+                <div class="col-md-3"><div class="card p-3 shadow-sm"><h6 class="text-muted">Returning subscribers</h6><h2 class="text-primary">${data.returningSubscribers}</h2></div></div>
+                <div class="col-md-3"><div class="card p-3 shadow-sm"><h6 class="text-muted">Monthly growth</h6><h2 class="${data.growthRateSubscribers >= 0 ? 'text-success' : 'text-danger'}">${data.growthRateSubscribers.toFixed(1)}%</h2></div></div>
+                <div class="col-md-6"><div class="card p-3 shadow-sm"><h6 class="text-muted">New subscribers this month</h6><h2>${data.newSubscribersThisMonth}</h2></div></div>
+                <div class="col-md-6"><div class="card p-3 shadow-sm"><h6 class="text-muted">New subscribers last month</h6><h2>${data.newSubscribersLastMonth}</h2></div></div>
+            `;
+        } catch (err) {
+            errorBox.classList.remove('d-none');
+            errorBox.textContent = `Could not load subscription stats. ${err.message}. Ensure you are logged in as an Admin.`;
+        }
     }
 
     document.addEventListener('DOMContentLoaded', loadStats);

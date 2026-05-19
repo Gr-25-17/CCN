@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using NewsSite.Mapping;
 using NewsSite.Models;
 using NewsSite.Models.Entities;
@@ -18,6 +19,7 @@ namespace NewsSite.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly INewsletterService _newsletterService;
         private readonly IWeatherService _weatherService;
+        private readonly ISubscriptionAnalyticsService _subscriptionAnalyticsService;
 
 
         public HomeController(
@@ -26,7 +28,8 @@ namespace NewsSite.Controllers
             ISubscriptionService subscriptionService,
             UserManager<ApplicationUser> userManager,
             INewsletterService newsletterService,
-            IWeatherService weatherService)
+            IWeatherService weatherService,
+            ISubscriptionAnalyticsService subscriptionAnalyticsService)
         {
             _articleService = articleService;
             _categoryService = categoryService;
@@ -34,6 +37,7 @@ namespace NewsSite.Controllers
             _userManager = userManager;
             _newsletterService = newsletterService;
             _weatherService = weatherService;
+            _subscriptionAnalyticsService = subscriptionAnalyticsService;
         }
 
         public async Task<IActionResult> Index()
@@ -131,6 +135,13 @@ namespace NewsSite.Controllers
         public async Task<IActionResult> WeatherWidget(bool detailed = false)
         {
             return ViewComponent("WeatherCardVC", new { detailed });
+        }
+
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> SubscriptionAnalytics()
+        {
+            var stats = await _subscriptionAnalyticsService.GetDashboardStatsAsync();
+            return View(stats);
         }
     }
 }
