@@ -72,11 +72,12 @@ body {
 }
 .navbar-utilities {
     min-width: 0;
+    flex-wrap: nowrap;
 }
 
 .navbar-search {
-    width: 100%;
-    max-width: 400px;
+    width: min(400px, 35vw);
+    min-width: 170px;
 }
 
 .navbar-search .form-control {
@@ -87,18 +88,37 @@ body {
     flex-shrink: 0;
 }
 
+.navbar-account .navbar-nav {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    margin-bottom: 0;
+}
+
+.navbar-account .nav-link,
+.navbar-account .btn.nav-link {
+    white-space: nowrap;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+.navbar-weather {
+    flex-shrink: 0;
+}
+
 .nav-link[aria-current="page"] {
     font-weight: 600;
     text-decoration: underline;
     text-underline-offset: 0.25rem;
 }
 
-@media (min-width: 992px) {
-    .navbar-search {
-        margin-left: auto;
-    }
-
+@media (max-width: 991.98px) {
     .navbar-utilities {
         width: auto;
     }
+
+    .navbar-search {
+        width: min(280px, 32vw);
+    }
 }
+
