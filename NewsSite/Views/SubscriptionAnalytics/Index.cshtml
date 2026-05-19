@@ -1,0 +1,64 @@
+﻿@{
+    ViewData["Title"] = "Subscription Analytics";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">📊 Subscription Analytics</h2>
+
+    <div id="statsContainer" class="row g-3"></div>
+</div>
+
+<script>
+    async function loadStats() {
+        const res = await fetch('/api/admin/subscription-stats');
+        const data = await res.json();
+
+        const container = document.getElementById('statsContainer');
+
+        container.innerHTML = `
+            <div class="col-md-3">
+                <div class="card p-3 shadow-sm">
+                    <h5>Total Users</h5>
+                    <h2>${data.totalUsers}</h2>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card p-3 shadow-sm">
+                    <h5>Active Subs</h5>
+                    <h2 class="text-success">${data.activeSubscribers}</h2>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card p-3 shadow-sm">
+                    <h5>Inactive Subs</h5>
+                    <h2 class="text-danger">${data.inactiveSubscribers}</h2>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card p-3 shadow-sm">
+                    <h5>Returning Subs</h5>
+                    <h2 class="text-primary">${data.returningSubscribers}</h2>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card p-3 shadow-sm">
+                    <h5>New This Month</h5>
+                    <h2>${data.newSubscribersThisMonth}</h2>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card p-3 shadow-sm">
+                    <h5>Last Month</h5>
+                    <h2>${data.newSubscribersLastMonth}</h2>
+                </div>
+            </div>
+        `;
+    }
+
+    document.addEventListener('DOMContentLoaded', loadStats);
+</script>

@@ -19,6 +19,7 @@ namespace NewsSite.Controllers
         private readonly INewsletterService _newsletterService;
         private readonly IWeatherService _weatherService;
 
+
         public HomeController(
             IArticleService articleService,
             ICategoryService categoryService,
