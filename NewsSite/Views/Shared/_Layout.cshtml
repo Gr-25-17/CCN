@@ -1,4 +1,6 @@
 @using NewsSite.Models.ViewModels
+@using Microsoft.AspNetCore.Authorization
+@inject IAuthorizationService AuthorizationService
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -24,7 +26,7 @@
                         <li class="nav-item"><a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
                         @await Component.InvokeAsync("NavbarCategory")
                         <li class="nav-item"><a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a></li>
-                        @if (!User.IsInRole("Subscriber"))
+                        @if (!(await AuthorizationService.AuthorizeAsync(User, "PremiumContent")).Succeeded)
                         {
                             <li class="nav-item">
                                 <a href="#" class="nav-link text-dark" data-bs-toggle="offcanvas" data-bs-target="#loginOffcanvas" data-auth-mode="subscribe">Subscribe</a>

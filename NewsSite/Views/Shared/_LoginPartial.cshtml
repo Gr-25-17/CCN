@@ -2,6 +2,8 @@
 @using NewsSite.Models.Entities
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
+@using Microsoft.AspNetCore.Authorization
+@inject IAuthorizationService AuthorizationService
 
 <ul class="navbar-nav">
     @if ((User.Identity?.IsAuthenticated ?? false) && User.IsInRole("Admin"))
@@ -11,11 +13,10 @@
         </li>
     }
 
-    @if (User.Identity != null && User.Identity.IsAuthenticated &&
-        (User.IsInRole("Admin") || User.IsInRole("Editor") || User.IsInRole("Writer")))
+    @if ((await AuthorizationService.AuthorizeAsync(User, "ManagementOnly")).Succeeded)
     {
         <li class="nav-item">
-            <a class="nav-link text-dark fw-bold" asp-area="" asp-controller="Writer" asp-action="Index">Skribentpanel</a>
+            <a class="nav-link text-dark" asp-area="" asp-controller="Writer" asp-action="Index">Skribentpanel</a>
         </li>
     }
 
