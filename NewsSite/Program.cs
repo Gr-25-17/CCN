@@ -77,6 +77,7 @@ namespace NewsSite
             builder.Services.AddScoped<INewsletterService, NewsletterService>();
             builder.Services.AddScoped<INewsletterPreferenceRepository, NewsletterPreferenceRepository>();
             builder.Services.AddScoped<ILocalToSqlServerMigrationService, LocalToSqlServerMigrationService>();
+            builder.Services.AddScoped<ISubscriptionAnalyticsService, SubscriptionAnalyticsService>();
 
             builder.Services.AddAuthorization(options =>
             {

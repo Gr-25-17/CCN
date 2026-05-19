@@ -1,0 +1,68 @@
+@model NewsSite.Models.Entities.SubscriptionStatsDto
+
+@{
+    ViewData["Title"] = "Subscription Analytics";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">📊 Subscription Analytics</h2>
+        <a class="btn btn-outline-secondary" asp-controller="SubscriptionAnalytics" asp-action="Index">API-backed dashboard</a>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Active subscribers</h6>
+                    <h3 class="text-success">@Model.ActiveSubscribers</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Inactive subscribers</h6>
+                    <h3 class="text-danger">@Model.InactiveSubscribers</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Returning subscribers</h6>
+                    <h3 class="text-primary">@Model.ReturningSubscribers</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Monthly growth</h6>
+                    <h3 class="@(Model.GrowthRateSubscribers >= 0 ? "text-success" : "text-danger")">@Model.GrowthRateSubscribers.ToString("0.0")%</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">New subscribers this month</h6>
+                    <h3>@Model.NewSubscribersThisMonth</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">New subscribers last month</h6>
+                    <h3>@Model.NewSubscribersLastMonth</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
