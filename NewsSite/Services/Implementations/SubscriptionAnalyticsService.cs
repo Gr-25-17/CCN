@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using NewsSite.Data;
 using NewsSite.Models.Entities;
@@ -26,10 +26,6 @@ namespace NewsSite.Services.Implementations
             var startOfThisMonth = new DateTime(now.Year, now.Month, 1);
             var startOfLastMonth = startOfThisMonth.AddMonths(-1);
 
-            // -------------------------
-            // EXCLUDE INTERNAL STAFF
-            // -------------------------
-
             var excludedRoles = new[] { "Admin", "Editor", "Writer" };
 
             var internalUserIds = await (
@@ -43,19 +39,10 @@ namespace NewsSite.Services.Implementations
             var customerUsers = _context.Users
                 .Where(u => !internalUserIds.Contains(u.Id));
 
-            // -------------------------
-            // USERS
-            // -------------------------
-
             var totalUsers = await customerUsers.CountAsync();
 
-            // Temporary hardcoded registration stats
             var regThisMonth = 26;
             var regLastMonth = 15;
-
-            // -------------------------
-            // SUBSCRIPTIONS
-            // -------------------------
 
             var activeSubs = await _context.Subscriptions
                 .Where(s => !internalUserIds.Contains(s.UserId))
@@ -75,10 +62,6 @@ namespace NewsSite.Services.Implementations
                     s.StartDate >= startOfLastMonth &&
                     s.StartDate < startOfThisMonth);
 
-            // -------------------------
-            // CHURN
-            // -------------------------
-
             var churnThisMonth = await _context.UnsubscribeLogs
                 .Where(u => !internalUserIds.Contains(u.UserId))
                 .CountAsync(u => u.UnsubscribedAt >= startOfThisMonth);
@@ -89,15 +72,7 @@ namespace NewsSite.Services.Implementations
                     u.UnsubscribedAt >= startOfLastMonth &&
                     u.UnsubscribedAt < startOfThisMonth);
 
-            // -------------------------
-            // RETURNING SUBSCRIBERS
-            // -------------------------
-
             var returningSubscribers = 7;
-
-            // -------------------------
-            // CALCULATIONS
-            // -------------------------
 
             var subscriberPercentage = totalUsers == 0
                 ? 0
@@ -109,9 +84,7 @@ namespace NewsSite.Services.Implementations
 
             var estimatedRevenue = activeSubs * 99;
 
-            // -------------------------
-            // RESULT
-            // -------------------------
+            var writerStats = await BuildWriterStatsAsync(startOfThisMonth);
 
             return new SubscriptionStatsDto
             {
@@ -133,8 +106,105 @@ namespace NewsSite.Services.Implementations
 
                 SubscriberPercentage = subscriberPercentage,
                 ChurnRate = churnRate,
-                EstimatedMonthlyRevenue = estimatedRevenue
+                EstimatedMonthlyRevenue = estimatedRevenue,
+
+                WriterPerformances = writerStats.WriterPerformances,
+                WriterMonthlyTrends = writerStats.WriterMonthlyTrends
             };
+        }
+
+        private async Task<(List<WriterPerformanceDto> WriterPerformances, List<WriterMonthlyTrendDto> WriterMonthlyTrends)> BuildWriterStatsAsync(DateTime startOfThisMonth)
+        {
+            var authors = await (
+                from user in _context.Users
+                join userRole in _context.UserRoles on user.Id equals userRole.UserId
+                join role in _context.Roles on userRole.RoleId equals role.Id
+                where role.Name == "Writer"
+                select new
+                {
+                    user.Id,
+                    user.FirstName,
+                    user.LastName,
+                    user.Email
+                }
+            ).Distinct().ToListAsync();
+
+            var writerIds = authors.Select(a => a.Id).ToList();
+
+            var writerArticles = await _context.Articles
+                .Include(a => a.Likes)
+                .Where(a => !a.IsDeleted && a.AuthorId != null && writerIds.Contains(a.AuthorId))
+                .ToListAsync();
+
+            var writerPerformances = authors
+                .Select(author =>
+                {
+                    var articles = writerArticles.Where(a => a.AuthorId == author.Id).ToList();
+                    var totalArticles = articles.Count;
+                    var articlesThisMonth = articles.Count(a => a.CreatedAt >= startOfThisMonth);
+                    var totalLikes = articles.Sum(a => a.Likes.Count);
+                    var totalViews = articles.Sum(a => a.ViewsCount);
+                    var totalEngagement = totalLikes + totalViews;
+                    var avgEngagementPerArticle = totalArticles == 0 ? 0 : Math.Round((double)totalEngagement / totalArticles, 1);
+                    var revenueEstimate = Math.Round((decimal)totalViews * 0.05m, 2);
+
+                    const double articleWeight = 2.0;
+                    const double likesWeight = 1.5;
+                    const double viewsWeight = 0.02;
+                    var impactScore = Math.Round((articlesThisMonth * articleWeight) + (avgEngagementPerArticle * likesWeight) + (totalViews * viewsWeight), 1);
+
+                    var displayName = $"{author.FirstName} {author.LastName}".Trim();
+                    if (string.IsNullOrWhiteSpace(displayName))
+                    {
+                        displayName = author.Email ?? "Unknown writer";
+                    }
+
+                    return new WriterPerformanceDto
+                    {
+                        AuthorId = author.Id,
+                        AuthorName = displayName,
+                        ArticlesThisMonth = articlesThisMonth,
+                        TotalArticles = totalArticles,
+                        TotalLikes = totalLikes,
+                        TotalViews = totalViews,
+                        AvgEngagementPerArticle = avgEngagementPerArticle,
+                        RevenueEstimate = revenueEstimate,
+                        ImpactScore = impactScore
+                    };
+                })
+                .OrderByDescending(w => w.ImpactScore)
+                .ToList();
+
+            var trendStart = startOfThisMonth.AddMonths(-5);
+            var writerMonthlyTrends = writerArticles
+                .Where(a => a.CreatedAt >= trendStart)
+                .GroupBy(a => new { a.AuthorId, Month = new DateTime(a.CreatedAt.Year, a.CreatedAt.Month, 1) })
+                .Select(g =>
+                {
+                    var author = authors.FirstOrDefault(a => a.Id == g.Key.AuthorId);
+                    var displayName = author == null
+                        ? "Unknown writer"
+                        : $"{author.FirstName} {author.LastName}".Trim();
+
+                    if (string.IsNullOrWhiteSpace(displayName) && author?.Email != null)
+                    {
+                        displayName = author.Email;
+                    }
+
+                    return new WriterMonthlyTrendDto
+                    {
+                        AuthorId = g.Key.AuthorId ?? string.Empty,
+                        AuthorName = displayName,
+                        MonthLabel = g.Key.Month.ToString("yyyy-MM"),
+                        Articles = g.Count(),
+                        Engagement = g.Sum(x => x.Likes.Count + x.ViewsCount)
+                    };
+                })
+                .OrderBy(t => t.AuthorName)
+                .ThenBy(t => t.MonthLabel)
+                .ToList();
+
+            return (writerPerformances, writerMonthlyTrends);
         }
 
         private double CalculateGrowth(int oldValue, int newValue)

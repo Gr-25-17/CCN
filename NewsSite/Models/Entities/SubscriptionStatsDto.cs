@@ -1,4 +1,4 @@
-﻿namespace NewsSite.Models.Entities
+namespace NewsSite.Models.Entities
 {
     public class SubscriptionStatsDto
     {
@@ -25,6 +25,29 @@
         public List<string> TrendLabels { get; set; } = [];
         public List<int> TrendSubscriberCounts { get; set; } = [];
 
+        public List<WriterPerformanceDto> WriterPerformances { get; set; } = [];
+        public List<WriterMonthlyTrendDto> WriterMonthlyTrends { get; set; } = [];
+    }
 
+    public class WriterPerformanceDto
+    {
+        public string AuthorId { get; set; } = string.Empty;
+        public string AuthorName { get; set; } = string.Empty;
+        public int ArticlesThisMonth { get; set; }
+        public int TotalArticles { get; set; }
+        public int TotalLikes { get; set; }
+        public int TotalViews { get; set; }
+        public double AvgEngagementPerArticle { get; set; }
+        public decimal RevenueEstimate { get; set; }
+        public double ImpactScore { get; set; }
+    }
+
+    public class WriterMonthlyTrendDto
+    {
+        public string AuthorId { get; set; } = string.Empty;
+        public string AuthorName { get; set; } = string.Empty;
+        public string MonthLabel { get; set; } = string.Empty;
+        public int Articles { get; set; }
+        public int Engagement { get; set; }
     }
 }
