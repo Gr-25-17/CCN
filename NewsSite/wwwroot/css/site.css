@@ -74,10 +74,11 @@ body {
     min-width: 0;
     flex-wrap: nowrap;
     max-width: 100%;
+    flex: 0 1 auto;
 }
 
 .navbar-search {
-    width: min(240px, 24vw);
+    width: clamp(120px, 18vw, 220px);
     min-width: 0;
 }
 
@@ -113,6 +114,13 @@ body {
     min-width: 0;
 }
 
+.navbar-weather #weatherWidget {
+    max-width: clamp(110px, 14vw, 180px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .nav-link[aria-current="page"] {
     font-weight: 600;
     text-decoration: underline;
@@ -126,7 +134,11 @@ body {
     }
 
     .navbar-search {
-        width: min(160px, 28vw);
+        width: clamp(105px, 32vw, 160px);
+    }
+
+    .navbar-weather #weatherWidget {
+        max-width: clamp(90px, 24vw, 130px);
     }
 }
 
