@@ -8,5 +8,7 @@ namespace NewsSite.Repositories.Interfaces
         Task<Subscription?> GetLatestByUserIdAsync(string userId);
         Task<int> GetDefaultSubscriptionTypeIdAsync();
         Task SaveAsync(Subscription subscription);
+
+        Task<Subscription?> GetActiveSubscriptionAsync(string userId);
     }
 }
