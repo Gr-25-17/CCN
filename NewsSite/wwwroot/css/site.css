@@ -76,8 +76,8 @@ body {
 }
 
 .navbar-search {
-    width: min(400px, 35vw);
-    min-width: 170px;
+    width: min(300px, 28vw);
+    min-width: 140px;
 }
 
 .navbar-search .form-control {
@@ -89,17 +89,22 @@ body {
 }
 
 .navbar-account .navbar-nav {
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-items: center;
     margin-bottom: 0;
 }
 
-.navbar-account .nav-link,
-.navbar-account .btn.nav-link {
-    white-space: nowrap;
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
+@media (min-width: 992px) {
+    .navbar-account .navbar-nav {
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+    }
+
+    .navbar-account .nav-link,
+    .navbar-account .btn.nav-link {
+        white-space: nowrap;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
 }
 
 .navbar-weather {
@@ -118,7 +123,7 @@ body {
     }
 
     .navbar-search {
-        width: min(280px, 32vw);
+        width: min(220px, 34vw);
     }
 }
 
