@@ -41,7 +41,61 @@
                     </div>
                 </div>
 
-                <!-- Newsletter Subscription Card -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">✨ Premium Status</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.SubscriptionInfo.HasActiveSubscription)
+                        {
+                            <div class="alert alert-primary">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-grow-1">
+                                        <strong>✅ Active Premium Subscription</strong><br />
+                                        <span class="small">Plan: <strong>@Model.SubscriptionInfo.PlanName</strong></span><br />
+                                        <span class="small">Started: @Model.SubscriptionInfo.StartDate?.ToString("yyyy-MM-dd")</span><br />
+                                        <span class="small">Expires: @Model.SubscriptionInfo.EndDate?.ToString("yyyy-MM-dd")</span>
+                        
+                                        @if (Model.SubscriptionInfo.IsExpiringSoon)
+                                        {
+                                            <div class="mt-2">
+                                                <span class="badge bg-warning text-dark">⚠️ Expires soon! <a href="/Subscription" class="alert-link">Renew now</a></span>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div>
+                                        <i class="bi bi-gem fs-3 text-primary"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <a href="/Subscription" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-arrow-repeat"></i> Manage Subscription
+                                </a>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-secondary">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-grow-1">
+                                        <strong>⭕ Free Reader</strong><br />
+                                        <span class="small">Upgrade to Premium for exclusive articles and benefits.</span>
+                                    </div>
+                                    <div>
+                                        <i class="bi bi-gem fs-3 text-muted"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <a href="/Subscription" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-trophy"></i> Upgrade to Premium
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-white">
                         <h5 class="mb-0">📧 Newsletter Subscription</h5>
