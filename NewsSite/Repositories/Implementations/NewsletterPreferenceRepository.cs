@@ -50,4 +50,11 @@ public class NewsletterPreferenceRepository : INewsletterPreferenceRepository
 
         await _context.SaveChangesAsync();
     }
+    public async Task<List<NewsletterPreference>> GetWeeklySubscribersAsync()
+    {
+        return await _context.NewsletterPreferences
+            .Include(p => p.User)
+            .Where(p => p.ReceiveNewsletter && !p.IsUnsubscribed)
+            .ToListAsync();
+    }
 }
