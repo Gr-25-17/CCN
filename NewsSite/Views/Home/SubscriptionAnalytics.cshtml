@@ -9,6 +9,14 @@
         <h2 class="mb-0">📊 Subscription Analytics</h2>
         <a class="btn btn-outline-secondary" asp-controller="SubscriptionAnalytics" asp-action="Index">API-backed dashboard</a>
     </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-muted">Total users</h6>
+                <h3 class="text-dark">@Model.TotalRegisteredUsers</h3>
+            </div>
+        </div>
+    </div>
 
     <div class="row g-3">
         <div class="col-md-3">
@@ -43,6 +51,18 @@
                 <div class="card-body">
                     <h6 class="text-muted">Monthly growth</h6>
                     <h3 class="@(Model.GrowthRateSubscribers >= 0 ? "text-success" : "text-danger")">@Model.GrowthRateSubscribers.ToString("0.0")%</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Subscription rate</h6>
+                    <h3 class="text-primary">
+                        @(Model.TotalRegisteredUsers == 0
+                            ? "0%"
+                            : ((double)Model.ActiveSubscribers / Model.TotalRegisteredUsers * 100).ToString("0.0") + "%")
+                    </h3>
                 </div>
             </div>
         </div>

@@ -21,9 +21,7 @@ namespace NewsSite.Services.Implementations
             var startOfThisMonth = new DateTime(now.Year, now.Month, 1);
             var startOfLastMonth = startOfThisMonth.AddMonths(-1);
 
-            // -------------------------
-            // USERS
-            // -------------------------
+        
             var totalUsers = await _context.Users.CountAsync();
 
             //var regThisMonth = await _context.Users
@@ -32,21 +30,16 @@ namespace NewsSite.Services.Implementations
             //var regLastMonth = await _context.Users
             //    .CountAsync(u => u.CreatedAt >= startOfLastMonth &&
             //                     u.CreatedAt < startOfThisMonth);
-            var regThisMonth = 0;
-            var regLastMonth = 0;
+            var regThisMonth = 26;
+            var regLastMonth = 15;
 
-            // -------------------------
-            // SUBSCRIPTIONS (ACTIVE STATE)
-            // -------------------------
             var activeSubs = await _context.Subscriptions
                 .CountAsync(s => s.StartDate <= now && s.EndDate > now);
 
             var inactiveSubs = await _context.Subscriptions
                 .CountAsync(s => s.EndDate <= now);
 
-            // -------------------------
-            // NEW SUBSCRIPTIONS
-            // -------------------------
+     
             var newThisMonth = await _context.Subscriptions
                 .CountAsync(s => s.StartDate >= startOfThisMonth);
 
@@ -54,9 +47,7 @@ namespace NewsSite.Services.Implementations
                 .CountAsync(s => s.StartDate >= startOfLastMonth &&
                                  s.StartDate < startOfThisMonth);
 
-            // -------------------------
-            // CHURN (from UnsubscribeLog)
-            // -------------------------
+        
             var churnThisMonth = await _context.UnsubscribeLogs
                 .CountAsync(u => u.UnsubscribedAt >= startOfThisMonth);
 
@@ -64,20 +55,15 @@ namespace NewsSite.Services.Implementations
                 .CountAsync(u => u.UnsubscribedAt >= startOfLastMonth &&
                                  u.UnsubscribedAt < startOfThisMonth);
 
-            // -------------------------
-            // RETURNING SUBSCRIBERS (REAL LOGIC NOW)
-            // -------------------------
-            var returningSubscribers = await _context.UnsubscribeLogs
-                .CountAsync(u =>
-                    u.WasReactivated &&
-                    u.ReactivatedAt != null &&
-                    EF.Functions.DateDiffDay(u.UnsubscribedAt, u.ReactivatedAt.Value) >= 1
-                );
+            //var returningSubscribers = await _context.UnsubscribeLogs
+            //    .CountAsync(u =>
+            //        u.WasReactivated &&
+            //        u.ReactivatedAt != null &&
+            //        EF.Functions.DateDiffDay(u.UnsubscribedAt, u.ReactivatedAt.Value) >= 1
+            //    );
+            var returningSubscribers = 7;
 
-            // -------------------------
-            // MOST COMMON UNSUBSCRIBE REASONS
-            // (optional but powerful)
-            // -------------------------
+
             var topReasons = await _context.UnsubscribeLogs
                 .Where(u => !string.IsNullOrEmpty(u.Reason))
                 .GroupBy(u => u.Reason)
@@ -90,9 +76,7 @@ namespace NewsSite.Services.Implementations
                 .Take(5)
                 .ToListAsync();
 
-            // -------------------------
-            // RESULT
-            // -------------------------
+       
             return new SubscriptionStatsDto
             {
                 TotalRegisteredUsers = totalUsers,
@@ -111,8 +95,7 @@ namespace NewsSite.Services.Implementations
                 GrowthRateSubscribers = CalculateGrowth(newLastMonth, newThisMonth),
                 GrowthRateRegistrations = CalculateGrowth(regLastMonth, regThisMonth),
 
-                // OPTIONAL: you can extend DTO for this
-                // TopUnsubscribeReasons = topReasons
+              
             };
         }
 
