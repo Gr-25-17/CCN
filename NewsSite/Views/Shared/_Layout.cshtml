@@ -35,7 +35,6 @@
                 </div>
                 <div class="d-flex align-items-center me-3">
                     <div id="weatherWidget">@await Component.InvokeAsync("WeatherCardVC", new { detailed = false })</div>
-                    <button type="button" class="btn btn-sm btn-primary ms-2" onclick="toggleWeather()" title="Toggle weather view">⇆</button>
                 </div>
                 <form class="d-flex mx-auto" asp-controller="Articles" asp-action="Search" method="get" style="max-width: 400px;">
                     <div class="input-group">

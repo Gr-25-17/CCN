@@ -1,0 +1,11 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated"
+  },
+  "NewsletterSettings": {
+    "AppUrl": "ccnews-fhdvd8hqcdc0akgx.swedencentral-01.azurewebsites.net",
+    "ApiKey": "CCNNewsSecretHandshakeKey123!"
+  }
+}
