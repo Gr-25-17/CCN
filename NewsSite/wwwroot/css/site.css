@@ -71,10 +71,6 @@ body {
             }
 }
 
-.navbar.navbar-expand-lg {
-    flex-wrap: nowrap;
-}
-
 .navbar-utilities {
     min-width: 0;
     flex-wrap: nowrap;
