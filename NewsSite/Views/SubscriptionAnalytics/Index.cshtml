@@ -17,6 +17,11 @@
             <canvas id="subscriberChart" height="100"></canvas>
         </div>
     </div>
+
+    <hr class="my-4" />
+
+    <h3 class="mb-3">🧑 Writer / Editor Value Snapshot</h3>
+    <div id="writerStatsContainer"></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -24,6 +29,7 @@
 <script>
     async function loadStats() {
     const container = document.getElementById('statsContainer');
+    const writerStatsContainer = document.getElementById('writerStatsContainer');
     const errorBox = document.getElementById('errorBox');
 
     try {
@@ -160,11 +166,156 @@
     `;
 
     renderChart(activeSubscribers);
+    renderWriterAnalytics(data, writerStatsContainer);
 
     } catch (err) {
     errorBox.classList.remove('d-none');
     errorBox.textContent =
     `Could not load subscription stats. ${err.message}. Ensure you are logged in as an Admin.`;
+    }
+
+    function renderWriterAnalytics(data, container) {
+    const writerPerformances = Array.isArray(data.writerPerformances)
+    ? data.writerPerformances
+    : [];
+
+    const writerMonthlyTrends = Array.isArray(data.writerMonthlyTrends)
+    ? data.writerMonthlyTrends
+    : [];
+
+    const topWriters = [...writerPerformances]
+    .sort((a, b) => (b.impactScore || 0) - (a.impactScore || 0))
+    .slice(0, 5);
+
+    const underperformers = [...writerPerformances]
+    .sort((a, b) => (a.impactScore || 0) - (b.impactScore || 0))
+    .slice(0, 5);
+
+    const performanceRows = writerPerformances.length === 0
+    ? `<tr><td colspan="8" class="text-muted">No writer analytics available yet.</td></tr>`
+    : writerPerformances.map(writer => {
+        const totalArticles = writer.totalArticles || 0;
+        const revenueEstimate = writer.revenueEstimate || 0;
+        const revenuePerArticle = totalArticles === 0 ? 0 : revenueEstimate / totalArticles;
+
+        return `
+        <tr>
+        <td>${escapeHtml(writer.authorName || 'Unknown writer')}</td>
+        <td>${writer.articlesThisMonth || 0}</td>
+        <td>${totalArticles}</td>
+        <td>${Number(writer.avgEngagementPerArticle || 0).toFixed(1)}</td>
+        <td>${writer.totalViews || 0}</td>
+        <td>${writer.totalLikes || 0}</td>
+        <td><strong>${Number(writer.impactScore || 0).toFixed(1)}</strong></td>
+        <td>${Number(revenuePerArticle).toFixed(2)}</td>
+        </tr>`;
+    }).join('');
+
+    const trendRows = writerMonthlyTrends.length === 0
+    ? `<tr><td colspan="4" class="text-muted">No writer trend data available yet.</td></tr>`
+    : writerMonthlyTrends.map(trend => `
+        <tr>
+        <td>${escapeHtml(trend.monthLabel || '-')}</td>
+        <td>${escapeHtml(trend.authorName || 'Unknown writer')}</td>
+        <td>${trend.articles || 0}</td>
+        <td>${trend.engagement || 0}</td>
+        </tr>`).join('');
+
+    container.innerHTML = `
+    <div class="row g-3 mb-4">
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">Top writers this month</h6>
+                    <ul class="list-group list-group-flush">
+                        ${topWriters.map(writer => `
+                            <li class="list-group-item d-flex justify-content-between px-0">
+                                <span>${escapeHtml(writer.authorName || 'Unknown writer')}</span>
+                                <strong>${Number(writer.impactScore || 0).toFixed(1)}</strong>
+                            </li>`).join('') || '<li class="list-group-item px-0 text-muted">No data</li>'}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">Underperforming writers</h6>
+                    <ul class="list-group list-group-flush">
+                        ${underperformers.map(writer => `
+                            <li class="list-group-item d-flex justify-content-between px-0">
+                                <span>${escapeHtml(writer.authorName || 'Unknown writer')}</span>
+                                <small class="text-muted">${Number(writer.impactScore || 0).toFixed(1)}</small>
+                            </li>`).join('') || '<li class="list-group-item px-0 text-muted">No data</li>'}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">Formula (current)</h6>
+                    <p class="mb-0">
+                        <code>Impact = (ArticlesThisMonth × 2.0) + (AvgEngagement × 1.5) + (Views × 0.02)</code>
+                    </p>
+                    <small class="text-muted">Simple model that can evolve to revenue contribution/ROI later.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-3">📄 Articles per writer / Engagement / ROI proxy</h5>
+            <div class="table-responsive">
+                <table class="table table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>Writer</th>
+                            <th>Articles (month)</th>
+                            <th>Articles (total)</th>
+                            <th>Avg engagement/article</th>
+                            <th>Views</th>
+                            <th>Likes</th>
+                            <th>Impact score</th>
+                            <th>Revenue/article proxy</th>
+                        </tr>
+                    </thead>
+                    <tbody>${performanceRows}</tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title mb-3">📈 Monthly trend per author (last 6 months)</h5>
+            <div class="table-responsive">
+                <table class="table table-sm table-hover">
+                    <thead>
+                        <tr>
+                            <th>Month</th>
+                            <th>Writer</th>
+                            <th>Articles</th>
+                            <th>Engagement</th>
+                        </tr>
+                    </thead>
+                    <tbody>${trendRows}</tbody>
+                </table>
+            </div>
+        </div>
+    </div>`;
+    }
+
+    function escapeHtml(value) {
+    return String(value)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
     }
     }
 
