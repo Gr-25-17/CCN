@@ -78,8 +78,9 @@ body {
 }
 
 .navbar-search {
-    width: clamp(100px, 14vw, 180px);
+    flex: 1 1 clamp(120px, 22vw, 360px);
     min-width: 0;
+    max-width: 360px;
 }
 
 .navbar-search .form-control {
@@ -110,8 +111,12 @@ body {
 }
 
 .navbar-weather {
-    flex-shrink: 1;
+    flex-shrink: 0;
     min-width: 0;
+}
+
+.navbar-weather #weatherWidget {
+    white-space: nowrap;
 }
 
 
@@ -129,7 +134,8 @@ body {
     }
 
     .navbar-search {
-        width: clamp(88px, 26vw, 130px);
+        flex: 1 1 clamp(76px, 22vw, 140px);
+        max-width: 140px;
     }
 
     .navbar-search .form-control,
