@@ -65,14 +65,11 @@ namespace NewsSite.Services.Implementations
                                  u.UnsubscribedAt < startOfThisMonth);
 
             // -------------------------
-            // RETURNING SUBSCRIBERS (REAL LOGIC NOW)
+            // RETURNING SUBSCRIBERS
+            // Placeholder until we persist enough data to verify
+            // prior subscription status before reactivation.
             // -------------------------
-            var returningSubscribers = await _context.UnsubscribeLogs
-                .CountAsync(u =>
-                    u.WasReactivated &&
-                    u.ReactivatedAt != null &&
-                    EF.Functions.DateDiffDay(u.UnsubscribedAt, u.ReactivatedAt.Value) >= 1
-                );
+            var returningSubscribers = 0;
 
             // -------------------------
             // MOST COMMON UNSUBSCRIBE REASONS
