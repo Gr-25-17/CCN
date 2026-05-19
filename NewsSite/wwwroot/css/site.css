@@ -76,12 +76,15 @@ body {
     max-width: 100%;
     flex: 1 1 auto;
     justify-content: flex-end;
+    width: 100%;
     gap: 0.35rem !important;
 }
 
 .navbar-search {
     flex: 1 1 auto;
     min-width: 0;
+    width: 100%;
+    max-width: none;
 }
 
 .navbar-search .form-control {
@@ -135,16 +138,16 @@ body {
 
 @media (max-width: 991.98px) {
     .navbar-utilities {
-        width: auto;
+        width: 100%;
         overflow: visible;
         gap: 0.25rem !important;
-        flex: 0 1 auto;
+        flex: 1 1 auto;
     }
 
     .navbar-search {
         flex: 1 1 auto;
         min-width: 86px;
-        max-width: 180px;
+        max-width: none;
     }
 
     .navbar-search .form-control,
