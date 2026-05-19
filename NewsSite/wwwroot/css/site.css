@@ -70,3 +70,60 @@ body {
                 display: none;
             }
 }
+.navbar-utilities {
+    min-width: 0;
+    flex-wrap: nowrap;
+}
+
+.navbar-search {
+    width: min(300px, 28vw);
+    min-width: 140px;
+}
+
+.navbar-search .form-control {
+    min-width: 0;
+}
+
+.navbar-search .btn {
+    flex-shrink: 0;
+}
+
+.navbar-account .navbar-nav {
+    margin-bottom: 0;
+}
+
+@media (min-width: 992px) {
+    .navbar-account .navbar-nav {
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+    }
+
+    .navbar-account .nav-link,
+    .navbar-account .btn.nav-link {
+        white-space: nowrap;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+}
+
+.navbar-weather {
+    flex-shrink: 0;
+}
+
+.nav-link[aria-current="page"] {
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 0.25rem;
+}
+
+@media (max-width: 991.98px) {
+    .navbar-utilities {
+        width: auto;
+    }
+
+    .navbar-search {
+        width: min(220px, 34vw);
+    }
+}
+
