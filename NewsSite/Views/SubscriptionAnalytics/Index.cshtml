@@ -183,17 +183,36 @@
     ? data.writerMonthlyTrends
     : [];
 
-    const topWriters = [...writerPerformances]
-    .sort((a, b) => (b.impactScore || 0) - (a.impactScore || 0))
-    .slice(0, 5);
+    const sortedByImpact = [...writerPerformances]
+    .sort((a, b) => (b.impactScore || 0) - (a.impactScore || 0));
 
-    const underperformers = [...writerPerformances]
-    .sort((a, b) => (a.impactScore || 0) - (b.impactScore || 0))
-    .slice(0, 5);
+    const bucketSize = Math.max(1, Math.ceil(sortedByImpact.length / 5));
+    const topWriters = sortedByImpact.slice(0, bucketSize);
+    const topWriterIds = new Set(topWriters.map(w => w.authorId));
+    const underperformers = sortedByImpact
+    .slice().reverse()
+    .filter(w => !topWriterIds.has(w.authorId))
+    .slice(0, bucketSize);
 
-    const performanceRows = writerPerformances.length === 0
-    ? `<tr><td colspan="8" class="text-muted">No writer analytics available yet.</td></tr>`
-    : writerPerformances.map(writer => {
+    let sortBy = 'impactScore';
+    let sortDirection = 'desc';
+
+    const sortWriters = (writers) => {
+        const sorted = [...writers].sort((a, b) => {
+            const av = Number(a?.[sortBy] ?? 0);
+            const bv = Number(b?.[sortBy] ?? 0);
+            return sortDirection === 'asc' ? av - bv : bv - av;
+        });
+
+        return sorted;
+    };
+
+    const renderPerformanceRows = () => {
+        const rows = sortWriters(writerPerformances);
+
+        return rows.length === 0
+        ? `<tr><td colspan="8" class="text-muted">No writer analytics available yet.</td></tr>`
+        : rows.map(writer => {
         const totalArticles = writer.totalArticles || 0;
         const revenueEstimate = writer.revenueEstimate || 0;
         const revenuePerArticle = totalArticles === 0 ? 0 : revenueEstimate / totalArticles;
@@ -210,6 +229,7 @@
         <td>${Number(revenuePerArticle).toFixed(2)}</td>
         </tr>`;
     }).join('');
+    };
 
     const trendRows = writerMonthlyTrends.length === 0
     ? `<tr><td colspan="4" class="text-muted">No writer trend data available yet.</td></tr>`
@@ -252,38 +272,27 @@
                 </div>
             </div>
         </div>
-
-        <div class="col-md-12 col-lg-4">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body">
-                    <h6 class="text-muted">Formula (current)</h6>
-                    <p class="mb-0">
-                        <code>Impact = (ArticlesThisMonth × 2.0) + (AvgEngagement × 1.5) + (Views × 0.02)</code>
-                    </p>
-                    <small class="text-muted">Simple model that can evolve to revenue contribution/ROI later.</small>
-                </div>
-            </div>
-        </div>
     </div>
 
     <div class="card shadow-sm mb-4">
         <div class="card-body">
             <h5 class="card-title mb-3">📄 Articles per writer / Engagement / ROI proxy</h5>
+            <p class="text-muted mb-3">Revenue/article proxy is an estimated revenue value per published article based on article views. It is not a direct count of subscribers acquired.</p>
             <div class="table-responsive">
                 <table class="table table-striped align-middle">
                     <thead>
                         <tr>
                             <th>Writer</th>
-                            <th>Articles (month)</th>
-                            <th>Articles (total)</th>
+                            <th><button type="button" class="btn btn-link p-0 text-decoration-none sort-writer" data-sort="articlesThisMonth">Articles (month)</button></th>
+                            <th><button type="button" class="btn btn-link p-0 text-decoration-none sort-writer" data-sort="totalArticles">Articles (total)</button></th>
                             <th>Avg engagement/article</th>
-                            <th>Views</th>
-                            <th>Likes</th>
-                            <th>Impact score</th>
-                            <th>Revenue/article proxy</th>
+                            <th><button type="button" class="btn btn-link p-0 text-decoration-none sort-writer" data-sort="totalViews">Views</button></th>
+                            <th><button type="button" class="btn btn-link p-0 text-decoration-none sort-writer" data-sort="totalLikes">Likes</button></th>
+                            <th><button type="button" class="btn btn-link p-0 text-decoration-none sort-writer" data-sort="impactScore">Impact score</button></th>
+                            <th><button type="button" class="btn btn-link p-0 text-decoration-none sort-writer" data-sort="revenueEstimate">Revenue/article proxy</button></th>
                         </tr>
                     </thead>
-                    <tbody>${performanceRows}</tbody>
+                    <tbody id="writerPerformanceBody">${renderPerformanceRows()}</tbody>
                 </table>
             </div>
         </div>
@@ -307,6 +316,25 @@
             </div>
         </div>
     </div>`;
+
+    container.querySelectorAll('.sort-writer').forEach(button => {
+        button.addEventListener('click', () => {
+            const selectedSort = button.dataset.sort;
+
+            if (sortBy === selectedSort) {
+                sortDirection = sortDirection === 'desc' ? 'asc' : 'desc';
+            } else {
+                sortBy = selectedSort;
+                sortDirection = 'desc';
+            }
+
+            const body = container.querySelector('#writerPerformanceBody');
+            if (body) {
+                body.innerHTML = renderPerformanceRows();
+            }
+        });
+    });
+
     }
 
     function escapeHtml(value) {
