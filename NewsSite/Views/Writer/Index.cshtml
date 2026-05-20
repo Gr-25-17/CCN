@@ -1,9 +1,7 @@
 @model IEnumerable<NewsSite.Models.ViewModels.ArticleViewModel>
 @{
     var articles = Model.OrderByDescending(a => a.CreatedAt).ToList();
-    var readyArticles = articles.Where(a => a.IsReadyForPublish).ToList();
-    var draftArticles = articles.Where(a => !a.IsReadyForPublish).ToList();
-    var topEngagement = articles.OrderByDescending(a => a.ViewsCount + a.LikesCount).Take(5).ToList();
+    var categories = articles.Select(a => a.CategoryName ?? "Okategoriserad").Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x).ToList();
 }
 
 <div class="container mt-4">
@@ -12,24 +10,45 @@
         <a asp-action="Create" class="btn btn-primary">Skapa ny artikel</a>
     </div>
 
-    <div class="row g-3 mb-4">
-        <div class="col-md-4"><div class="card shadow-sm"><div class="card-body"><div class="text-muted small">Utkast</div><div class="h4 mb-0">@draftArticles.Count</div></div></div></div>
-        <div class="col-md-4"><div class="card shadow-sm"><div class="card-body"><div class="text-muted small">Redo för publicering</div><div class="h4 mb-0">@readyArticles.Count</div></div></div></div>
-        <div class="col-md-4"><div class="card shadow-sm"><div class="card-body"><div class="text-muted small">Totalt</div><div class="h4 mb-0">@articles.Count</div></div></div></div>
-    </div>
+    <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#category-all" type="button" role="tab">Alla</button></li>
+        @for (var i = 0; i < categories.Count; i++)
+        {
+            var category = categories[i];
+            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#category-@i" type="button" role="tab">@category</button></li>
+        }
+    </ul>
 
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-white"><h5 class="mb-0">Utkast (nyast först)</h5></div>
-        <div class="card-body p-0">@await Html.PartialAsync("_WriterArticlesTable", draftArticles)</div>
-    </div>
+    <div class="tab-content pt-3">
+        <div class="tab-pane fade show active" id="category-all" role="tabpanel">
+            @{ var allPublished = articles.Where(a => a.IsReadyForPublish).ToList(); var allDrafts = articles.Where(a => !a.IsReadyForPublish).ToList(); }
+            <div class="row g-3 mb-3">
+                <div class="col-12 col-sm-6"><div class="card shadow-sm"><div class="card-body"><div class="text-muted small">Publicerade</div><div class="h4 mb-0">@allPublished.Count</div></div></div></div>
+                <div class="col-12 col-sm-6"><div class="card shadow-sm"><div class="card-body"><div class="text-muted small">Utkast</div><div class="h4 mb-0">@allDrafts.Count</div></div></div></div>
+            </div>
+            <div class="card shadow-sm mb-4"><div class="card-header bg-white"><h5 class="mb-0">Publicerade</h5></div><div class="card-body p-0">@await Html.PartialAsync("_WriterArticlesTable", allPublished)</div></div>
+            <div class="card shadow-sm"><div class="card-header bg-white"><h5 class="mb-0">Utkast</h5></div><div class="card-body p-0">@await Html.PartialAsync("_WriterArticlesTable", allDrafts)</div></div>
+        </div>
 
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-white"><h5 class="mb-0">Redo för publicering (nyast först)</h5></div>
-        <div class="card-body p-0">@await Html.PartialAsync("_WriterArticlesTable", readyArticles)</div>
-    </div>
+        @for (var i = 0; i < categories.Count; i++)
+        {
+            var category = categories[i];
+            var categoryItems = articles.Where(a => string.Equals(a.CategoryName ?? "Okategoriserad", category, StringComparison.OrdinalIgnoreCase)).ToList();
+            var categoryPublished = categoryItems.Where(a => a.IsReadyForPublish).ToList();
+            var categoryDrafts = categoryItems.Where(a => !a.IsReadyForPublish).ToList();
 
-    <div class="card shadow-sm">
-        <div class="card-header bg-white"><h5 class="mb-0">Top 5 engagemang (visningar + likes)</h5></div>
-        <div class="card-body p-0">@await Html.PartialAsync("_WriterArticlesTable", topEngagement)</div>
+            <div class="tab-pane fade" id="category-@i" role="tabpanel">
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-sm-6"><div class="card shadow-sm"><div class="card-body"><div class="text-muted small">Publicerade</div><div class="h4 mb-0">@categoryPublished.Count</div></div></div></div>
+                    <div class="col-12 col-sm-6"><div class="card shadow-sm"><div class="card-body"><div class="text-muted small">Utkast</div><div class="h4 mb-0">@categoryDrafts.Count</div></div></div></div>
+                </div>
+                <div class="card shadow-sm mb-4"><div class="card-header bg-white"><h5 class="mb-0">Publicerade</h5></div><div class="card-body p-0">@await Html.PartialAsync("_WriterArticlesTable", categoryPublished)</div></div>
+                <div class="card shadow-sm"><div class="card-header bg-white"><h5 class="mb-0">Utkast</h5></div><div class="card-body p-0">@await Html.PartialAsync("_WriterArticlesTable", categoryDrafts)</div></div>
+            </div>
+        }
     </div>
 </div>
+
+@section Scripts {
+<script src="~/js/writer-operations.js" asp-append-version="true"></script>
+}

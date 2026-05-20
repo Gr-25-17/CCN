@@ -1,14 +1,22 @@
+@using Microsoft.AspNetCore.Mvc.Rendering
 @model IEnumerable<NewsSite.Models.ViewModels.UserDisplayInfo>
+@{
+    var query = ViewContext.HttpContext.Request.Query;
+    var currentSortBy = ViewBag.SortBy as string;
+    var currentSortDir = ViewBag.SortDir as string ?? "desc";
+
+    string NextDir(string column) => string.Equals(currentSortBy, column, StringComparison.OrdinalIgnoreCase) && string.Equals(currentSortDir, "asc", StringComparison.OrdinalIgnoreCase) ? "desc" : "asc";
+}
 
 <div class="table-responsive">
     <table class="table table-hover align-middle mb-0">
         <thead class="table-light">
             <tr>
-                <th>Namn</th>
-                <th class="d-none d-lg-table-cell">Födelsedatum</th>
-                <th class="d-none d-md-table-cell">E-post</th>
-                <th>Roll</th>
-                <th>Status</th>
+                <th><a asp-action="Index" asp-route-search="@query["search"]" asp-route-roleFilter="@query["roleFilter"]" asp-route-isDeletedFilter="@query["isDeletedFilter"]" asp-route-sortBy="name" asp-route-sortDir="@NextDir("name")">Namn</a></th>
+                <th class="d-none d-lg-table-cell"><a asp-action="Index" asp-route-search="@query["search"]" asp-route-roleFilter="@query["roleFilter"]" asp-route-isDeletedFilter="@query["isDeletedFilter"]" asp-route-sortBy="dob" asp-route-sortDir="@NextDir("dob")">Födelsedatum</a></th>
+                <th class="d-none d-md-table-cell"><a asp-action="Index" asp-route-search="@query["search"]" asp-route-roleFilter="@query["roleFilter"]" asp-route-isDeletedFilter="@query["isDeletedFilter"]" asp-route-sortBy="email" asp-route-sortDir="@NextDir("email")">E-post</a></th>
+                <th><a asp-action="Index" asp-route-search="@query["search"]" asp-route-roleFilter="@query["roleFilter"]" asp-route-isDeletedFilter="@query["isDeletedFilter"]" asp-route-sortBy="role" asp-route-sortDir="@NextDir("role")">Roll</a></th>
+                <th><a asp-action="Index" asp-route-search="@query["search"]" asp-route-roleFilter="@query["roleFilter"]" asp-route-isDeletedFilter="@query["isDeletedFilter"]" asp-route-sortBy="status" asp-route-sortDir="@NextDir("status")">Status</a></th>
                 <th class="text-end">Åtgärder</th>
             </tr>
         </thead>

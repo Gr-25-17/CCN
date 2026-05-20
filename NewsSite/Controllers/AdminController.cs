@@ -15,7 +15,7 @@ namespace NewsSite.Controllers
         ILogger<AdminController> logger) : Controller
     {
         [HttpGet]
-        public async Task<IActionResult> Index(string? search, string? roleFilter, bool? isDeletedFilter)
+        public async Task<IActionResult> Index(string? search, string? roleFilter, bool? isDeletedFilter, string? sortBy, string? sortDir)
         {
             var model = await userService.GetUsersForAdminAsync();
 
@@ -39,8 +39,26 @@ namespace NewsSite.Controllers
                 query = query.Where(user => user.IsDeleted == isDeletedFilter.Value);
             }
 
+            var direction = string.Equals(sortDir, "asc", StringComparison.OrdinalIgnoreCase) ? "asc" : "desc";
+            query = (sortBy?.ToLowerInvariant(), direction) switch
+            {
+                ("name", "asc") => query.OrderBy(x => x.FullName),
+                ("name", _) => query.OrderByDescending(x => x.FullName),
+                ("dob", "asc") => query.OrderBy(x => x.DateOfBirth),
+                ("dob", _) => query.OrderByDescending(x => x.DateOfBirth),
+                ("email", "asc") => query.OrderBy(x => x.Email),
+                ("email", _) => query.OrderByDescending(x => x.Email),
+                ("role", "asc") => query.OrderBy(x => x.CurrentRole),
+                ("role", _) => query.OrderByDescending(x => x.CurrentRole),
+                ("status", "asc") => query.OrderBy(x => x.IsDeleted),
+                ("status", _) => query.OrderByDescending(x => x.IsDeleted),
+                _ => query.OrderBy(x => x.CurrentRole).ThenBy(x => x.FullName)
+            };
+
             model.Users = query.ToList();
             ViewBag.AvailableRoles = model.AvailableRoles;
+            ViewBag.SortBy = sortBy;
+            ViewBag.SortDir = direction;
             model.Search = search;
             model.RoleFilter = roleFilter;
             model.IsDeletedFilter = isDeletedFilter;
@@ -95,7 +113,6 @@ namespace NewsSite.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> RunImageMigration()
         {
-            // Hämtar endast artiklar som behöver migreras (körs som SQL Query tack vare IQueryable)
             var articles = await _articleRepository.GetQueryable()
                 .Where(a => !string.IsNullOrEmpty(a.ImageUrl) && !a.ImageUrl.EndsWith(".webp") && !a.ImageUrl.EndsWith(".svg"))
                 .ToListAsync();
@@ -110,7 +127,6 @@ namespace NewsSite.Controllers
                     using var stream = await _imageOrchestrationService.FetchExternalImageAsync(article.ImageUrl!);
                     if (stream == null) continue;
 
-                    // Fix CS8130: Ta emot hela tupeln i en variabel istället för dekonstruktion
                     var result = await _imageOrchestrationService.HandleIncomingImageAsync(
                         stream, article.ImageUrl, "application/octet-stream");
 

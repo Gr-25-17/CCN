@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using NewsSite.Models.Entities;
 
 namespace NewsSite.Repositories.Interfaces
@@ -11,5 +11,6 @@ namespace NewsSite.Repositories.Interfaces
         Task<ApplicationUser?> GetUserByIdAsync(string id);
         Task<bool> UpdateUserRoleAsync(string userId, string newRole);
         Task<bool> UpdateUserDetailsAsync(ApplicationUser user);
+        Task<HashSet<string>> GetActiveSubscriberUserIdsAsync();
     }
 }

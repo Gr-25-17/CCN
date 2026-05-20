@@ -19,5 +19,6 @@ public class UserAdminViewModel
         public DateTime DateOfBirth { get; set; }
         public string CurrentRole { get; set; } = string.Empty;
         public bool IsDeleted { get; set; }
+        public bool HasActiveSubscription { get; set; }
     }
 }
