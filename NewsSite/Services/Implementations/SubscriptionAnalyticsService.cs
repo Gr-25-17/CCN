@@ -61,11 +61,15 @@ namespace NewsSite.Services.Implementations
                 .Select(x => x.UserId)
                 .ToHashSet();
 
-            var returningSubscribers = await _context.UnsubscribeLogs
-                .Where(u => !internalUserIds.Contains(u.UserId) && u.WasReactivated)
-                .Select(u => u.UserId)
-                .Distinct()
-                .CountAsync();
+            var returningSubscribers = await (
+                from unsubscribe in _context.UnsubscribeLogs
+                where !internalUserIds.Contains(unsubscribe.UserId)
+                join subscription in _context.Subscriptions on unsubscribe.UserId equals subscription.UserId
+                where subscription.StartDate > unsubscribe.UnsubscribedAt
+                select unsubscribe.UserId
+            )
+            .Distinct()
+            .CountAsync();
 
             var activeSubs = await _context.Subscriptions
                 .Where(s => !internalUserIds.Contains(s.UserId) && !deactivatedUserIds.Contains(s.UserId))
@@ -106,7 +110,7 @@ namespace NewsSite.Services.Implementations
 
             var estimatedRevenue = activeSubs * 99;
 
-            var writerStats = await BuildWriterStatsAsync(startOfThisMonth);
+            var writerStats = await BuildWriterStatsAsync(startOfThisMonth, totalUsers);
 
             return new SubscriptionStatsDto
             {
@@ -138,7 +142,7 @@ namespace NewsSite.Services.Implementations
             };
         }
 
-        private async Task<(List<WriterPerformanceDto> WriterPerformances, List<WriterMonthlyTrendDto> WriterMonthlyTrends, List<string> TrendLabels, List<int> TrendSubscriberCounts, List<int> TrendUserCounts)> BuildWriterStatsAsync(DateTime startOfThisMonth)
+        private async Task<(List<WriterPerformanceDto> WriterPerformances, List<WriterMonthlyTrendDto> WriterMonthlyTrends, List<string> TrendLabels, List<int> TrendSubscriberCounts, List<int> TrendUserCounts)> BuildWriterStatsAsync(DateTime startOfThisMonth, int totalUsers)
         {
             var authors = await (
                 from user in _context.Users
@@ -249,11 +253,7 @@ namespace NewsSite.Services.Implementations
                     .Distinct()
                     .CountAsync();
 
-                var userCount = await _context.Subscriptions
-                    .Where(s => s.StartDate < monthEnd)
-                    .Select(s => s.UserId)
-                    .Distinct()
-                    .CountAsync();
+                var userCount = totalUsers;
 
                 trendSubscriberCounts.Add(activeSubscriberCount);
                 trendUserCounts.Add(userCount);
