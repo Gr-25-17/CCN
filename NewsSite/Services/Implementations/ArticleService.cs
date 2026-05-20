@@ -180,5 +180,15 @@ namespace NewsSite.Services.Implementations
         public async Task<IEnumerable<ArticleSummaryViewModel>> GetAllArticlesSortedByPreferencesAsync(List<int> preferredCategoryIds, List<string> preferredAuthorIds, int count)
     => await _articleRepository.GetAllArticlesSortedByPreferencesAsync(preferredCategoryIds, preferredAuthorIds, count);
 
+        public async Task<bool> DeleteDraftAsync(int articleId, string userId, bool canSeeAll)
+        {
+            var article = await _articleRepository.GetByIdAsync(articleId);
+            if (article == null || article.IsDeleted || article.IsReadyForPublish) return false;
+            if (!canSeeAll && article.AuthorId != userId) return false;
+
+            await _articleRepository.SoftDeleteAsync(article);
+            return true;
+        }
+
     }
 }

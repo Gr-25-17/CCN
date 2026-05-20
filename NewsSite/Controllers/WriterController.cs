@@ -80,6 +80,23 @@ namespace NewsSite.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteDraft(int id)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var canSeeAll = User.IsInRole("Admin") || User.IsInRole("Editor");
+            var success = await articleService.DeleteDraftAsync(id, userId!, canSeeAll);
+
+            if (!success)
+            {
+                return Forbid();
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
         [HttpPost]
         public async Task<IActionResult> UploadImageAjax(IFormFile? file, [FromForm] string? externalUrl)
         {
