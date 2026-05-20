@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Moq;
+using Microsoft.Extensions.Logging;
 using NewsSite.Services.Implementations;
 
 namespace Tests.Services;
@@ -18,7 +19,9 @@ public class EmailSenderTests
         configMock.Setup(c => c["EmailSettings:SenderEmail"]).Returns("noreply@test.com");
         configMock.Setup(c => c["EmailSettings:SenderName"]).Returns("Test");
 
-        var service = new EmailSender(configMock.Object);
+        var loggerMock = new Mock<ILogger<EmailSender>>();
+
+        var service = new EmailSender(configMock.Object, loggerMock.Object);
 
         // Vi verifierar att konfigurationen läses utan att kasta NullReferenceException
         var act = async () => await service.SendEmailAsync("user@test.com", "Sub", "Body");
