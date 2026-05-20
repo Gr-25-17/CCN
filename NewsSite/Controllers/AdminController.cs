@@ -40,6 +40,7 @@ namespace NewsSite.Controllers
             }
 
             model.Users = query.ToList();
+            ViewBag.AvailableRoles = model.AvailableRoles;
             model.Search = search;
             model.RoleFilter = roleFilter;
             model.IsDeletedFilter = isDeletedFilter;

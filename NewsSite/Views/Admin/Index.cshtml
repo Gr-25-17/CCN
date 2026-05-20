@@ -1,11 +1,17 @@
-﻿@model NewsSite.Models.ViewModels.UserAdminViewModel
+@model NewsSite.Models.ViewModels.UserAdminViewModel
+@{
+    var activeUsers = Model.Users.Where(u => !u.IsDeleted).OrderBy(u => u.CurrentRole).ThenBy(u => u.FullName).ToList();
+    var deletedUsers = Model.Users.Where(u => u.IsDeleted).OrderBy(u => u.FullName).ToList();
+    var admins = activeUsers.Where(u => string.Equals(u.CurrentRole, "Admin", StringComparison.OrdinalIgnoreCase)).ToList();
+    var editors = activeUsers.Where(u => string.Equals(u.CurrentRole, "Editor", StringComparison.OrdinalIgnoreCase)).ToList();
+    var writers = activeUsers.Where(u => string.Equals(u.CurrentRole, "Writer", StringComparison.OrdinalIgnoreCase)).ToList();
+    var others = activeUsers.Where(u => !string.Equals(u.CurrentRole, "Admin", StringComparison.OrdinalIgnoreCase) && !string.Equals(u.CurrentRole, "Editor", StringComparison.OrdinalIgnoreCase) && !string.Equals(u.CurrentRole, "Writer", StringComparison.OrdinalIgnoreCase)).ToList();
+}
 
 <div class="container-fluid px-4 mt-4">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
         <h2 class="mb-3 mb-md-0">Användaradministration</h2>
-        <div class="badge bg-primary p-2">
-            Totalt: @Model.Users.Count användare
-        </div>
+        <div class="badge bg-primary p-2">Totalt: @Model.Users.Count användare</div>
     </div>
 
     @if (TempData["Error"] != null)
@@ -24,159 +30,52 @@
         </div>
     }
 
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
-            <form asp-action="Index" method="get" class="row g-2 align-items-end">
-                <div class="col-md-4">
-                    <label class="form-label" for="search">Sök</label>
-                    <input id="search" name="search" value="@Model.Search" class="form-control" placeholder="Namn eller e-post" />
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label" for="roleFilter">Roll</label>
-                    <select id="roleFilter" name="roleFilter" class="form-select">
-                        <option value="">Alla</option>
-                        @foreach (var role in Model.AvailableRoles)
-                        {
-                            <option value="@role.Value" selected="@(role.Value == Model.RoleFilter)">@role.Text</option>
-                        }
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label" for="isDeletedFilter">Status</label>
-                    <select id="isDeletedFilter" name="isDeletedFilter" class="form-select">
-                        <option value="">Alla</option>
-                        <option value="false" selected="@(Model.IsDeletedFilter == false)">Aktiv</option>
-                        <option value="true" selected="@(Model.IsDeletedFilter == true)">Borttagen</option>
-                    </select>
-                </div>
-                <div class="col-md-2 d-grid">
-                    <button type="submit" class="btn btn-primary">Filtrera</button>
-                </div>
-            </form>
-        </div>
-    </div>
+    <ul class="nav nav-tabs" id="adminTabs" role="tablist">
+        <li class="nav-item" role="presentation"><button class="nav-link active" id="users-tab" data-bs-toggle="tab" data-bs-target="#users-pane" type="button" role="tab">Användare</button></li>
+        <li class="nav-item" role="presentation"><button class="nav-link" id="analytics-tab" data-bs-toggle="tab" data-bs-target="#analytics-pane" type="button" role="tab">Analytics</button></li>
+        <li class="nav-item" role="presentation"><button class="nav-link" id="tools-tab" data-bs-toggle="tab" data-bs-target="#tools-pane" type="button" role="tab">Systemverktyg</button></li>
+    </ul>
 
-    <div class="card shadow-sm">
-        <div class="card-header bg-white py-3">
-            <h5 class="card-title mb-0">Systemanvändare</h5>
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Namn</th>
-                            <th class="d-none d-lg-table-cell">Födelsedatum</th>
-                            <th class="d-none d-md-table-cell">E-post</th>
-                            <th>Roll</th>
-                            <th>Status</th>
-                            <th class="text-end">Åtgärder</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var user in Model.Users)
-                        {
-                            <tr class="@(user.IsDeleted ? "table-light text-muted" : "")">
-                                <td>
-                                    <div class="fw-bold">@user.FullName</div>
-                                    <div class="d-md-none text-muted small">@user.Email</div>
-                                </td>
-                                <td class="d-none d-lg-table-cell">
-                                    @user.DateOfBirth.ToShortDateString()
-                                </td>
-                                <td class="d-none d-md-table-cell">
-                                    @user.Email
-                                </td>
-                                <td>
-                                    <form asp-action="UpdateRole" method="post" class="d-flex gap-2">
-                                        <input type="hidden" name="userId" value="@user.Id" />
-                                        <div class="input-group input-group-sm" style="min-width: 140px;">
-                                            <select name="newRole" class="form-select" disabled="@user.IsDeleted">
-                                                @foreach (var role in Model.AvailableRoles)
-                                                {
-                                                    <option value="@role.Value" selected="@(role.Value == user.CurrentRole)">
-                                                        @role.Text
-                                                    </option>
-                                                }
-                                            </select>
-                                            <button type="submit" class="btn btn-primary" disabled="@user.IsDeleted">
-                                                <i class="bi bi-check-lg"></i>
-                                            </button>
-                                        </div>
-                                    </form>
-                                </td>
-                                <td>
-                                    @if (user.IsDeleted)
-                                    {
-                                        <span class="badge rounded-pill bg-danger">Borttagen</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge rounded-pill bg-success">Aktiv</span>
-                                    }
-                                </td>
-                                <td class="text-end px-3">
-                                    @if (user.IsDeleted)
-                                    {
-                                        @* Om det är en anonymiserad användare ska vi inte kunna återställa den (GDPR) *@
-                                        @if (!user.Email.Contains("@anonymized.com"))
-                                        {
-                                            <form asp-action="Restore" method="post" class="d-inline">
-                                                <input type="hidden" name="userId" value="@user.Id" />
-                                                <button type="submit" class="btn btn-sm btn-success">Återställ</button>
-                                            </form>
-                                        }
-                                    }
-                                    else
-                                    {
-                                        <form asp-action="SoftDelete" method="post" onsubmit="return confirm('Inaktivera?');" class="d-inline">
-                                            <input type="hidden" name="userId" value="@user.Id" />
-                                            <button type="submit" class="btn btn-sm btn-outline-danger">Inaktivera</button>
-                                        </form>
-                                    }
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+    <div class="tab-content pt-3">
+        <div class="tab-pane fade show active" id="users-pane" role="tabpanel" aria-labelledby="users-tab">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <form asp-action="Index" method="get" class="row g-2 align-items-end">
+                        <div class="col-md-4"><label class="form-label" for="search">Sök</label><input id="search" name="search" value="@Model.Search" class="form-control" placeholder="Namn eller e-post" /></div>
+                        <div class="col-md-3"><label class="form-label" for="roleFilter">Roll</label><select id="roleFilter" name="roleFilter" class="form-select"><option value="">Alla</option>@foreach (var role in Model.AvailableRoles){<option value="@role.Value" selected="@(role.Value == Model.RoleFilter)">@role.Text</option>}</select></div>
+                        <div class="col-md-3"><label class="form-label" for="isDeletedFilter">Status</label><select id="isDeletedFilter" name="isDeletedFilter" class="form-select"><option value="">Alla</option><option value="false" selected="@(Model.IsDeletedFilter == false)">Aktiv</option><option value="true" selected="@(Model.IsDeletedFilter == true)">Borttagen</option></select></div>
+                        <div class="col-md-2 d-grid"><button type="submit" class="btn btn-primary">Filtrera</button></div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-3"><div class="card shadow-sm"><div class="card-body"><div class="text-muted small">Admin</div><div class="h4 mb-0">@admins.Count</div></div></div></div>
+                <div class="col-md-3"><div class="card shadow-sm"><div class="card-body"><div class="text-muted small">Editor</div><div class="h4 mb-0">@editors.Count</div></div></div></div>
+                <div class="col-md-3"><div class="card shadow-sm"><div class="card-body"><div class="text-muted small">Writer</div><div class="h4 mb-0">@writers.Count</div></div></div></div>
+                <div class="col-md-3"><div class="card shadow-sm"><div class="card-body"><div class="text-muted small">Övriga aktiva</div><div class="h4 mb-0">@others.Count</div></div></div></div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white py-3"><h5 class="card-title mb-0">Aktiva användare (sorterad per roll, namn)</h5></div>
+                <div class="card-body p-0">@await Html.PartialAsync("_AdminUserTable", activeUsers)</div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-white py-3"><h5 class="card-title mb-0">Inaktiverade användare</h5></div>
+                <div class="card-body p-0">@await Html.PartialAsync("_AdminUserTable", deletedUsers)</div>
             </div>
         </div>
-    </div>
-</div>
-<div class="card shadow-sm border-warning mb-4">
-    <div class="card-body">
-        <h5 class="card-title text-warning"><i class="bi bi-exclamation-triangle"></i> Systemverktyg: Bildmigrering</h5>
-        <p class="card-text text-muted">
-            Kör detta skript för att konvertera alla gamla bilder i databasen till den nya WebP-arkitekturen.
-            Detta körs i bakgrunden. Stäng inte den här fliken förrän processen är klar.
-        </p>
-        
-        @Html.AntiForgeryToken()
-        <button id="btnMigrate" class="btn btn-warning" onclick="startMigration()">
-            Kör migrering nu
-        </button>
 
-        <div id="migrationFeedback" class="mt-3 d-none align-items-center">
-            <div class="spinner-border spinner-border-sm text-warning me-2" role="status"></div>
-            <span id="migrationStatus" class="fw-bold text-secondary">Startar migrering... Detta kan ta flera minuter.</span>
+        <div class="tab-pane fade" id="analytics-pane" role="tabpanel" aria-labelledby="analytics-tab">
+            <div id="errorBox" class="alert alert-danger d-none" role="alert"></div>
+            <div id="statsContainer" class="row g-3"></div>
         </div>
-    </div>
-</div>
 
-
-
-<div class="card shadow-sm border-danger mb-4">
-    <div class="card-body">
-        <h5 class="card-title text-danger"><i class="bi bi-database-up"></i> Systemverktyg: Datamigrering till extern SQL Server</h5>
-        <p class="card-text text-muted">
-            Kör en engångsmigrering av lokal SQLite-data till extern SQL Server (LexiconConnection).
-            Kör endast när du är säker på att anslutningssträngen är korrekt och målmiljön är redo.
-        </p>
-
-        <form asp-action="RunLocalToLexiconMigration" method="post" onsubmit="return confirm('Vill du starta datamigrering till extern SQL Server nu?');" class="d-inline">
-            @Html.AntiForgeryToken()
-            <button type="submit" class="btn btn-danger">Kör datamigrering nu</button>
-        </form>
+        <div class="tab-pane fade" id="tools-pane" role="tabpanel" aria-labelledby="tools-tab">
+            <div class="card shadow-sm border-warning mb-4"><div class="card-body"><h5 class="card-title text-warning"><i class="bi bi-exclamation-triangle"></i> Systemverktyg: Bildmigrering</h5><p class="card-text text-muted">Kör detta skript för att konvertera alla gamla bilder i databasen till den nya WebP-arkitekturen.</p>@Html.AntiForgeryToken()<button id="btnMigrate" class="btn btn-warning" onclick="startMigration()">Kör migrering nu</button><div id="migrationFeedback" class="mt-3 d-none align-items-center"><div class="spinner-border spinner-border-sm text-warning me-2" role="status"></div><span id="migrationStatus" class="fw-bold text-secondary">Startar migrering... Detta kan ta flera minuter.</span></div></div></div>
+            <div class="card shadow-sm border-danger mb-4"><div class="card-body"><h5 class="card-title text-danger"><i class="bi bi-database-up"></i> Systemverktyg: Datamigrering till extern SQL Server</h5><p class="card-text text-muted">Kör en engångsmigrering av lokal SQLite-data till extern SQL Server (LexiconConnection).</p><form asp-action="RunLocalToLexiconMigration" method="post" onsubmit="return confirm('Vill du starta datamigrering till extern SQL Server nu?');" class="d-inline">@Html.AntiForgeryToken()<button type="submit" class="btn btn-danger">Kör datamigrering nu</button></form></div></div>
+        </div>
     </div>
 </div>
 

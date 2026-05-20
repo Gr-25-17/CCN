@@ -1,66 +1,35 @@
-﻿@model IEnumerable<NewsSite.Models.ViewModels.ArticleViewModel>
+@model IEnumerable<NewsSite.Models.ViewModels.ArticleViewModel>
+@{
+    var articles = Model.OrderByDescending(a => a.CreatedAt).ToList();
+    var readyArticles = articles.Where(a => a.IsReadyForPublish).ToList();
+    var draftArticles = articles.Where(a => !a.IsReadyForPublish).ToList();
+    var topEngagement = articles.OrderByDescending(a => a.ViewsCount + a.LikesCount).Take(5).ToList();
+}
 
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Mina Artiklar</h2>
         <a asp-action="Create" class="btn btn-primary">Skapa ny artikel</a>
     </div>
-    
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4"><div class="card shadow-sm"><div class="card-body"><div class="text-muted small">Utkast</div><div class="h4 mb-0">@draftArticles.Count</div></div></div></div>
+        <div class="col-md-4"><div class="card shadow-sm"><div class="card-body"><div class="text-muted small">Redo för publicering</div><div class="h4 mb-0">@readyArticles.Count</div></div></div></div>
+        <div class="col-md-4"><div class="card shadow-sm"><div class="card-body"><div class="text-muted small">Totalt</div><div class="h4 mb-0">@articles.Count</div></div></div></div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white"><h5 class="mb-0">Utkast (nyast först)</h5></div>
+        <div class="card-body p-0">@await Html.PartialAsync("_WriterArticlesTable", draftArticles)</div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white"><h5 class="mb-0">Redo för publicering (nyast först)</h5></div>
+        <div class="card-body p-0">@await Html.PartialAsync("_WriterArticlesTable", readyArticles)</div>
+    </div>
+
     <div class="card shadow-sm">
-        <div class="table-responsive-custom">
-            <table class="table table-hover align-middle mb-0 custom-mobile-table">
-                <thead class="table-light">
-                    <tr>
-                        <th>Titel</th>
-                        <th>Kategori</th>
-                        @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
-                        {
-                            <th>Skribent</th>
-                        }
-                        <th>Status</th>
-                        <th>Visningar</th>
-                        <th>Likes</th>
-                        <th>Skapad</th>
-                        <th class="text-end">Åtgärder</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model)
-                    {
-                        <tr>
-                            <td data-label="Titel" class="fw-bold">@item.Title</td>
-                            <td data-label="Kategori"><span class="badge bg-secondary">@item.CategoryName</span></td>
-                            @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
-                            {
-                                <td data-label="Skribent">@item.AuthorName</td>
-                            }
-                            <td data-label="Status">
-                                @if (item.IsReadyForPublish)
-                                {
-                                    <span class="badge bg-success">Redo</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-warning text-dark">Utkast</span>
-                                }
-                            </td>
-                            <td data-label="Visningar">@item.ViewsCount</td>
-                            <td data-label="Likes">@item.LikesCount</td>
-                            <td data-label="Skapad">@item.CreatedAt.ToShortDateString()</td>
-                            <td data-label="Åtgärder" class="text-md-end">
-                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">Redigera</a>
-                                @if (!item.IsReadyForPublish)
-                                {
-                                    <form asp-action="DeleteDraft" asp-route-id="@item.Id" method="post" class="d-inline">
-                                        @Html.AntiForgeryToken()
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Radera utkastet permanent?');">Radera</button>
-                                    </form>
-                                }
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+        <div class="card-header bg-white"><h5 class="mb-0">Top 5 engagemang (visningar + likes)</h5></div>
+        <div class="card-body p-0">@await Html.PartialAsync("_WriterArticlesTable", topEngagement)</div>
     </div>
 </div>
