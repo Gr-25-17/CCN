@@ -1,7 +1,10 @@
 @model IEnumerable<NewsSite.Models.ViewModels.ArticleViewModel>
+@using Microsoft.AspNetCore.Mvc.ViewFeatures
 @{
     var articles = Model.OrderByDescending(a => a.CreatedAt).ToList();
     var categories = articles.Select(a => a.CategoryName ?? "Okategoriserad").Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x).ToList();
+    var allTableViewData = new ViewDataDictionary(ViewData) { ["ShowCategory"] = true, ["ShowStatus"] = true };
+    var categoryTableViewData = new ViewDataDictionary(ViewData) { ["ShowCategory"] = false, ["ShowStatus"] = false };
 }
 
 <div class="container mt-4">
@@ -26,8 +29,8 @@
                 <div class="col-12 col-sm-6"><div class="card shadow-sm"><div class="card-body"><div class="text-muted small">Publicerade</div><div class="h4 mb-0">@allPublished.Count</div></div></div></div>
                 <div class="col-12 col-sm-6"><div class="card shadow-sm"><div class="card-body"><div class="text-muted small">Utkast</div><div class="h4 mb-0">@allDrafts.Count</div></div></div></div>
             </div>
-            <div class="card shadow-sm mb-4"><div class="card-header bg-white"><h5 class="mb-0">Publicerade</h5></div><div class="card-body p-0">@await Html.PartialAsync("_WriterArticlesTable", allPublished)</div></div>
-            <div class="card shadow-sm"><div class="card-header bg-white"><h5 class="mb-0">Utkast</h5></div><div class="card-body p-0">@await Html.PartialAsync("_WriterArticlesTable", allDrafts)</div></div>
+            <div class="card shadow-sm mb-4"><div class="card-header bg-white"><h5 class="mb-0">Publicerade</h5></div><div class="card-body p-0">@await Html.PartialAsync("_WriterArticlesTable", allPublished, allTableViewData)</div></div>
+            <div class="card shadow-sm"><div class="card-header bg-white"><h5 class="mb-0">Utkast</h5></div><div class="card-body p-0">@await Html.PartialAsync("_WriterArticlesTable", allDrafts, allTableViewData)</div></div>
         </div>
 
         @for (var i = 0; i < categories.Count; i++)
@@ -42,8 +45,8 @@
                     <div class="col-12 col-sm-6"><div class="card shadow-sm"><div class="card-body"><div class="text-muted small">Publicerade</div><div class="h4 mb-0">@categoryPublished.Count</div></div></div></div>
                     <div class="col-12 col-sm-6"><div class="card shadow-sm"><div class="card-body"><div class="text-muted small">Utkast</div><div class="h4 mb-0">@categoryDrafts.Count</div></div></div></div>
                 </div>
-                <div class="card shadow-sm mb-4"><div class="card-header bg-white"><h5 class="mb-0">Publicerade</h5></div><div class="card-body p-0">@await Html.PartialAsync("_WriterArticlesTable", categoryPublished)</div></div>
-                <div class="card shadow-sm"><div class="card-header bg-white"><h5 class="mb-0">Utkast</h5></div><div class="card-body p-0">@await Html.PartialAsync("_WriterArticlesTable", categoryDrafts)</div></div>
+                <div class="card shadow-sm mb-4"><div class="card-header bg-white"><h5 class="mb-0">Publicerade</h5></div><div class="card-body p-0">@await Html.PartialAsync("_WriterArticlesTable", categoryPublished, categoryTableViewData)</div></div>
+                <div class="card shadow-sm"><div class="card-header bg-white"><h5 class="mb-0">Utkast</h5></div><div class="card-body p-0">@await Html.PartialAsync("_WriterArticlesTable", categoryDrafts, categoryTableViewData)</div></div>
             </div>
         }
     </div>

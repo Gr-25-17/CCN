@@ -1,29 +1,27 @@
 @using Microsoft.AspNetCore.Mvc.Rendering
 @model IEnumerable<NewsSite.Models.ViewModels.UserDisplayInfo>
-@{
-    var query = ViewContext.HttpContext.Request.Query;
-    var currentSortBy = ViewBag.SortBy as string;
-    var currentSortDir = ViewBag.SortDir as string ?? "desc";
-
-    string NextDir(string column) => string.Equals(currentSortBy, column, StringComparison.OrdinalIgnoreCase) && string.Equals(currentSortDir, "asc", StringComparison.OrdinalIgnoreCase) ? "desc" : "asc";
-}
 
 <div class="table-responsive">
-    <table class="table table-hover align-middle mb-0">
+    <table class="table table-hover align-middle mb-0 admin-sortable-table">
         <thead class="table-light">
             <tr>
-                <th><a asp-action="Index" asp-route-search="@query["search"]" asp-route-roleFilter="@query["roleFilter"]" asp-route-isDeletedFilter="@query["isDeletedFilter"]" asp-route-sortBy="name" asp-route-sortDir="@NextDir("name")">Namn</a></th>
-                <th class="d-none d-lg-table-cell"><a asp-action="Index" asp-route-search="@query["search"]" asp-route-roleFilter="@query["roleFilter"]" asp-route-isDeletedFilter="@query["isDeletedFilter"]" asp-route-sortBy="dob" asp-route-sortDir="@NextDir("dob")">Födelsedatum</a></th>
-                <th class="d-none d-md-table-cell"><a asp-action="Index" asp-route-search="@query["search"]" asp-route-roleFilter="@query["roleFilter"]" asp-route-isDeletedFilter="@query["isDeletedFilter"]" asp-route-sortBy="email" asp-route-sortDir="@NextDir("email")">E-post</a></th>
-                <th><a asp-action="Index" asp-route-search="@query["search"]" asp-route-roleFilter="@query["roleFilter"]" asp-route-isDeletedFilter="@query["isDeletedFilter"]" asp-route-sortBy="role" asp-route-sortDir="@NextDir("role")">Roll</a></th>
-                <th><a asp-action="Index" asp-route-search="@query["search"]" asp-route-roleFilter="@query["roleFilter"]" asp-route-isDeletedFilter="@query["isDeletedFilter"]" asp-route-sortBy="status" asp-route-sortDir="@NextDir("status")">Status</a></th>
+                <th><button type="button" class="btn btn-link p-0 text-decoration-none admin-sort" data-sort="name">Namn</button></th>
+                <th class="d-none d-lg-table-cell"><button type="button" class="btn btn-link p-0 text-decoration-none admin-sort" data-sort="dob">Födelsedatum</button></th>
+                <th class="d-none d-md-table-cell"><button type="button" class="btn btn-link p-0 text-decoration-none admin-sort" data-sort="email">E-post</button></th>
+                <th><button type="button" class="btn btn-link p-0 text-decoration-none admin-sort" data-sort="role">Roll</button></th>
+                <th><button type="button" class="btn btn-link p-0 text-decoration-none admin-sort" data-sort="status">Status</button></th>
                 <th class="text-end">Åtgärder</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var user in Model)
             {
-                <tr class="@(user.IsDeleted ? "table-light text-muted" : "")">
+                <tr class="@(user.IsDeleted ? "table-light text-muted" : "")"
+                    data-name="@user.FullName"
+                    data-dob="@user.DateOfBirth.Ticks"
+                    data-email="@user.Email"
+                    data-role="@user.CurrentRole"
+                    data-status="@(user.IsDeleted ? 1 : 0)">
                     <td><div class="fw-bold">@user.FullName</div><div class="d-md-none text-muted small">@user.Email</div></td>
                     <td class="d-none d-lg-table-cell">@user.DateOfBirth.ToShortDateString()</td>
                     <td class="d-none d-md-table-cell">@user.Email</td>
