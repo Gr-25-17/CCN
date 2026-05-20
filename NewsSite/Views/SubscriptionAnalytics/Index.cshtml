@@ -13,7 +13,7 @@
 
     <div class="card shadow-sm mt-4">
         <div class="card-body">
-            <h5 class="mb-4">📈 Subscriber Trend (Last 6 Months)</h5>
+            <h5 class="mb-4">📈 User Trends (Last 6 Months)</h5>
             <canvas id="subscriberChart" height="100"></canvas>
         </div>
     </div>
@@ -165,7 +165,7 @@
     </div>
     `;
 
-    renderChart(activeSubscribers);
+    renderChart(data);
     renderWriterAnalytics(data, writerStatsContainer);
 
     } catch (err) {
@@ -231,15 +231,26 @@
     }).join('');
     };
 
-    const trendRows = writerMonthlyTrends.length === 0
+    let trendSortBy = 'engagement';
+    let trendSortDirection = 'desc';
+
+    const renderTrendRows = () => {
+    const sortedTrends = [...writerMonthlyTrends].sort((a, b) => {
+        const av = Number(a?.[trendSortBy] ?? 0);
+        const bv = Number(b?.[trendSortBy] ?? 0);
+        return trendSortDirection === 'asc' ? av - bv : bv - av;
+    });
+
+    return sortedTrends.length === 0
     ? `<tr><td colspan="4" class="text-muted">No writer trend data available yet.</td></tr>`
-    : writerMonthlyTrends.map(trend => `
+    : sortedTrends.map(trend => `
         <tr>
         <td>${escapeHtml(trend.monthLabel || '-')}</td>
         <td>${escapeHtml(trend.authorName || 'Unknown writer')}</td>
         <td>${trend.articles || 0}</td>
         <td>${trend.engagement || 0}</td>
         </tr>`).join('');
+    };
 
     container.innerHTML = `
     <div class="row g-3 mb-4">
@@ -300,7 +311,7 @@
 
     <div class="card shadow-sm">
         <div class="card-body">
-            <h5 class="card-title mb-3">📈 Monthly trend per author (last 6 months)</h5>
+            <h5 class="card-title mb-3">📈 Monthly user trends per author (last 6 months)</h5>
             <div class="table-responsive">
                 <table class="table table-sm table-hover">
                     <thead>
@@ -308,10 +319,10 @@
                             <th>Month</th>
                             <th>Writer</th>
                             <th>Articles</th>
-                            <th>Engagement</th>
+                            <th><button type="button" class="btn btn-link p-0 text-decoration-none sort-trend" data-sort="engagement">Engagement</button></th>
                         </tr>
                     </thead>
-                    <tbody>${trendRows}</tbody>
+                    <tbody id="writerTrendBody">${renderTrendRows()}</tbody>
                 </table>
             </div>
         </div>
@@ -335,6 +346,24 @@
         });
     });
 
+    container.querySelectorAll('.sort-trend').forEach(button => {
+        button.addEventListener('click', () => {
+            const selectedSort = button.dataset.sort;
+
+            if (trendSortBy === selectedSort) {
+                trendSortDirection = trendSortDirection === 'desc' ? 'asc' : 'desc';
+            } else {
+                trendSortBy = selectedSort;
+                trendSortDirection = 'desc';
+            }
+
+            const body = container.querySelector('#writerTrendBody');
+            if (body) {
+                body.innerHTML = renderTrendRows();
+            }
+        });
+    });
+
     }
 
     function escapeHtml(value) {
@@ -347,34 +376,20 @@
     }
     }
 
-    function renderChart(currentSubscribers) {
+    function renderChart(data) {
 
-    // fake trend data for now
-    const data = [
-    Math.max(currentSubscribers - 25, 0),
-    Math.max(currentSubscribers - 18, 0),
-    Math.max(currentSubscribers - 12, 0),
-    Math.max(currentSubscribers - 8, 0),
-    Math.max(currentSubscribers - 4, 0),
-    currentSubscribers
-    ];
+    const trendLabels = Array.isArray(data.trendLabels) ? data.trendLabels : [];
+    const trendSubscribers = Array.isArray(data.trendSubscriberCounts) ? data.trendSubscriberCounts : [];
 
     const ctx = document.getElementById('subscriberChart');
 
     new Chart(ctx, {
     type: 'line',
     data: {
-    labels: [
-    '5 months ago',
-    '4 months ago',
-    '3 months ago',
-    '2 months ago',
-    'Last month',
-    'Now'
-    ],
+    labels: trendLabels,
     datasets: [{
     label: 'Subscribers',
-    data: data,
+    data: trendSubscribers,
     tension: 0.3,
     fill: false
     }]
