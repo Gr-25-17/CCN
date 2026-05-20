@@ -5,20 +5,12 @@
 
     const applyAdminFilters = () => {
         const search = toText(document.getElementById('adminSearch')?.value);
-        const role = toText(document.getElementById('adminRoleFilter')?.value);
-        const state = toText(document.getElementById('adminStateFilter')?.value);
 
         document.querySelectorAll('.admin-sortable-table tbody tr').forEach(row => {
             const name = toText(row.dataset.name);
             const email = toText(row.dataset.email);
-            const rowRole = toText(row.dataset.role);
-            const rowState = toText(row.dataset.status);
-
             const matchSearch = !search || name.includes(search) || email.includes(search);
-            const matchRole = role === 'all' || rowRole === role;
-            const matchState = state === 'all' || rowState === state;
-
-            row.style.display = matchSearch && matchRole && matchState ? '' : 'none';
+            row.style.display = matchSearch ? '' : 'none';
         });
     };
 
@@ -83,12 +75,8 @@
     };
 
     document.getElementById('adminSearch')?.addEventListener('input', applyAdminFilters);
-    document.getElementById('adminRoleFilter')?.addEventListener('change', applyAdminFilters);
-    document.getElementById('adminStateFilter')?.addEventListener('change', applyAdminFilters);
     document.getElementById('adminClearFilter')?.addEventListener('click', () => {
         const search = document.getElementById('adminSearch'); if (search) search.value = '';
-        const role = document.getElementById('adminRoleFilter'); if (role) role.value = 'all';
-        const state = document.getElementById('adminStateFilter'); if (state) state.value = 'all';
         applyAdminFilters();
     });
 

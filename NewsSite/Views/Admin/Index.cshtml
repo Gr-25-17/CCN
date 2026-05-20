@@ -42,9 +42,7 @@
                 <div class="card-body">
                     <div class="row g-2 align-items-end">
                         <div class="col-12 col-md-4"><label class="form-label" for="adminSearch">Sök</label><input id="adminSearch" class="form-control" placeholder="Namn eller e-post" /></div>
-                        <div class="col-6 col-md-3"><label class="form-label" for="adminRoleFilter">Roll</label><select id="adminRoleFilter" class="form-select"><option value="all">Alla</option>@foreach (var role in Model.AvailableRoles){<option value="@role.Value">@role.Text</option>}</select></div>
-                        <div class="col-6 col-md-3"><label class="form-label" for="adminStateFilter">Status</label><select id="adminStateFilter" class="form-select"><option value="all">Alla</option><option value="0">Aktiv</option><option value="1">Borttagen</option></select></div>
-                        <div class="col-12 col-md-2"><button type="button" id="adminClearFilter" class="btn btn-outline-secondary w-100">Rensa</button></div>
+                        <div class="col-12 col-md-3"><button type="button" id="adminClearFilter" class="btn btn-outline-secondary w-100">Rensa sök</button></div>
                     </div>
                 </div>
             </div>

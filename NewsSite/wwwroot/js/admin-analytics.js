@@ -192,12 +192,12 @@ async function loadStats() {
         <tr>
         <td>${escapeHtml(writer.authorName || 'Unknown writer')}</td>
         <td>${writer.articlesThisMonth || 0}</td>
-        <td>${totalArticles}</td>
-        <td>${Number(writer.avgEngagementPerArticle || 0).toFixed(1)}</td>
-        <td>${writer.totalViews || 0}</td>
-        <td>${writer.totalLikes || 0}</td>
+        <td class="d-none d-md-table-cell">${totalArticles}</td>
+        <td class="d-none d-lg-table-cell">${Number(writer.avgEngagementPerArticle || 0).toFixed(1)}</td>
+        <td class="d-none d-md-table-cell">${writer.totalViews || 0}</td>
+        <td class="d-none d-md-table-cell">${writer.totalLikes || 0}</td>
         <td><strong>${Number(writer.impactScore || 0).toFixed(1)}</strong></td>
-        <td>${Number(revenuePerArticle).toFixed(2)}</td>
+        <td class="d-none d-lg-table-cell">${Number(revenuePerArticle).toFixed(2)}</td>
         </tr>`;
     }).join('');
     };
@@ -255,12 +255,12 @@ async function loadStats() {
                         <tr>
                             <th>Writer</th>
                             <th><button type="button" class="btn btn-link p-0 text-decoration-none sort-writer" data-sort="articlesThisMonth">Articles (month)</button></th>
-                            <th><button type="button" class="btn btn-link p-0 text-decoration-none sort-writer" data-sort="totalArticles">Articles (total)</button></th>
-                            <th><button type="button" class="btn btn-link p-0 text-decoration-none sort-writer" data-sort="avgEngagementPerArticle">Avg engagement/article</button></th>
-                            <th><button type="button" class="btn btn-link p-0 text-decoration-none sort-writer" data-sort="totalViews">Views</button></th>
-                            <th><button type="button" class="btn btn-link p-0 text-decoration-none sort-writer" data-sort="totalLikes">Likes</button></th>
+                            <th class="d-none d-md-table-cell"><button type="button" class="btn btn-link p-0 text-decoration-none sort-writer" data-sort="totalArticles">Articles (total)</button></th>
+                            <th class="d-none d-lg-table-cell"><button type="button" class="btn btn-link p-0 text-decoration-none sort-writer" data-sort="avgEngagementPerArticle">Avg engagement/article</button></th>
+                            <th class="d-none d-md-table-cell"><button type="button" class="btn btn-link p-0 text-decoration-none sort-writer" data-sort="totalViews">Views</button></th>
+                            <th class="d-none d-md-table-cell"><button type="button" class="btn btn-link p-0 text-decoration-none sort-writer" data-sort="totalLikes">Likes</button></th>
                             <th><button type="button" class="btn btn-link p-0 text-decoration-none sort-writer" data-sort="impactScore">Impact score</button></th>
-                            <th><button type="button" class="btn btn-link p-0 text-decoration-none sort-writer" data-sort="revenueEstimate">Revenue/article proxy</button></th>
+                            <th class="d-none d-lg-table-cell"><button type="button" class="btn btn-link p-0 text-decoration-none sort-writer" data-sort="revenueEstimate">Revenue/article proxy</button></th>
                         </tr>
                     </thead>
                     <tbody id="writerPerformanceBody">${renderPerformanceRows()}</tbody>
