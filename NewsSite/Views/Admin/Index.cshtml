@@ -24,6 +24,38 @@
         </div>
     }
 
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form asp-action="Index" method="get" class="row g-2 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label" for="search">Sök</label>
+                    <input id="search" name="search" value="@Model.Search" class="form-control" placeholder="Namn eller e-post" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label" for="roleFilter">Roll</label>
+                    <select id="roleFilter" name="roleFilter" class="form-select">
+                        <option value="">Alla</option>
+                        @foreach (var role in Model.AvailableRoles)
+                        {
+                            <option value="@role.Value" selected="@(role.Value == Model.RoleFilter)">@role.Text</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label" for="isDeletedFilter">Status</label>
+                    <select id="isDeletedFilter" name="isDeletedFilter" class="form-select">
+                        <option value="">Alla</option>
+                        <option value="false" selected="@(Model.IsDeletedFilter == false)">Aktiv</option>
+                        <option value="true" selected="@(Model.IsDeletedFilter == true)">Borttagen</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-grid">
+                    <button type="submit" class="btn btn-primary">Filtrera</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="card shadow-sm">
         <div class="card-header bg-white py-3">
             <h5 class="card-title mb-0">Systemanvändare</h5>
@@ -119,6 +151,7 @@
             Detta körs i bakgrunden. Stäng inte den här fliken förrän processen är klar.
         </p>
         
+        @Html.AntiForgeryToken()
         <button id="btnMigrate" class="btn btn-warning" onclick="startMigration()">
             Kör migrering nu
         </button>
@@ -130,37 +163,7 @@
     </div>
 </div>
 
-<script>
-    async function startMigration() {
-        const btn = document.getElementById('btnMigrate');
-        const feedback = document.getElementById('migrationFeedback');
-        const statusText = document.getElementById('migrationStatus');
 
-        btn.disabled = true;
-        feedback.classList.replace('d-none', 'd-flex');
-        statusText.innerText = "Migrering pågår... vänligen vänta.";
-        statusText.className = "fw-bold text-primary";
-
-        try {
-            const response = await fetch('/Admin/RunImageMigration', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            });
-
-            if (response.ok) {
-                statusText.innerText = "Migrering skickad till Azure! Bilderna bearbetas nu i bakgrunden.";
-                statusText.className = "fw-bold text-success";
-            } else {
-                throw new Error("Ett fel uppstod på servern.");
-            }
-        } catch (error) {
-            statusText.innerText = error.message;
-            statusText.className = "fw-bold text-danger";
-        } finally {
-            btn.disabled = false;
-        }
-    }
-</script>
 
 <div class="card shadow-sm border-danger mb-4">
     <div class="card-body">
@@ -176,3 +179,7 @@
         </form>
     </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/admin-operations.js" asp-append-version="true"></script>
+}

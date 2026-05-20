@@ -15,9 +15,35 @@ namespace NewsSite.Controllers
         ILogger<AdminController> logger) : Controller
     {
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? search, string? roleFilter, bool? isDeletedFilter)
         {
             var model = await userService.GetUsersForAdminAsync();
+
+            var query = model.Users.AsEnumerable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var normalizedSearch = search.Trim();
+                query = query.Where(user =>
+                    user.FullName.Contains(normalizedSearch, StringComparison.OrdinalIgnoreCase) ||
+                    user.Email.Contains(normalizedSearch, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!string.IsNullOrWhiteSpace(roleFilter))
+            {
+                query = query.Where(user => string.Equals(user.CurrentRole, roleFilter, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (isDeletedFilter is not null)
+            {
+                query = query.Where(user => user.IsDeleted == isDeletedFilter.Value);
+            }
+
+            model.Users = query.ToList();
+            model.Search = search;
+            model.RoleFilter = roleFilter;
+            model.IsDeletedFilter = isDeletedFilter;
+
             return View(model);
         }
 
@@ -64,7 +90,7 @@ namespace NewsSite.Controllers
 
             return RedirectToAction(nameof(Index));
         }
-        [HttpPost]
+        [HttpPost, ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> RunImageMigration()
         {
@@ -72,6 +98,9 @@ namespace NewsSite.Controllers
             var articles = await _articleRepository.GetQueryable()
                 .Where(a => !string.IsNullOrEmpty(a.ImageUrl) && !a.ImageUrl.EndsWith(".webp") && !a.ImageUrl.EndsWith(".svg"))
                 .ToListAsync();
+
+            var migratedCount = 0;
+            var failedCount = 0;
 
             foreach (var article in articles)
             {
@@ -88,16 +117,17 @@ namespace NewsSite.Controllers
                     {
                         article.ImageUrl = result.FileName;
                         await _articleRepository.UpdateAsync(article);
+                        migratedCount++;
                     }
                 }
                 catch (Exception ex)
                 {
-                    // Implementera ILogger här framöver för att fånga upp specifika artiklar som misslyckas 
-                    // _logger.LogWarning(ex, "Kunde inte migrera bild för artikel {Id}", article.Id);
+                    failedCount++;
+                    logger.LogWarning(ex, "Kunde inte migrera bild för artikel {ArticleId}", article.Id);
                 }
             }
 
-            return Ok("Migration slutförd. Azure Functions bearbetar bilderna asynkront.");
+            return Ok($"Migration slutförd. Migrerade: {migratedCount}. Misslyckade: {failedCount}.");
         }
 
         [HttpPost, ValidateAntiForgeryToken]
