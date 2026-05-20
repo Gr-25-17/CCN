@@ -67,7 +67,7 @@ namespace NewsSite
             builder.Services.AddScoped<IBlobService, BlobService>();
             builder.Services.AddHttpClient();
             builder.Services.AddScoped<IImageOrchestrationService, ImageOrchestrationService>();
-
+            builder.Services.AddControllers();
             builder.Services.AddHttpClient<IWeatherService, WeatherService>()
                 .AddTransientHttpErrorPolicy(policy =>
                     policy.WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));

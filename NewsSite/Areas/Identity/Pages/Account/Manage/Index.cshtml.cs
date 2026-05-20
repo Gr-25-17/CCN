@@ -4,8 +4,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using NewsSite.Models.Entities;
-using NewsSite.Services.Interfaces;
 using NewsSite.Models.ViewModels;
+using NewsSite.Repositories.Implementations;
+using NewsSite.Repositories.Interfaces;
+using NewsSite.Services.Interfaces;
 using System.ComponentModel.DataAnnotations;
 
 namespace NewsSite.Areas.Identity.Pages.Account.Manage
@@ -15,15 +17,18 @@ namespace NewsSite.Areas.Identity.Pages.Account.Manage
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly INewsletterService _newsletterService;
-
+        private readonly ISubscriptionService _subscriptionService;
+        private readonly ISubscriptionRepository _subscriptionRepository;
         public IndexModel(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            INewsletterService newsletterService)
+            INewsletterService newsletterService, ISubscriptionService subscriptionService, ISubscriptionRepository subscriptionRepository)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _newsletterService = newsletterService;
+            _subscriptionService = subscriptionService;
+            _subscriptionRepository = subscriptionRepository;
         }
 
         public string Username { get; set; }
@@ -37,6 +42,7 @@ namespace NewsSite.Areas.Identity.Pages.Account.Manage
         [BindProperty]
         public NewsletterPreferencesViewModel ContentPreferences { get; set; } = new();
 
+        public SubscriptionInfoViewModel SubscriptionInfo { get; set; } = new();
         public class InputModel
         {
             [Required]
@@ -109,7 +115,34 @@ namespace NewsSite.Areas.Identity.Pages.Account.Manage
                     .ToList() ?? new List<string>()
             };
 
+            await LoadSubscriptionInfoAsync(user.Id);
+
             return Page();
+        }
+
+        private async Task LoadSubscriptionInfoAsync(string userId)
+        {
+            var activeSubscription = await _subscriptionRepository.GetActiveSubscriptionAsync(userId);
+
+            if (activeSubscription != null)
+            {
+               
+                SubscriptionInfo = new SubscriptionInfoViewModel
+                {
+                    HasActiveSubscription = true,
+                    StartDate = activeSubscription.StartDate,
+                    EndDate = activeSubscription.EndDate,
+                    PlanName = activeSubscription.Type?.Name ?? "Premium",
+                    Price = activeSubscription.Type?.Price
+                };
+            }
+            else
+            {
+                SubscriptionInfo = new SubscriptionInfoViewModel
+                {
+                    HasActiveSubscription = false
+                };
+            }
         }
 
         public async Task<IActionResult> OnPostAsync()

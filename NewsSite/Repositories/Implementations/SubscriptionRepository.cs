@@ -56,5 +56,14 @@ namespace NewsSite.Repositories.Implementations
 
             await _context.SaveChangesAsync();
         }
+
+        public async Task<Subscription?> GetActiveSubscriptionAsync(string userId)
+        {
+            return await _context.Subscriptions
+                .Include(s => s.Type)
+                .Where(s => s.UserId == userId && s.EndDate > DateTime.UtcNow && s.PaymentComplete)
+                .OrderByDescending(s => s.EndDate)
+                .FirstOrDefaultAsync();
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using NewsSite.Models.ViewModels;
+﻿using NewsSite.Models.Entities;
+using NewsSite.Models.ViewModels;
 
 namespace NewsSite.Services.Interfaces;
 
@@ -8,5 +9,6 @@ public interface INewsletterService
     Task SavePreferencesAsync(string userId, NewsletterPreferencesViewModel preferences);
     Task<List<CategoryViewModel>> GetAllCategoriesAsync();
     Task<List<AuthorViewModel>> GetAllAuthorsAsync();
+    Task<List<NewsletterPreference>> GetWeeklySubscribersAsync();
 
 }
