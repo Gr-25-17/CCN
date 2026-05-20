@@ -5,7 +5,7 @@ namespace NewsSite.Mapping
 {
     public static class UserExtensions
     {
-        public static UserDisplayInfo ToDisplayInfo(this ApplicationUser user, string? currentRole)
+        public static UserDisplayInfo ToDisplayInfo(this ApplicationUser user, string? currentRole, bool hasActiveSubscription)
         {
             return new UserDisplayInfo
             {
@@ -14,7 +14,8 @@ namespace NewsSite.Mapping
                 FullName = $"{user.FirstName} {user.LastName}",
                 DateOfBirth = user.DateOfBirth,
                 CurrentRole = currentRole ?? "Ingen roll",
-                IsDeleted = user.IsDeleted
+                IsDeleted = user.IsDeleted,
+                HasActiveSubscription = hasActiveSubscription
             };
         }
     }

@@ -15,15 +15,13 @@ public class ManagementNavigationService(IAuthorizationService authorizationServ
 
         var isAdminPage = path.StartsWithSegments("/Admin", StringComparison.OrdinalIgnoreCase);
         var isWriterPage = path.StartsWithSegments("/Writer", StringComparison.OrdinalIgnoreCase);
-        var isAnalyticsPage = path.StartsWithSegments("/SubscriptionAnalytics", StringComparison.OrdinalIgnoreCase);
 
         if (isAdmin && canAccessWriterPanel)
         {
             var items = new List<ManagementNavItemViewModel>
             {
                 new() { Label = "Admin", Controller = "Admin", Action = "Index", IsCurrent = isAdminPage },
-                new() { Label = "Skribent", Controller = "Writer", Action = "Index", IsCurrent = isWriterPage },
-                new() { Label = "Analytics", Controller = "SubscriptionAnalytics", Action = "Index", IsCurrent = isAnalyticsPage }
+                new() { Label = "Skribent", Controller = "Writer", Action = "Index", IsCurrent = isWriterPage }
             };
 
             return new ManagementNavigationViewModel
@@ -46,4 +44,3 @@ public class ManagementNavigationService(IAuthorizationService authorizationServ
         return new ManagementNavigationViewModel();
     }
 }
-
