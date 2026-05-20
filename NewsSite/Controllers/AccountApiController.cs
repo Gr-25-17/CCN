@@ -99,10 +99,33 @@ namespace NewsSite.Controllers
 
             _logger.LogInformation("User registered via AJAX.");
 
+            try
+            {
+                var userId = await _userManager.GetUserIdAsync(user);
+                var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+
+                var callbackUrl = Url.Page(
+                    "/Account/ConfirmEmail",
+                    pageHandler: null,
+                    values: new { area = "Identity", userId, code },
+                    protocol: Request.Scheme);
+
+                await _emailSender.SendEmailAsync(
+                    request.Email,
+                    "Confirm your email",
+                    $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl ?? string.Empty)}'>clicking here</a>.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send confirmation email to {Email}", request.Email);
+                // Don't fail registration if email sending fails.
+            }
+
             return Ok(new
             {
                 success = true,
-                message = "Kontot har skapats. Bekräfta din e-postadress innan du loggar in."
+                message = "Kontot har skapats. Ett bekräftelsemail har skickats till din e-postadress."
             });
         }
 
