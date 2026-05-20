@@ -139,16 +139,18 @@ body {
 
 @media (max-width: 991.98px) {
     .navbar-utilities {
-        width: 100%;
+        width: auto;
         overflow: visible;
         gap: 0.25rem !important;
-        flex: 1 1 auto;
+        flex: 0 1 auto;
+        min-width: 0;
     }
 
     .navbar-search {
         flex: 1 1 auto;
         min-width: 86px;
         max-width: none;
+        width: auto;
     }
 
     .navbar-search .form-control,
