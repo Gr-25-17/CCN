@@ -243,5 +243,12 @@ namespace NewsSite.Repositories.Implementations
                 .Where(a => ids.Contains(a.Id))
                 .ExecuteUpdateAsync(s => s.SetProperty(a => a.IsArchived, true));
         }
+
+        public async Task SoftDeleteAsync(Article article)
+        {
+            article.IsDeleted = true;
+            context.Articles.Update(article);
+            await context.SaveChangesAsync();
+        }
     }
 }

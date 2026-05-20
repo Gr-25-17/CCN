@@ -33,5 +33,6 @@ namespace NewsSite.Repositories.Interfaces
 
         Task<IEnumerable<Article>> GetArticlesToArchiveAsync(int days);
         Task ArchiveArticlesAsync(List<int> ids);
+        Task SoftDeleteAsync(Article article);
     }
 }
