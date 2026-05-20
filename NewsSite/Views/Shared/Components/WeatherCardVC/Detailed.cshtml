@@ -15,6 +15,13 @@
             <img src="@Model.IconUrl" alt="Weather icon" class="me-2" style="width:40px; height:40px;" />
             <div>
                 <div><strong>@Model.City</strong></div>
+                <select class="form-select form-select-sm mt-1" style="width:auto;"
+                        onchange="updateWeather(this.value)">
+                    @foreach (var c in new[] { "Stockholm", "Göteborg", "Malmö", "Kiruna", "Linköping" })
+                    {
+                        <option value="@c" selected="@(c == Model.City ? "selected" : null)">@c</option>
+                    }
+                </select>
                 <div>@Model.TemperatureC.ToString("F1")°C</div>
             </div>
         </div>

@@ -4,6 +4,6 @@ namespace NewsSite.Services.Interfaces
 {
     public interface IWeatherService
     {
-        Task<WeatherForecast> GetWeatherAsync();
+        Task<WeatherForecast?> GetWeatherAsync(string? city = null);
     }
 }
