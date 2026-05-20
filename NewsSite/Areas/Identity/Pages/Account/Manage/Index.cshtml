@@ -12,7 +12,7 @@
     <div class="row">
         <div class="col-md-6">
             <form id="profile-form" method="post">
-                <!-- Personal Information Card -->
+                <!-- personlig info -->
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-white">
                         <h5 class="mb-0">👤 Personal Information</h5>
@@ -41,6 +41,7 @@
                     </div>
                 </div>
 
+                <!-- Premium -->
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-white">
                         <h5 class="mb-0">✨ Premium Status</h5>
@@ -51,11 +52,11 @@
                             <div class="alert alert-primary">
                                 <div class="d-flex align-items-center">
                                     <div class="flex-grow-1">
-                                        <strong>✅ Active Premium Subscription</strong><br />
+                                        <strong>Active Premium Subscription</strong><br />
                                         <span class="small">Plan: <strong>@Model.SubscriptionInfo.PlanName</strong></span><br />
                                         <span class="small">Started: @Model.SubscriptionInfo.StartDate?.ToString("yyyy-MM-dd")</span><br />
                                         <span class="small">Expires: @Model.SubscriptionInfo.EndDate?.ToString("yyyy-MM-dd")</span>
-                        
+
                                         @if (Model.SubscriptionInfo.IsExpiringSoon)
                                         {
                                             <div class="mt-2">
@@ -68,10 +69,13 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="mt-3">
+                            <div class="mt-3 d-flex gap-2">
                                 <a href="/Subscription" class="btn btn-outline-primary btn-sm">
                                     <i class="bi bi-arrow-repeat"></i> Manage Subscription
                                 </a>
+                                <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#cancelSubscriptionModal">
+                                    <i class="bi bi-x-circle"></i> Cancel Subscription
+                                </button>
                             </div>
                         }
                         else
@@ -96,6 +100,7 @@
                     </div>
                 </div>
 
+                <!-- Subscription till newsletter -->
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-white">
                         <h5 class="mb-0">📧 Newsletter Subscription</h5>
@@ -165,7 +170,7 @@
                     </div>
                 </div>
 
-                <!-- Content Preferences Card -->
+                <!-- preferences -->
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-white">
                         <h5 class="mb-0">📂 Content Preferences</h5>
@@ -228,7 +233,7 @@
     </div>
 </div>
 
-<!-- Unsubscribe Modal -->
+<!-- Unsubscribe modal-->
 <div class="modal fade" id="unsubscribeModal" tabindex="-1" aria-labelledby="unsubscribeModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -267,6 +272,39 @@
                 <button type="button" class="btn btn-danger" id="confirmUnsubscribeBtn">
                     <i class="bi bi-check-circle"></i> Yes, Unsubscribe
                 </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- avsluta subscribtion -->
+<div class="modal fade" id="cancelSubscriptionModal" tabindex="-1" aria-labelledby="cancelSubscriptionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="cancelSubscriptionModalLabel">
+                    <i class="bi bi-exclamation-triangle"></i> Cancel Premium Subscription
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="fw-semibold">Are you sure you want to cancel your premium subscription?</p>
+                <p class="text-muted small">You will lose access to premium articles</p>
+                <p class="text-muted small mt-2">Your subscription will remain active until <strong>@Model.SubscriptionInfo.EndDate?.ToString("yyyy-MM-dd")</strong>.</p>
+                <div class="alert alert-warning mt-2">
+                    <i class="bi bi-info-circle"></i> This action cannot be undone.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Keep Subscription
+                </button>
+                <form asp-controller="Subscription" asp-action="Cancel" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-check-circle"></i> Yes, Cancel
+                    </button>
+                </form>
             </div>
         </div>
     </div>

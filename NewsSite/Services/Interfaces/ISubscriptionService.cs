@@ -6,6 +6,7 @@ namespace NewsSite.Services.Interfaces
     {
         Task<bool> HasActiveSubscriptionAsync(string userId);
         Task CreateOrRenewAsync(string userId);
-       
+
+        Task CancelSubscriptionAsync(string userId);
     }
 }
