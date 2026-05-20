@@ -70,3 +70,94 @@ body {
                 display: none;
             }
 }
+
+.navbar-utilities {
+    min-width: 0;
+    flex-wrap: nowrap;
+    max-width: 100%;
+    flex: 1 1 auto;
+    justify-content: flex-end;
+    width: 100%;
+    gap: 0.35rem !important;
+}
+
+.navbar-search {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: 100%;
+    max-width: none;
+}
+
+.navbar-search .form-control {
+    min-width: 0;
+}
+
+.navbar-search .input-group {
+    flex-wrap: nowrap;
+}
+
+.navbar-search .btn {
+    flex-shrink: 0;
+}
+
+.navbar-account .navbar-nav {
+    margin-bottom: 0;
+}
+
+@media (min-width: 992px) {
+    .navbar-account .navbar-nav {
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
+    }
+
+    .navbar-account .nav-link,
+    .navbar-account .btn.nav-link,
+    .navbar-nav .nav-link,
+    .navbar-nav .btn.nav-link {
+        white-space: nowrap;
+        padding-left: 0.4rem;
+        padding-right: 0.4rem;
+    }
+}
+
+.navbar-weather {
+    flex-shrink: 0;
+    min-width: 0;
+}
+
+.navbar-weather #weatherWidget {
+    white-space: nowrap;
+}
+
+
+.nav-link[aria-current="page"] {
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 0.25rem;
+}
+
+@media (max-width: 991.98px) {
+    .navbar-utilities {
+        width: auto;
+        overflow: visible;
+        gap: 0.25rem !important;
+        flex: 0 1 auto;
+        min-width: 0;
+    }
+
+    .navbar-search {
+        flex: 1 1 auto;
+        min-width: 86px;
+        max-width: none;
+        width: auto;
+    }
+
+    .navbar-search .form-control,
+    .navbar-search .btn {
+        padding-left: 0.35rem;
+        padding-right: 0.35rem;
+    }
+}
+
+

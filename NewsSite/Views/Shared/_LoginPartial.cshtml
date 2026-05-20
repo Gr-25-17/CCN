@@ -2,20 +2,43 @@
 @using NewsSite.Models.Entities
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
+@using Microsoft.AspNetCore.Authorization
+@inject IAuthorizationService AuthorizationService
+
+@{
+    var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+    var isAdmin = isAuthenticated && User.IsInRole("Admin");
+    var canAccessWriterPanel = (await AuthorizationService.AuthorizeAsync(User, "ManagementOnly")).Succeeded;
+    var showManagementDropdown = isAdmin && canAccessWriterPanel;
+}
 
 <ul class="navbar-nav">
-    @if ((User.Identity?.IsAuthenticated ?? false) && User.IsInRole("Admin"))
+    @if (showManagementDropdown)
     {
-        <li class="nav-item">
+        <li class="nav-item dropdown d-none d-lg-block">
+            <a class="nav-link dropdown-toggle text-dark" href="#" id="managementMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Paneler
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="managementMenu">
+                <li>
+                    <a class="dropdown-item" asp-area="" asp-controller="Admin" asp-action="Index">Admin Dashboard</a>
+                </li>
+                <li>
+                    <a class="dropdown-item" asp-area="" asp-controller="Writer" asp-action="Index">Skribent</a>
+                </li>
+            </ul>
+        </li>
+        <li class="nav-item d-lg-none">
             <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="Index">Admin Dashboard</a>
         </li>
+        <li class="nav-item d-lg-none">
+            <a class="nav-link text-dark" asp-area="" asp-controller="Writer" asp-action="Index">Skribent</a>
+        </li>
     }
-
-    @if (User.Identity != null && User.Identity.IsAuthenticated &&
-        (User.IsInRole("Admin") || User.IsInRole("Editor") || User.IsInRole("Writer")))
+    else if (canAccessWriterPanel)
     {
         <li class="nav-item">
-            <a class="nav-link text-dark fw-bold" asp-area="" asp-controller="Writer" asp-action="Index">Skribentpanel</a>
+            <a class="nav-link text-dark" asp-area="" asp-controller="Writer" asp-action="Index">Skribent</a>
         </li>
     }
 
