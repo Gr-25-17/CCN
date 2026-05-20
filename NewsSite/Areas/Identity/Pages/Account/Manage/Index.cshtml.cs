@@ -80,6 +80,27 @@ namespace NewsSite.Areas.Identity.Pages.Account.Manage
             ContentPreferences.Frequency = prefs.Frequency;
             ContentPreferences.UnsubscribeToken = prefs.UnsubscribeToken;
             ContentPreferences.IsUnsubscribed = prefs.IsUnsubscribed;
+
+            var activeSubscription = await _subscriptionRepository.GetActiveSubscriptionAsync(user.Id);
+
+            if (activeSubscription != null)
+            {
+                SubscriptionInfo = new SubscriptionInfoViewModel
+                {
+                    HasActiveSubscription = true,
+                    StartDate = activeSubscription.StartDate,
+                    EndDate = activeSubscription.EndDate,
+                    PlanName = activeSubscription.Type?.Name ?? "Premium",
+                    Price = activeSubscription.Type?.Price
+                };
+            }
+            else
+            {
+                SubscriptionInfo = new SubscriptionInfoViewModel
+                {
+                    HasActiveSubscription = false
+                };
+            }
         }
 
         public async Task<IActionResult> OnGetAsync()
@@ -90,7 +111,7 @@ namespace NewsSite.Areas.Identity.Pages.Account.Manage
                 return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
-            await LoadAsync(user);
+            await LoadAsync(user);  // ← Hämtar ALLT nu
 
             var prefs = await _newsletterService.GetPreferencesAsync(user.Id);
             var categories = await _newsletterService.GetAllCategoriesAsync();
@@ -115,35 +136,10 @@ namespace NewsSite.Areas.Identity.Pages.Account.Manage
                     .ToList() ?? new List<string>()
             };
 
-            await LoadSubscriptionInfoAsync(user.Id);
-
-            return Page();
+            return Page(); 
         }
 
-        private async Task LoadSubscriptionInfoAsync(string userId)
-        {
-            var activeSubscription = await _subscriptionRepository.GetActiveSubscriptionAsync(userId);
-
-            if (activeSubscription != null)
-            {
-               
-                SubscriptionInfo = new SubscriptionInfoViewModel
-                {
-                    HasActiveSubscription = true,
-                    StartDate = activeSubscription.StartDate,
-                    EndDate = activeSubscription.EndDate,
-                    PlanName = activeSubscription.Type?.Name ?? "Premium",
-                    Price = activeSubscription.Type?.Price
-                };
-            }
-            else
-            {
-                SubscriptionInfo = new SubscriptionInfoViewModel
-                {
-                    HasActiveSubscription = false
-                };
-            }
-        }
+        
 
         public async Task<IActionResult> OnPostAsync()
         {

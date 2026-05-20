@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NewsSite.Models.ViewModels;
+using NewsSite.Services.Implementations;
 using NewsSite.Services.Interfaces;
 using System.Security.Claims;
 
@@ -50,6 +51,7 @@ namespace NewsSite.Controllers
                 });
             }
 
+
             if (!string.IsNullOrWhiteSpace(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
             {
                 return LocalRedirect(model.ReturnUrl);
@@ -57,5 +59,12 @@ namespace NewsSite.Controllers
 
             return RedirectToAction("Index", "Home");
         }
+            [HttpPost]
+            public async Task<IActionResult> Cancel()
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                await subscriptionService.CancelSubscriptionAsync(userId);
+                return Redirect("/Identity/Account/Manage/Index");
+            }
     }
 }

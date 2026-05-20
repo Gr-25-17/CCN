@@ -89,6 +89,19 @@ namespace NewsSite.Services.Implementations
             await _signInManager.RefreshSignInAsync(user);
         }
 
+        public async Task CancelSubscriptionAsync(string userId)
+        {
+            var subscription = await _subscriptionRepository.GetActiveSubscriptionAsync(userId);
+            if (subscription != null)
+            {
+                subscription.PaymentComplete = false;
+                await _subscriptionRepository.SaveAsync(subscription);
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            await _userManager.RemoveFromRoleAsync(user, "Subscriber");
+            await _userManager.AddToRoleAsync(user, "Reader");
+        }
 
     }
 
