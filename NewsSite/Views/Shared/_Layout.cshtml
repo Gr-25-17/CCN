@@ -85,14 +85,25 @@
     <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script>
-            let isDetailed = false;
-            async function toggleWeather() {
-                isDetailed = !isDetailed;
-                const response = await fetch(`/Home/WeatherWidget?detailed=${isDetailed}`);
-                const html = await response.text();
-                document.getElementById('weatherWidget').innerHTML = html;
-            }
+        let isDetailed = false;
+        let currentCity = 'Stockholm';
 
+        async function toggleWeather() {
+        isDetailed = !isDetailed;
+        const response = await fetch(`/Weather/Widget?detailed=${isDetailed}&city=${encodeURIComponent(currentCity)}`);
+        document.getElementById('weatherWidget').innerHTML = await response.text();
+        }
+
+        function updateWeather(city) {
+        currentCity = city;
+            fetch(`/Weather/Card?city=${encodeURIComponent(city)}`)
+                .then(r => r.text())
+                .then(html => document.getElementById('weatherCardContainer').innerHTML = html);
+
+    fetch(`/Weather/Widget?detailed=${isDetailed}&city=${encodeURIComponent(city)}`)
+        .then(r => r.text())
+        .then(html => document.getElementById('weatherWidget').innerHTML = html);
+}
             document.addEventListener('DOMContentLoaded', () => {
                 const expirationInput = document.querySelector('#subscriptionExpirationDate');
                 if (!expirationInput) return;
