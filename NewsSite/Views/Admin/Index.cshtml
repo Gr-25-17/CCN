@@ -68,8 +68,7 @@
         </div>
 
         <div class="tab-pane fade" id="analytics-pane" role="tabpanel" aria-labelledby="analytics-tab">
-            <div id="errorBox" class="alert alert-danger d-none" role="alert"></div>
-            <div id="statsContainer" class="row g-3"></div>
+            @await Html.PartialAsync("_SubscriptionAnalyticsContent")
         </div>
 
         <div class="tab-pane fade" id="tools-pane" role="tabpanel" aria-labelledby="tools-tab">
@@ -80,5 +79,7 @@
 </div>
 
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="~/js/admin-analytics.js" asp-append-version="true"></script>
     <script src="~/js/admin-operations.js" asp-append-version="true"></script>
 }

@@ -1,0 +1,364 @@
+async function loadStats() {
+    const container = document.getElementById('statsContainer');
+    const writerStatsContainer = document.getElementById('writerStatsContainer');
+    const errorBox = document.getElementById('errorBox');
+
+    try {
+    const res = await fetch('/api/admin/subscription-stats', {
+    headers: { 'Accept': 'application/json' }
+    });
+
+    if (!res.ok) {
+    throw new Error(`HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+
+    const totalUsers = data.totalRegisteredUsers || 0;
+    const activeSubscribers = data.activeSubscribers || 0;
+    const inactiveSubscribers = data.inactiveSubscribers || 0;
+
+    const rawConversionRate =
+    totalUsers === 0
+    ? 0
+    : ((activeSubscribers / totalUsers) * 100);
+
+    const conversionRate = Math.min(Math.max(rawConversionRate, 0), 100);
+
+    const churnRate =
+    activeSubscribers + inactiveSubscribers === 0
+    ? 0
+    : ((inactiveSubscribers / (activeSubscribers + inactiveSubscribers)) * 100);
+
+    const estimatedRevenue = activeSubscribers * 99;
+
+    container.innerHTML = `
+    <div class="col-md-3">
+    <div class="card shadow-sm border-0 h-100">
+    <div class="card-body">
+    <h6 class="text-muted">👥 Total users</h6>
+    <h2>${totalUsers}</h2>
+    </div>
+    </div>
+    </div>
+
+    <div class="col-md-3">
+    <div class="card shadow-sm border-0 h-100">
+    <div class="card-body">
+    <h6 class="text-muted">✅ Active subscribers</h6>
+    <h2 class="text-success">${activeSubscribers}</h2>
+    </div>
+    </div>
+    </div>
+
+    <div class="col-md-3">
+    <div class="card shadow-sm border-0 h-100">
+    <div class="card-body">
+    <h6 class="text-muted">❌ Inactive subscribers</h6>
+    <h2 class="text-danger">${inactiveSubscribers}</h2>
+    </div>
+    </div>
+    </div>
+
+    <div class="col-md-3">
+    <div class="card shadow-sm border-0 h-100">
+    <div class="card-body">
+    <h6 class="text-muted">🔁 Returning subscribers</h6>
+    <h2 class="text-primary">${data.returningSubscribers}</h2>
+    </div>
+    </div>
+    </div>
+
+    <div class="col-md-4">
+    <div class="card shadow-sm border-0 h-100">
+    <div class="card-body">
+    <h6 class="text-muted">📈 Subscriber growth</h6>
+    <h2 class="${data.growthRateSubscribers >= 0 ? 'text-success' : 'text-danger'}">
+    ${data.growthRateSubscribers.toFixed(1)}%
+    </h2>
+    </div>
+    </div>
+    </div>
+
+    <div class="col-md-4">
+    <div class="card shadow-sm border-0 h-100">
+    <div class="card-body">
+    <h6 class="text-muted">📉 Churn rate</h6>
+    <h2 class="text-warning">
+    ${churnRate.toFixed(1)}%
+    </h2>
+    </div>
+    </div>
+    </div>
+
+    <div class="col-md-4">
+    <div class="card shadow-sm border-0 h-100">
+    <div class="card-body">
+    <h6 class="text-muted">💰 Estimated monthly revenue</h6>
+    <h2 class="text-success">
+    ${estimatedRevenue.toLocaleString()} kr
+    </h2>
+    </div>
+    </div>
+    </div>
+
+    <div class="col-md-6">
+    <div class="card shadow-sm border-0 h-100">
+    <div class="card-body">
+    <h6 class="text-muted">🆕 New subscribers this month</h6>
+    <h2>${data.newSubscribersThisMonth}</h2>
+    </div>
+    </div>
+    </div>
+
+    <div class="col-md-6">
+    <div class="card shadow-sm border-0 h-100">
+    <div class="card-body">
+    <h6 class="text-muted">📅 New subscribers last month</h6>
+    <h2>${data.newSubscribersLastMonth}</h2>
+    </div>
+    </div>
+    </div>
+
+    <div class="col-md-12">
+    <div class="card shadow-sm border-0">
+    <div class="card-body">
+    <h6 class="text-muted">📊 User to Subscriber conversion rate</h6>
+    <div class="progress mt-3" style="height: 30px;">
+    <div class="progress-bar bg-success"
+    role="progressbar"
+    style="width: ${conversionRate}%;">
+    ${conversionRate.toFixed(1)}%
+    </div>
+    </div>
+    </div>
+    </div>
+    </div>
+    `;
+
+    renderChart(activeSubscribers);
+    renderWriterAnalytics(data, writerStatsContainer);
+
+    } catch (err) {
+    errorBox.classList.remove('d-none');
+    errorBox.textContent =
+    `Could not load subscription stats. ${err.message}. Ensure you are logged in as an Admin.`;
+    }
+
+    function renderWriterAnalytics(data, container) {
+    const writerPerformances = Array.isArray(data.writerPerformances)
+    ? data.writerPerformances
+    : [];
+
+    const writerMonthlyTrends = Array.isArray(data.writerMonthlyTrends)
+    ? data.writerMonthlyTrends
+    : [];
+
+    const sortedByImpact = [...writerPerformances]
+    .sort((a, b) => (b.impactScore || 0) - (a.impactScore || 0));
+
+    const bucketSize = Math.max(1, Math.ceil(sortedByImpact.length / 5));
+    const topWriters = sortedByImpact.slice(0, bucketSize);
+    const topWriterIds = new Set(topWriters.map(w => w.authorId));
+    const underperformers = sortedByImpact
+    .slice().reverse()
+    .filter(w => !topWriterIds.has(w.authorId))
+    .slice(0, bucketSize);
+
+    let sortBy = 'impactScore';
+    let sortDirection = 'desc';
+
+    const sortWriters = (writers) => {
+        const sorted = [...writers].sort((a, b) => {
+            const av = Number(a?.[sortBy] ?? 0);
+            const bv = Number(b?.[sortBy] ?? 0);
+            return sortDirection === 'asc' ? av - bv : bv - av;
+        });
+
+        return sorted;
+    };
+
+    const renderPerformanceRows = () => {
+        const rows = sortWriters(writerPerformances);
+
+        return rows.length === 0
+        ? `<tr><td colspan="8" class="text-muted">No writer analytics available yet.</td></tr>`
+        : rows.map(writer => {
+        const totalArticles = writer.totalArticles || 0;
+        const revenueEstimate = writer.revenueEstimate || 0;
+        const revenuePerArticle = totalArticles === 0 ? 0 : revenueEstimate / totalArticles;
+
+        return `
+        <tr>
+        <td>${escapeHtml(writer.authorName || 'Unknown writer')}</td>
+        <td>${writer.articlesThisMonth || 0}</td>
+        <td>${totalArticles}</td>
+        <td>${Number(writer.avgEngagementPerArticle || 0).toFixed(1)}</td>
+        <td>${writer.totalViews || 0}</td>
+        <td>${writer.totalLikes || 0}</td>
+        <td><strong>${Number(writer.impactScore || 0).toFixed(1)}</strong></td>
+        <td>${Number(revenuePerArticle).toFixed(2)}</td>
+        </tr>`;
+    }).join('');
+    };
+
+    const trendRows = writerMonthlyTrends.length === 0
+    ? `<tr><td colspan="4" class="text-muted">No writer trend data available yet.</td></tr>`
+    : writerMonthlyTrends.map(trend => `
+        <tr>
+        <td>${escapeHtml(trend.monthLabel || '-')}</td>
+        <td>${escapeHtml(trend.authorName || 'Unknown writer')}</td>
+        <td>${trend.articles || 0}</td>
+        <td>${trend.engagement || 0}</td>
+        </tr>`).join('');
+
+    container.innerHTML = `
+    <div class="row g-3 mb-4">
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">Top writers this month</h6>
+                    <ul class="list-group list-group-flush">
+                        ${topWriters.map(writer => `
+                            <li class="list-group-item d-flex justify-content-between px-0">
+                                <span>${escapeHtml(writer.authorName || 'Unknown writer')}</span>
+                                <strong>${Number(writer.impactScore || 0).toFixed(1)}</strong>
+                            </li>`).join('') || '<li class="list-group-item px-0 text-muted">No data</li>'}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">Underperforming writers</h6>
+                    <ul class="list-group list-group-flush">
+                        ${underperformers.map(writer => `
+                            <li class="list-group-item d-flex justify-content-between px-0">
+                                <span>${escapeHtml(writer.authorName || 'Unknown writer')}</span>
+                                <small class="text-muted">${Number(writer.impactScore || 0).toFixed(1)}</small>
+                            </li>`).join('') || '<li class="list-group-item px-0 text-muted">No data</li>'}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-3">📄 Articles per writer / Engagement / ROI proxy</h5>
+            <p class="text-muted mb-3">Revenue/article proxy is an estimated revenue value per published article based on article views.</p>
+            <div class="table-responsive">
+                <table class="table table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>Writer</th>
+                            <th><button type="button" class="btn btn-link p-0 text-decoration-none sort-writer" data-sort="articlesThisMonth">Articles (month)</button></th>
+                            <th><button type="button" class="btn btn-link p-0 text-decoration-none sort-writer" data-sort="totalArticles">Articles (total)</button></th>
+                            <th><button type="button" class="btn btn-link p-0 text-decoration-none sort-writer" data-sort="avgEngagementPerArticle">Avg engagement/article</button></th>
+                            <th><button type="button" class="btn btn-link p-0 text-decoration-none sort-writer" data-sort="totalViews">Views</button></th>
+                            <th><button type="button" class="btn btn-link p-0 text-decoration-none sort-writer" data-sort="totalLikes">Likes</button></th>
+                            <th><button type="button" class="btn btn-link p-0 text-decoration-none sort-writer" data-sort="impactScore">Impact score</button></th>
+                            <th><button type="button" class="btn btn-link p-0 text-decoration-none sort-writer" data-sort="revenueEstimate">Revenue/article proxy</button></th>
+                        </tr>
+                    </thead>
+                    <tbody id="writerPerformanceBody">${renderPerformanceRows()}</tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title mb-3">📈 Monthly trend per author (last 6 months)</h5>
+            <div class="table-responsive">
+                <table class="table table-sm table-hover">
+                    <thead>
+                        <tr>
+                            <th>Month</th>
+                            <th>Writer</th>
+                            <th>Articles</th>
+                            <th>Engagement</th>
+                        </tr>
+                    </thead>
+                    <tbody>${trendRows}</tbody>
+                </table>
+            </div>
+        </div>
+    </div>`;
+
+    container.querySelectorAll('.sort-writer').forEach(button => {
+        button.addEventListener('click', () => {
+            const selectedSort = button.dataset.sort;
+
+            if (sortBy === selectedSort) {
+                sortDirection = sortDirection === 'desc' ? 'asc' : 'desc';
+            } else {
+                sortBy = selectedSort;
+                sortDirection = 'desc';
+            }
+
+            const body = container.querySelector('#writerPerformanceBody');
+            if (body) {
+                body.innerHTML = renderPerformanceRows();
+            }
+        });
+    });
+
+    }
+
+    function escapeHtml(value) {
+    return String(value)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+    }
+    }
+
+    function renderChart(currentSubscribers) {
+
+    // fake trend data for now
+    const data = [
+    Math.max(currentSubscribers - 25, 0),
+    Math.max(currentSubscribers - 18, 0),
+    Math.max(currentSubscribers - 12, 0),
+    Math.max(currentSubscribers - 8, 0),
+    Math.max(currentSubscribers - 4, 0),
+    currentSubscribers
+    ];
+
+    const ctx = document.getElementById('subscriberChart');
+
+    new Chart(ctx, {
+    type: 'line',
+    data: {
+    labels: [
+    '5 months ago',
+    '4 months ago',
+    '3 months ago',
+    '2 months ago',
+    'Last month',
+    'Now'
+    ],
+    datasets: [{
+    label: 'Subscribers',
+    data: data,
+    tension: 0.3,
+    fill: false
+    }]
+    },
+    options: {
+    responsive: true,
+    plugins: {
+    legend: {
+    display: true
+    }
+    }
+    }
+    });
+    }
+
+    window.loadAdminAnalytics = loadStats;
