@@ -1,8 +1,9 @@
 @using Microsoft.AspNetCore.Mvc.Rendering
 @model IEnumerable<NewsSite.Models.ViewModels.UserDisplayInfo>
+@{ var tableId = ViewData["TableId"] as string ?? "admin-table"; }
 
 <div class="table-responsive">
-    <table class="table table-hover align-middle mb-0 admin-sortable-table">
+    <table class="table table-hover align-middle mb-0 admin-sortable-table" data-table-id="@tableId">
         <thead class="table-light">
             <tr>
                 <th><button type="button" class="btn btn-link p-0 text-decoration-none admin-sort" data-sort="name">Namn</button></th>
@@ -16,7 +17,7 @@
         <tbody>
             @foreach (var user in Model)
             {
-                <tr class="@(user.IsDeleted ? "table-light text-muted" : "")"
+                <tr data-user-id="@user.Id" class="@(user.IsDeleted ? "table-light text-muted" : "")"
                     data-name="@user.FullName"
                     data-dob="@user.DateOfBirth.Ticks"
                     data-email="@user.Email"
@@ -46,12 +47,12 @@
                         {
                             @if (!user.Email.Contains("@anonymized.com"))
                             {
-                                <form asp-action="Restore" method="post" class="d-inline">@Html.AntiForgeryToken()<input type="hidden" name="userId" value="@user.Id" /><button type="submit" class="btn btn-sm btn-success">Återställ</button></form>
+                                <form asp-action="Restore" method="post" class="d-inline js-user-state-form" data-user-action="restore">@Html.AntiForgeryToken()<input type="hidden" name="userId" value="@user.Id" /><button type="submit" class="btn btn-sm btn-success">Återställ</button></form>
                             }
                         }
                         else
                         {
-                            <form asp-action="SoftDelete" method="post" onsubmit="return confirm('Inaktivera?');" class="d-inline">@Html.AntiForgeryToken()<input type="hidden" name="userId" value="@user.Id" /><button type="submit" class="btn btn-sm btn-outline-danger">Inaktivera</button></form>
+                            <form asp-action="SoftDelete" method="post" class="d-inline js-user-state-form" data-user-action="softdelete">@Html.AntiForgeryToken()<input type="hidden" name="userId" value="@user.Id" /><button type="submit" class="btn btn-sm btn-outline-danger">Inaktivera</button></form>
                         }
                     </td>
                 </tr>

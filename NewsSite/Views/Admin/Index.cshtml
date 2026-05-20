@@ -1,16 +1,26 @@
 @model NewsSite.Models.ViewModels.UserAdminViewModel
+@using Microsoft.AspNetCore.Mvc.ViewFeatures
 @{
     var staffRoleNames = new[] { "Admin", "Editor", "Writer" };
     var staffUsers = Model.Users.Where(u => staffRoleNames.Contains(u.CurrentRole, StringComparer.OrdinalIgnoreCase)).ToList();
     var regularUsers = Model.Users.Where(u => !staffRoleNames.Contains(u.CurrentRole, StringComparer.OrdinalIgnoreCase)).ToList();
 
-    var admins = staffUsers.Where(u => string.Equals(u.CurrentRole, "Admin", StringComparison.OrdinalIgnoreCase)).ToList();
-    var editors = staffUsers.Where(u => string.Equals(u.CurrentRole, "Editor", StringComparison.OrdinalIgnoreCase)).ToList();
-    var writers = staffUsers.Where(u => string.Equals(u.CurrentRole, "Writer", StringComparison.OrdinalIgnoreCase)).ToList();
+    var staffActiveUsers = staffUsers.Where(u => !u.IsDeleted).ToList();
+    var staffInactiveUsers = staffUsers.Where(u => u.IsDeleted).ToList();
+    var regularActiveUsers = regularUsers.Where(u => !u.IsDeleted).ToList();
+    var regularInactiveUsers = regularUsers.Where(u => u.IsDeleted).ToList();
 
-    var subscribers = regularUsers.Where(u => u.HasActiveSubscription).ToList();
-    var nonSubscribers = regularUsers.Where(u => !u.HasActiveSubscription).ToList();
-    var inactiveUsers = Model.Users.Where(u => u.IsDeleted).ToList();
+    var admins = staffActiveUsers.Where(u => string.Equals(u.CurrentRole, "Admin", StringComparison.OrdinalIgnoreCase)).ToList();
+    var editors = staffActiveUsers.Where(u => string.Equals(u.CurrentRole, "Editor", StringComparison.OrdinalIgnoreCase)).ToList();
+    var writers = staffActiveUsers.Where(u => string.Equals(u.CurrentRole, "Writer", StringComparison.OrdinalIgnoreCase)).ToList();
+
+    var subscribers = regularActiveUsers.Where(u => u.HasActiveSubscription).ToList();
+    var nonSubscribers = regularActiveUsers.Where(u => !u.HasActiveSubscription).ToList();
+
+    var staffActiveTableViewData = new ViewDataDictionary(ViewData) { ["TableId"] = "staff-active" };
+    var staffInactiveTableViewData = new ViewDataDictionary(ViewData) { ["TableId"] = "staff-inactive" };
+    var regularActiveTableViewData = new ViewDataDictionary(ViewData) { ["TableId"] = "regular-active" };
+    var regularInactiveTableViewData = new ViewDataDictionary(ViewData) { ["TableId"] = "regular-inactive" };
 }
 
 <div class="container-fluid px-4 mt-4">
@@ -18,16 +28,6 @@
         <h2 class="mb-3 mb-md-0">Användaradministration</h2>
         <div class="badge bg-primary p-2">Totalt: @Model.Users.Count användare</div>
     </div>
-
-    @if (TempData["Error"] != null)
-    {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">@TempData["Error"]<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>
-    }
-
-    @if (TempData["Success"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">@TempData["Success"]<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>
-    }
 
     <ul class="nav nav-tabs" id="adminTabs" role="tablist">
         <li class="nav-item" role="presentation"><button class="nav-link active" id="users-tab" data-bs-toggle="tab" data-bs-target="#users-pane" type="button" role="tab">Användare</button></li>
@@ -37,17 +37,6 @@
 
     <div class="tab-content pt-3">
         <div class="tab-pane fade show active" id="users-pane" role="tabpanel" aria-labelledby="users-tab">
-            <div class="card shadow-sm mb-4">
-                <div class="card-body">
-                    <form asp-action="Index" method="get" class="row g-2 align-items-end">
-                        <div class="col-12 col-md-4"><label class="form-label" for="search">Sök</label><input id="search" name="search" value="@Model.Search" class="form-control" placeholder="Namn eller e-post" /></div>
-                        <div class="col-6 col-md-3"><label class="form-label" for="roleFilter">Roll</label><select id="roleFilter" name="roleFilter" class="form-select"><option value="">Alla</option>@foreach (var role in Model.AvailableRoles){<option value="@role.Value" selected="@(role.Value == Model.RoleFilter)">@role.Text</option>}</select></div>
-                        <div class="col-6 col-md-3"><label class="form-label" for="isDeletedFilter">Status</label><select id="isDeletedFilter" name="isDeletedFilter" class="form-select"><option value="">Alla</option><option value="false" selected="@(Model.IsDeletedFilter == false)">Aktiv</option><option value="true" selected="@(Model.IsDeletedFilter == true)">Borttagen</option></select></div>
-                        <div class="col-12 col-md-2 d-grid"><button type="submit" class="btn btn-primary">Filtrera</button></div>
-                    </form>
-                </div>
-            </div>
-
             <ul class="nav nav-pills mb-3" role="tablist">
                 <li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#staff-pane" type="button" role="tab">Personal</button></li>
                 <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#regular-pane" type="button" role="tab">Användare</button></li>
@@ -60,7 +49,8 @@
                         <div class="col-12 col-sm-6 col-xl-4"><div class="card shadow-sm"><div class="card-body"><div class="text-muted small">Editors</div><div class="h4 mb-0">@editors.Count</div></div></div></div>
                         <div class="col-12 col-sm-6 col-xl-4"><div class="card shadow-sm"><div class="card-body"><div class="text-muted small">Writers</div><div class="h4 mb-0">@writers.Count</div></div></div></div>
                     </div>
-                    <div class="card shadow-sm mb-4"><div class="card-header bg-white py-3"><h5 class="card-title mb-0">Personal</h5></div><div class="card-body p-0">@await Html.PartialAsync("_AdminUserTable", staffUsers)</div></div>
+                    <div class="card shadow-sm mb-4"><div class="card-header bg-white py-3"><h5 class="card-title mb-0">Aktiv personal</h5></div><div class="card-body p-0">@await Html.PartialAsync("_AdminUserTable", staffActiveUsers, staffActiveTableViewData)</div></div>
+                    <div class="card shadow-sm mb-4"><div class="card-header bg-white py-3"><h5 class="card-title mb-0">Inaktiv / Borttagen personal</h5></div><div class="card-body p-0">@await Html.PartialAsync("_AdminUserTable", staffInactiveUsers, staffInactiveTableViewData)</div></div>
                 </div>
 
                 <div class="tab-pane fade" id="regular-pane" role="tabpanel">
@@ -68,22 +58,14 @@
                         <div class="col-12 col-sm-6"><div class="card shadow-sm"><div class="card-body"><div class="text-muted small">Prenumeranter</div><div class="h4 mb-0">@subscribers.Count</div></div></div></div>
                         <div class="col-12 col-sm-6"><div class="card shadow-sm"><div class="card-body"><div class="text-muted small">Icke prenumeranter</div><div class="h4 mb-0">@nonSubscribers.Count</div></div></div></div>
                     </div>
-                    <div class="card shadow-sm mb-4"><div class="card-header bg-white py-3"><h5 class="card-title mb-0">Användare</h5></div><div class="card-body p-0">@await Html.PartialAsync("_AdminUserTable", regularUsers)</div></div>
+                    <div class="card shadow-sm mb-4"><div class="card-header bg-white py-3"><h5 class="card-title mb-0">Aktiva användare (readers + subscribers)</h5></div><div class="card-body p-0">@await Html.PartialAsync("_AdminUserTable", regularActiveUsers, regularActiveTableViewData)</div></div>
+                    <div class="card shadow-sm mb-4"><div class="card-header bg-white py-3"><h5 class="card-title mb-0">Inaktiv / Borttagen användare</h5></div><div class="card-body p-0">@await Html.PartialAsync("_AdminUserTable", regularInactiveUsers, regularInactiveTableViewData)</div></div>
                 </div>
-            </div>
-
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-white py-3"><h5 class="card-title mb-0">Inaktiva / Borttagna användare</h5></div>
-                <div class="card-body p-0">@await Html.PartialAsync("_AdminUserTable", inactiveUsers)</div>
             </div>
         </div>
 
         <div class="tab-pane fade" id="analytics-pane" role="tabpanel" aria-labelledby="analytics-tab">@await Html.PartialAsync("_SubscriptionAnalyticsContent")</div>
-
-        <div class="tab-pane fade" id="tools-pane" role="tabpanel" aria-labelledby="tools-tab">
-            <div class="card shadow-sm border-warning mb-4"><div class="card-body"><h5 class="card-title text-warning"><i class="bi bi-exclamation-triangle"></i> Systemverktyg: Bildmigrering</h5><p class="card-text text-muted">Kör detta skript för att konvertera alla gamla bilder i databasen till den nya WebP-arkitekturen.</p>@Html.AntiForgeryToken()<button id="btnMigrate" class="btn btn-warning" onclick="startMigration()">Kör migrering nu</button><div id="migrationFeedback" class="mt-3 d-none align-items-center"><div class="spinner-border spinner-border-sm text-warning me-2" role="status"></div><span id="migrationStatus" class="fw-bold text-secondary">Startar migrering... Detta kan ta flera minuter.</span></div></div></div>
-            <div class="card shadow-sm border-danger mb-4"><div class="card-body"><h5 class="card-title text-danger"><i class="bi bi-database-up"></i> Systemverktyg: Datamigrering till extern SQL Server</h5><p class="card-text text-muted">Kör en engångsmigrering av lokal SQLite-data till extern SQL Server (LexiconConnection).</p><form asp-action="RunLocalToLexiconMigration" method="post" onsubmit="return confirm('Vill du starta datamigrering till extern SQL Server nu?');" class="d-inline">@Html.AntiForgeryToken()<button type="submit" class="btn btn-danger">Kör datamigrering nu</button></form></div></div>
-        </div>
+        <div class="tab-pane fade" id="tools-pane" role="tabpanel" aria-labelledby="tools-tab"></div>
     </div>
 </div>
 

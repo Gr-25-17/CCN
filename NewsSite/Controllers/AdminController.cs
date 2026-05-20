@@ -71,7 +71,7 @@ namespace NewsSite.Controllers
         {
             if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(newRole))
             {
-                return RedirectToAction(nameof(Index));
+                return Request.Headers["X-Requested-With"] == "XMLHttpRequest" ? BadRequest() : RedirectToAction(nameof(Index));
             }
 
             var success = await userService.UpdateUserRoleAsync(userId, newRole);
@@ -79,6 +79,12 @@ namespace NewsSite.Controllers
             {
                 TempData["Error"] = "Gick inte att uppdatera rollen.";
             }
+
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return success ? Ok() : BadRequest();
+            }
+
             return RedirectToAction(nameof(Index));
         }
 
@@ -87,7 +93,7 @@ namespace NewsSite.Controllers
         {
             if (string.IsNullOrEmpty(userId))
             {
-                return RedirectToAction(nameof(Index));
+                return Request.Headers["X-Requested-With"] == "XMLHttpRequest" ? BadRequest() : RedirectToAction(nameof(Index));
             }
 
             var success = await userService.SoftDeleteUserAsync(userId);
@@ -97,15 +103,28 @@ namespace NewsSite.Controllers
                 TempData["Error"] = "Kunde inte radera användaren.";
             }
 
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return success ? Ok() : BadRequest();
+            }
+
             return RedirectToAction(nameof(Index));
         }
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Restore(string userId)
         {
-            if (string.IsNullOrEmpty(userId)) return RedirectToAction(nameof(Index));
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Request.Headers["X-Requested-With"] == "XMLHttpRequest" ? BadRequest() : RedirectToAction(nameof(Index));
+            }
 
             var success = await userService.RestoreUserAsync(userId);
             if (!success) TempData["Error"] = "Kunde inte återställa användaren.";
+
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return success ? Ok() : BadRequest();
+            }
 
             return RedirectToAction(nameof(Index));
         }
