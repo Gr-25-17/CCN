@@ -10,7 +10,6 @@
                 <th class="d-none d-lg-table-cell"><button type="button" class="btn btn-link p-0 text-decoration-none admin-sort" data-sort="dob">Födelsedatum</button></th>
                 <th class="d-none d-md-table-cell"><button type="button" class="btn btn-link p-0 text-decoration-none admin-sort" data-sort="email">E-post</button></th>
                 <th><button type="button" class="btn btn-link p-0 text-decoration-none admin-sort" data-sort="role">Roll</button></th>
-                <th><button type="button" class="btn btn-link p-0 text-decoration-none admin-sort" data-sort="status">Status</button></th>
                 <th class="text-end">Åtgärder</th>
             </tr>
         </thead>
@@ -41,7 +40,6 @@
                             </div>
                         </form>
                     </td>
-                    <td>@if (user.IsDeleted){<span class="badge rounded-pill bg-danger">Borttagen</span>}else{<span class="badge rounded-pill bg-success">Aktiv</span>}</td>
                     <td class="text-end px-3">
                         @if (user.IsDeleted)
                         {

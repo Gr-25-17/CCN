@@ -3,14 +3,25 @@
 @{
     var articles = Model.OrderByDescending(a => a.CreatedAt).ToList();
     var categories = articles.Select(a => a.CategoryName ?? "Okategoriserad").Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x).ToList();
-    var allTableViewData = new ViewDataDictionary(ViewData) { ["ShowCategory"] = true, ["ShowStatus"] = true };
-    var categoryTableViewData = new ViewDataDictionary(ViewData) { ["ShowCategory"] = false, ["ShowStatus"] = false };
+    var allTableViewData = new ViewDataDictionary(ViewData) { ["ShowCategory"] = true };
+    var categoryTableViewData = new ViewDataDictionary(ViewData) { ["ShowCategory"] = false };
 }
 
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Mina Artiklar</h2>
         <a asp-action="Create" class="btn btn-primary">Skapa ny artikel</a>
+    </div>
+
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <div class="row g-2">
+                <div class="col-12 col-md-5"><input id="writerSearch" class="form-control" placeholder="Sök titel" /></div>
+                <div class="col-6 col-md-3"><select id="writerStatusFilter" class="form-select"><option value="all">Alla status</option><option value="1">Publicerade</option><option value="0">Utkast</option></select></div>
+                <div class="col-6 col-md-4"><button type="button" id="writerClearFilter" class="btn btn-outline-secondary w-100">Rensa filter</button></div>
+            </div>
+        </div>
     </div>
 
     <ul class="nav nav-tabs" role="tablist">

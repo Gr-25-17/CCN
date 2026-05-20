@@ -1,7 +1,6 @@
 @model IEnumerable<NewsSite.Models.ViewModels.ArticleViewModel>
 @{
     var showCategory = ViewData["ShowCategory"] as bool? ?? true;
-    var showStatus = ViewData["ShowStatus"] as bool? ?? true;
 }
 
 <div class="table-responsive-custom">
@@ -16,10 +15,6 @@
                 @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
                 {
                     <th><button type="button" class="btn btn-link p-0 text-decoration-none writer-sort" data-sort="author">Skribent</button></th>
-                }
-                @if (showStatus)
-                {
-                    <th><button type="button" class="btn btn-link p-0 text-decoration-none writer-sort" data-sort="status">Status</button></th>
                 }
                 <th><button type="button" class="btn btn-link p-0 text-decoration-none writer-sort" data-sort="views">Visningar</button></th>
                 <th><button type="button" class="btn btn-link p-0 text-decoration-none writer-sort" data-sort="likes">Likes</button></th>
@@ -45,10 +40,6 @@
                         @if (User.IsInRole("Admin") || User.IsInRole("Editor"))
                         {
                             <td data-label="Skribent">@item.AuthorName</td>
-                        }
-                        @if (showStatus)
-                        {
-                            <td data-label="Status">@if (item.IsReadyForPublish){<span class="badge bg-success">Redo</span>}else{<span class="badge bg-warning text-dark">Utkast</span>}</td>
                         }
                         <td data-label="Visningar">@item.ViewsCount</td>
                         <td data-label="Likes">@item.LikesCount</td>

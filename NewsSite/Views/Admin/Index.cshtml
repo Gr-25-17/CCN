@@ -37,6 +37,18 @@
 
     <div class="tab-content pt-3">
         <div class="tab-pane fade show active" id="users-pane" role="tabpanel" aria-labelledby="users-tab">
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="row g-2 align-items-end">
+                        <div class="col-12 col-md-4"><label class="form-label" for="adminSearch">Sök</label><input id="adminSearch" class="form-control" placeholder="Namn eller e-post" /></div>
+                        <div class="col-6 col-md-3"><label class="form-label" for="adminRoleFilter">Roll</label><select id="adminRoleFilter" class="form-select"><option value="all">Alla</option>@foreach (var role in Model.AvailableRoles){<option value="@role.Value">@role.Text</option>}</select></div>
+                        <div class="col-6 col-md-3"><label class="form-label" for="adminStateFilter">Status</label><select id="adminStateFilter" class="form-select"><option value="all">Alla</option><option value="0">Aktiv</option><option value="1">Borttagen</option></select></div>
+                        <div class="col-12 col-md-2"><button type="button" id="adminClearFilter" class="btn btn-outline-secondary w-100">Rensa</button></div>
+                    </div>
+                </div>
+            </div>
+
             <ul class="nav nav-pills mb-3" role="tablist">
                 <li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#staff-pane" type="button" role="tab">Personal</button></li>
                 <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#regular-pane" type="button" role="tab">Användare</button></li>
@@ -65,7 +77,10 @@
         </div>
 
         <div class="tab-pane fade" id="analytics-pane" role="tabpanel" aria-labelledby="analytics-tab">@await Html.PartialAsync("_SubscriptionAnalyticsContent")</div>
-        <div class="tab-pane fade" id="tools-pane" role="tabpanel" aria-labelledby="tools-tab"></div>
+        <div class="tab-pane fade" id="tools-pane" role="tabpanel" aria-labelledby="tools-tab">
+            <div class="card shadow-sm border-warning mb-4"><div class="card-body"><h5 class="card-title text-warning"><i class="bi bi-exclamation-triangle"></i> Systemverktyg: Bildmigrering</h5><p class="card-text text-muted">Kör detta skript för att konvertera alla gamla bilder i databasen till den nya WebP-arkitekturen.</p>@Html.AntiForgeryToken()<button id="btnMigrate" class="btn btn-warning" onclick="startMigration()">Kör migrering nu</button><div id="migrationFeedback" class="mt-3 d-none align-items-center"><div class="spinner-border spinner-border-sm text-warning me-2" role="status"></div><span id="migrationStatus" class="fw-bold text-secondary">Startar migrering... Detta kan ta flera minuter.</span></div></div></div>
+            <div class="card shadow-sm border-danger mb-4"><div class="card-body"><h5 class="card-title text-danger"><i class="bi bi-database-up"></i> Systemverktyg: Datamigrering till extern SQL Server</h5><p class="card-text text-muted">Kör en engångsmigrering av lokal SQLite-data till extern SQL Server (LexiconConnection).</p><form asp-action="RunLocalToLexiconMigration" method="post" onsubmit="return confirm('Vill du starta datamigrering till extern SQL Server nu?');" class="d-inline">@Html.AntiForgeryToken()<button type="submit" class="btn btn-danger">Kör datamigrering nu</button></form></div></div>
+        </div>
     </div>
 </div>
 
