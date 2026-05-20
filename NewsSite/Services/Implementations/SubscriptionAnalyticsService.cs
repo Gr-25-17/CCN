@@ -110,7 +110,7 @@ namespace NewsSite.Services.Implementations
 
             var estimatedRevenue = activeSubs * 99;
 
-            var writerStats = await BuildWriterStatsAsync(startOfThisMonth, totalUsers);
+            var writerStats = await BuildWriterStatsAsync(startOfThisMonth, internalUserIds);
 
             return new SubscriptionStatsDto
             {
@@ -136,13 +136,12 @@ namespace NewsSite.Services.Implementations
 
                 TrendLabels = writerStats.TrendLabels,
                 TrendSubscriberCounts = writerStats.TrendSubscriberCounts,
-                TrendUserCounts = writerStats.TrendUserCounts,
                 WriterPerformances = writerStats.WriterPerformances,
                 WriterMonthlyTrends = writerStats.WriterMonthlyTrends
             };
         }
 
-        private async Task<(List<WriterPerformanceDto> WriterPerformances, List<WriterMonthlyTrendDto> WriterMonthlyTrends, List<string> TrendLabels, List<int> TrendSubscriberCounts, List<int> TrendUserCounts)> BuildWriterStatsAsync(DateTime startOfThisMonth, int totalUsers)
+        private async Task<(List<WriterPerformanceDto> WriterPerformances, List<WriterMonthlyTrendDto> WriterMonthlyTrends, List<string> TrendLabels, List<int> TrendSubscriberCounts)> BuildWriterStatsAsync(DateTime startOfThisMonth, List<string> internalUserIds)
         {
             var authors = await (
                 from user in _context.Users
@@ -240,26 +239,39 @@ namespace NewsSite.Services.Implementations
                 .ToList();
 
             var trendSubscriberCounts = new List<int>();
-            var trendUserCounts = new List<int>();
 
             foreach (var label in trendLabels)
             {
                 var monthStart = DateTime.ParseExact(label + "-01", "yyyy-MM-dd", null);
                 var monthEnd = monthStart.AddMonths(1);
 
+                var monthDeactivatedUserIds = await _context.UnsubscribeLogs
+                    .Where(u => !internalUserIds.Contains(u.UserId) && u.UnsubscribedAt < monthEnd)
+                    .GroupBy(u => u.UserId)
+                    .Select(g => new
+                    {
+                        UserId = g.Key,
+                        IsDeactivated = !g.OrderByDescending(x => x.UnsubscribedAt)
+                            .Select(x => x.WasReactivated)
+                            .FirstOrDefault()
+                    })
+                    .Where(x => x.IsDeactivated)
+                    .Select(x => x.UserId)
+                    .ToListAsync();
+
                 var activeSubscriberCount = await _context.Subscriptions
-                    .Where(s => s.StartDate < monthEnd && s.EndDate >= monthStart)
+                    .Where(s => !internalUserIds.Contains(s.UserId)
+                        && s.StartDate < monthEnd
+                        && s.EndDate >= monthStart
+                        && !monthDeactivatedUserIds.Contains(s.UserId))
                     .Select(s => s.UserId)
                     .Distinct()
                     .CountAsync();
 
-                var userCount = totalUsers;
-
                 trendSubscriberCounts.Add(activeSubscriberCount);
-                trendUserCounts.Add(userCount);
             }
 
-            return (writerPerformances, writerMonthlyTrends, trendLabels, trendSubscriberCounts, trendUserCounts);
+            return (writerPerformances, writerMonthlyTrends, trendLabels, trendSubscriberCounts);
         }
 
         private double CalculateGrowth(int oldValue, int newValue)

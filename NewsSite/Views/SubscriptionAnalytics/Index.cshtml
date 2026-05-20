@@ -380,7 +380,6 @@
 
     const trendLabels = Array.isArray(data.trendLabels) ? data.trendLabels : [];
     const trendSubscribers = Array.isArray(data.trendSubscriberCounts) ? data.trendSubscriberCounts : [];
-    const trendUsers = Array.isArray(data.trendUserCounts) ? data.trendUserCounts : [];
 
     const ctx = document.getElementById('subscriberChart');
 
@@ -391,11 +390,6 @@
     datasets: [{
     label: 'Subscribers',
     data: trendSubscribers,
-    tension: 0.3,
-    fill: false
-    }, {
-    label: 'Users',
-    data: trendUsers,
     tension: 0.3,
     fill: false
     }]
