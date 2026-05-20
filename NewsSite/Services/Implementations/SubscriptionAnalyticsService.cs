@@ -100,15 +100,30 @@ namespace NewsSite.Services.Implementations
                     u.UnsubscribedAt < startOfThisMonth);
 
 
+            var startOfNextMonth = startOfThisMonth.AddMonths(1);
+            var activeSubsLastMonth = await _context.Subscriptions
+                .Where(s => !internalUserIds.Contains(s.UserId) && !deactivatedUserIds.Contains(s.UserId))
+                .CountAsync(s => s.StartDate < startOfThisMonth && s.EndDate >= startOfLastMonth);
+
+            var activeSubsThisMonth = await _context.Subscriptions
+                .Where(s => !internalUserIds.Contains(s.UserId) && !deactivatedUserIds.Contains(s.UserId))
+                .CountAsync(s => s.StartDate < startOfNextMonth && s.EndDate >= startOfThisMonth);
+
             var subscriberPercentage = totalUsers == 0
                 ? 0
                 : Math.Round((double)activeSubs / totalUsers * 100, 1);
 
-            var churnRate = activeSubs == 0
-                ? 0
-                : Math.Round((double)churnThisMonth / activeSubs * 100, 1);
+            var growthRateSubscribers = CalculateGrowth(activeSubsLastMonth, activeSubsThisMonth);
 
-            var estimatedRevenue = activeSubs * 99;
+            var activeAtMonthStart = await _context.Subscriptions
+                .Where(s => !internalUserIds.Contains(s.UserId) && !deactivatedUserIds.Contains(s.UserId))
+                .CountAsync(s => s.StartDate < startOfThisMonth && s.EndDate >= startOfThisMonth);
+
+            var churnRate = activeAtMonthStart == 0
+                ? 0
+                : Math.Round((double)churnThisMonth / activeAtMonthStart * 100, 1);
+
+            var estimatedRevenue = Math.Round(activeSubs * 99m, 2);
 
             var writerStats = await BuildWriterStatsAsync(startOfThisMonth, internalUserIds);
 
@@ -127,7 +142,7 @@ namespace NewsSite.Services.Implementations
 
                 ReturningSubscribers = returningSubscribers,
 
-                GrowthRateSubscribers = CalculateGrowth(newLastMonth, newThisMonth),
+                GrowthRateSubscribers = growthRateSubscribers,
                 GrowthRateRegistrations = CalculateGrowth(regLastMonth, regThisMonth),
 
                 SubscriberPercentage = subscriberPercentage,
@@ -174,12 +189,13 @@ namespace NewsSite.Services.Implementations
                     var totalViews = articles.Sum(a => a.ViewsCount);
                     var totalEngagement = totalLikes + totalViews;
                     var avgEngagementPerArticle = totalArticles == 0 ? 0 : Math.Round((double)totalEngagement / totalArticles, 1);
-                    var revenueEstimate = Math.Round((decimal)totalViews * 0.05m, 2);
 
-                    const double articleWeight = 2.0;
-                    const double likesWeight = 1.5;
-                    const double viewsWeight = 0.02;
-                    var impactScore = Math.Round((articlesThisMonth * articleWeight) + (avgEngagementPerArticle * likesWeight) + (totalViews * viewsWeight), 1);
+                    const double viewPoints = 0.3;
+                    const double likePoints = 0.7;
+                    var impactScore = Math.Round((totalViews * viewPoints) + (totalLikes * likePoints), 1);
+
+                    const decimal revenuePerView = 0.05m;
+                    var revenueEstimate = Math.Round((decimal)totalViews * revenuePerView, 2);
 
                     var displayName = $"{author.FirstName} {author.LastName}".Trim();
                     if (string.IsNullOrWhiteSpace(displayName))
