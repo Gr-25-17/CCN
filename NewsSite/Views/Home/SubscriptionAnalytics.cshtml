@@ -1,0 +1,211 @@
+@model NewsSite.Models.Entities.SubscriptionStatsDto
+
+@{
+    ViewData["Title"] = "Subscription Analytics";
+    var topWriters = Model.WriterPerformances.Take(5).ToList();
+    var underperformers = Model.WriterPerformances.OrderBy(w => w.ImpactScore).Take(5).ToList();
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">📊 Subscription Analytics</h2>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-muted">Total users</h6>
+                <h3 class="text-dark">@Model.TotalRegisteredUsers</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Active subscribers</h6>
+                    <h3 class="text-success">@Model.ActiveSubscribers</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Inactive subscribers</h6>
+                    <h3 class="text-danger">@Model.InactiveSubscribers</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Returning subscribers</h6>
+                    <h3 class="text-primary">@Model.ReturningSubscribers</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Monthly growth</h6>
+                    <h3 class="@(Model.GrowthRateSubscribers >= 0 ? "text-success" : "text-danger")">@Model.GrowthRateSubscribers.ToString("0.0")%</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">Subscription rate</h6>
+                    <h3 class="text-primary">
+                        @(Model.TotalRegisteredUsers == 0
+                            ? "0%"
+                            : ((double)Model.ActiveSubscribers / Model.TotalRegisteredUsers * 100).ToString("0.0") + "%")
+                    </h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">New subscribers this month</h6>
+                    <h3>@Model.NewSubscribersThisMonth</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">New subscribers last month</h6>
+                    <h3>@Model.NewSubscribersLastMonth</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-4" />
+
+    <h3 class="mb-3">🧑 Writer / Editor Value Snapshot</h3>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">Top writers this month</h6>
+                    <ul class="list-group list-group-flush">
+                        @foreach (var writer in topWriters)
+                        {
+                            <li class="list-group-item d-flex justify-content-between px-0">
+                                <span>@writer.AuthorName</span>
+                                <strong>@writer.ImpactScore.ToString("0.0")</strong>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">Underperforming writers</h6>
+                    <ul class="list-group list-group-flush">
+                        @foreach (var writer in underperformers)
+                        {
+                            <li class="list-group-item d-flex justify-content-between px-0">
+                                <span>@writer.AuthorName</span>
+                                <small class="text-muted">@writer.ImpactScore.ToString("0.0")</small>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h6 class="text-muted">Formula (current)</h6>
+                    <p class="mb-0">
+                        <code>Impact = (ArticlesThisMonth × 2.0) + (AvgEngagement × 1.5) + (Views × 0.02)</code>
+                    </p>
+                    <small class="text-muted">Simple model that can evolve to revenue contribution/ROI later.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-3">📄 Articles per writer / Engagement / ROI proxy</h5>
+            <div class="table-responsive">
+                <table class="table table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>Writer</th>
+                            <th>Articles (month)</th>
+                            <th>Articles (total)</th>
+                            <th>Avg engagement/article</th>
+                            <th>Views</th>
+                            <th>Likes</th>
+                            <th>Impact score</th>
+                            <th>Revenue/article proxy</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var writer in Model.WriterPerformances)
+                        {
+                            var revenuePerArticle = writer.TotalArticles == 0
+                                ? 0
+                                : writer.RevenueEstimate / writer.TotalArticles;
+
+                            <tr>
+                                <td>@writer.AuthorName</td>
+                                <td>@writer.ArticlesThisMonth</td>
+                                <td>@writer.TotalArticles</td>
+                                <td>@writer.AvgEngagementPerArticle.ToString("0.0")</td>
+                                <td>@writer.TotalViews</td>
+                                <td>@writer.TotalLikes</td>
+                                <td><strong>@writer.ImpactScore.ToString("0.0")</strong></td>
+                                <td>@revenuePerArticle.ToString("0.00")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title mb-3">📈 Monthly trend per author (last 6 months)</h5>
+            <div class="table-responsive">
+                <table class="table table-sm table-hover">
+                    <thead>
+                        <tr>
+                            <th>Month</th>
+                            <th>Writer</th>
+                            <th>Articles</th>
+                            <th>Engagement</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var trend in Model.WriterMonthlyTrends)
+                        {
+                            <tr>
+                                <td>@trend.MonthLabel</td>
+                                <td>@trend.AuthorName</td>
+                                <td>@trend.Articles</td>
+                                <td>@trend.Engagement</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
