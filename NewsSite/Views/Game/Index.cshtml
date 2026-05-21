@@ -1,0 +1,81 @@
+@model NewsSite.Models.ViewModels.GameViewModel
+@{
+    ViewData["Title"] = "Panchinko";
+}
+
+<div class="ratio ratio-16x9 mb-4" style="min-height: 70vh;">
+    <iframe id="panchinkoFrame" src="@Url.Content("~/Panchinko/index.html")" referrerpolicy="same-origin"
+            title="Panchinko"
+            allowfullscreen
+            loading="eager"
+            style="border: 0; width: 100%; height: 100%;"></iframe>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Subscription powered purchases</h5>
+        <p class="mb-2">Days left: <strong id="daysLeft">@Model.RemainingSubscriptionDays</strong></p>
+        <p class="text-muted small">Use 1 subscription day to buy new balls in the game.</p>
+
+        <form id="buyBallsForm" asp-controller="Game" asp-action="BuyBallsWithSubscriptionDay" method="post">
+            @Html.AntiForgeryToken()
+            <button id="buyBallsButton" type="submit" class="btn btn-primary">Buy balls (cost: 1 day)</button>
+        </form>
+
+        <div id="lastDayWarning" class="alert alert-warning mt-3 d-none" role="alert">
+            Sorry can't use the last day to pay
+        </div>
+        <div id="purchaseStatus" class="small mt-2 text-muted"></div>
+    </div>
+</div>
+
+<script>
+    const frame = document.getElementById('panchinkoFrame');
+    const buyForm = document.getElementById('buyBallsForm');
+    const daysLeftEl = document.getElementById('daysLeft');
+    const warningEl = document.getElementById('lastDayWarning');
+    const statusEl = document.getElementById('purchaseStatus');
+
+    async function performPurchase(origin = window.location.origin) {
+        const formData = new FormData(buyForm);
+        const response = await fetch(buyForm.action, {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+        daysLeftEl.textContent = data.remainingDays;
+        statusEl.textContent = data.message;
+
+        const blockedByLastDay = !data.success && data.message === "Sorry can't use the last day to pay";
+        warningEl.classList.toggle('d-none', !blockedByLastDay);
+
+        if (frame && frame.contentWindow) {
+            frame.contentWindow.postMessage({
+                type: 'CCN_SUBSCRIPTION_PURCHASE_RESULT',
+                success: data.success,
+                item: 'BALLS',
+                spentDays: data.success ? 1 : 0,
+                remainingDays: data.remainingDays,
+                message: data.message
+            }, origin);
+        }
+
+        return data;
+    }
+
+    buyForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        await performPurchase();
+    });
+
+    window.addEventListener('message', async (event) => {
+        if (!frame || event.source !== frame.contentWindow || event.origin !== window.location.origin) {
+            return;
+        }
+
+        if (event.data?.type === 'CCN_BUY_BALLS_REQUEST') {
+            await performPurchase(event.origin);
+        }
+    });
+</script>
