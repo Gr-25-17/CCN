@@ -42,6 +42,12 @@
                     @await Component.InvokeAsync("GoldVC")
                 </div>
             }
+            @if (category?.Name == "Weather")
+            {
+                <div class="mt-4" id="weatherCardContainer">
+                    <partial name="Partials/_WeatherCard" model="ViewBag.Weather as NewsSite.Models.ViewModels.WeatherViewModel" />
+                </div>
+            }
         </div>
     </div>
 </div>
