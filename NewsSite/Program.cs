@@ -110,6 +110,7 @@ namespace NewsSite
             }
 
             app.UseHttpsRedirection();
+
             app.UseRouting();
             app.UseAuthorization();
 
