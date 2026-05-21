@@ -14,8 +14,8 @@ namespace NewsSite.Models.APIs
 
     public class Icon
     {
-        public string Url { get; set; }
-        public string Code { get; set; }
+        public string Url { get; set; } = string.Empty;
+        public string Code { get; set; } = string.Empty;
     }
 
 }
