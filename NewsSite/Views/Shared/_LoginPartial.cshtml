@@ -51,6 +51,13 @@
     @if (SignInManager.IsSignedIn(User))
     {
         var hasSubscription = (await AuthorizationService.AuthorizeAsync(User, "PremiumContent")).Succeeded;
+
+        if (hasSubscription)
+        {
+            <li class="nav-item d-lg-none">
+                <a class="nav-link text-dark" asp-controller="Game" asp-action="Index">Panchinko</a>
+            </li>
+        }
         
         <li class="nav-item">
             <a class="nav-link text-dark fw-bold" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">

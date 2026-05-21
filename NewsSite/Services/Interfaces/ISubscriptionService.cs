@@ -8,5 +8,7 @@ namespace NewsSite.Services.Interfaces
         Task CreateOrRenewAsync(string userId);
 
         Task CancelSubscriptionAsync(string userId);
+        Task<int> GetRemainingSubscriptionDaysAsync(string userId);
+        Task<(bool Success, string Message, int RemainingDays)> SpendSubscriptionDayForGameAsync(string userId);
     }
 }
