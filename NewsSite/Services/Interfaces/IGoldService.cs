@@ -2,6 +2,6 @@
 {
     public interface IGoldService
     {
-        Task<List<GoldPrice>> GetLatestPricesAsync(int count);
+        Task<List<GoldPrice>> GetLatestPricesAsync(int count, string symbol = "Gold");
     }
 }

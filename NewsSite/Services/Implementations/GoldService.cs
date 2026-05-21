@@ -10,14 +10,16 @@ public class GoldService(IConfiguration config, ILogger<GoldService> logger) : I
         config.GetConnectionString("AzureWebJobsStorage") ?? config["AzureWebJobsStorage"],
         "GoldPrices");
 
-    public async Task<List<GoldPrice>> GetLatestPricesAsync(int count = 7)
+    public async Task<List<GoldPrice>> GetLatestPricesAsync(int count = 7, string symbol = "Gold")
     {
         var list = new List<GoldPrice>();
 
         try
         {
+            var normalizedSymbol = string.IsNullOrWhiteSpace(symbol) ? "Gold" : symbol.Trim();
+
             var results = _tableClient.QueryAsync<GoldPrice>(
-                filter: "PartitionKey eq 'Gold'",
+                filter: $"PartitionKey eq '{normalizedSymbol}'",
                 maxPerPage: count
             ).Take(count);
 
@@ -28,11 +30,11 @@ public class GoldService(IConfiguration config, ILogger<GoldService> logger) : I
         }
         catch (RequestFailedException ex)
         {
-            logger.LogError(ex, "Azure Table Storage error fetching gold prices.");
+            logger.LogError(ex, "Azure Table Storage error fetching {Symbol} prices.", symbol);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "General error fetching gold prices. Check internet connection.");
+            logger.LogError(ex, "General error fetching {Symbol} prices. Check internet connection.", symbol);
         }
 
         return list;
