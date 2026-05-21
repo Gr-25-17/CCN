@@ -11,7 +11,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - NewsSite</title>
+    <title>@ViewData["Title"] - CCN</title>
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
@@ -22,7 +22,7 @@
     <header>
         <nav class="navbar navbar-expand-lg navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">NewsSite</a>
+                <a class="navbar-brand fw-bolder" asp-area="" asp-controller="Home" asp-action="Index"><span style="color: red;"><strong>CC</strong></span><span style="color: blue;">N</span></a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -36,7 +36,7 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy" aria-current="@(isPrivacyPage ? "page" : null)">Privacy</a>
                         </li>
                         @if (!(await AuthorizationService.AuthorizeAsync(User, "PremiumContent")).Succeeded)
-                            {
+                        {
                             <li class="nav-item">
                                 <a href="#" class="nav-link text-dark" data-bs-toggle="offcanvas" data-bs-target="#loginOffcanvas" data-auth-mode="subscribe">Subscribe</a>
                             </li>
@@ -56,7 +56,7 @@
                     </form>
 
                     <div class="d-flex align-items-center navbar-weather">
-                        <div id="weatherWidget">@await Component.InvokeAsync("WeatherCardVC", new { detailed = false })</div>
+                        <div id="weatherWidget"></div>
                     </div>
                 </div>
             </div>
@@ -68,7 +68,7 @@
     </div>
 
     <footer class="border-top footer text-muted">
-        <div class="container">&copy; 2026 - NewsSite - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a></div>
+        <div class="container">&copy; 2026 - CCN - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a></div>
     </footer>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
@@ -76,7 +76,7 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script>
         let isDetailed = false;
-        let currentCity = 'Stockholm';
+        let currentCity = localStorage.getItem('selectedCity') ?? 'Stockholm';
 
         async function toggleWeather() {
         isDetailed = !isDetailed;
@@ -86,102 +86,111 @@
 
         function updateWeather(city) {
         currentCity = city;
+        localStorage.setItem('selectedCity', city);
+            fetch(`/Weather/Widget?detailed=${isDetailed}&city=${encodeURIComponent(city)}`)
+                .then(r => r.text())
+                .then(html => document.getElementById('weatherWidget').innerHTML = html);
+
+        const card = document.getElementById('weatherCardContainer');
+            if (card) {
             fetch(`/Weather/Card?city=${encodeURIComponent(city)}`)
                 .then(r => r.text())
-                .then(html => document.getElementById('weatherCardContainer').innerHTML = html);
+                .then(html => card.innerHTML = html);
+            }
+        }
 
-    fetch(`/Weather/Widget?detailed=${isDetailed}&city=${encodeURIComponent(city)}`)
-        .then(r => r.text())
-        .then(html => document.getElementById('weatherWidget').innerHTML = html);
-}
-            document.addEventListener('DOMContentLoaded', () => {
-                const expirationInput = document.querySelector('#subscriptionExpirationDate');
-                if (!expirationInput) return;
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch(`/Weather/Widget?detailed=${isDetailed}&city=${encodeURIComponent(currentCity)}`)
+                .then(r => r.text())
+                .then(html => document.getElementById('weatherWidget').innerHTML = html);
 
-                const placeholder = 'MM/YY';
-                let digits = '';
+        const expirationInput = document.querySelector('#subscriptionExpirationDate');
+        if (!expirationInput) return;
 
-                const render = () => {
-                    const chars = placeholder.split('');
-                    for (let i = 0; i < digits.length; i++) {
-                        chars[i < 2 ? i : i + 1] = digits[i];
-                    }
-                    expirationInput.value = chars.join('');
-                };
+        const placeholder = 'MM/YY';
+        let digits = '';
 
-                expirationInput.addEventListener('focus', () => {
-                    render();
-                    const pos = digits.length < 2 ? digits.length : digits.length + 1;
-                    expirationInput.setSelectionRange(pos, pos);
-                });
+        const render = () => {
+        const chars = placeholder.split('');
+        for (let i = 0; i < digits.length; i++) {
+            chars[i < 2 ? i : i + 1] = digits[i];
+        }
+            expirationInput.value = chars.join('');
+        };
 
-                expirationInput.addEventListener('keydown', (event) => {
-                    const isDigit = event.key >= '0' && event.key <= '9';
+        expirationInput.addEventListener('focus', () => {
+        render();
+        const pos = digits.length < 2 ? digits.length : digits.length + 1;
+            expirationInput.setSelectionRange(pos, pos);
+        });
 
-                    if (isDigit) {
-                        event.preventDefault();
-                        if (digits.length >= 4) return;
+        expirationInput.addEventListener('keydown', (event) => {
+        const isDigit = event.key >= '0' && event.key <= '9';
 
-                        const caret = expirationInput.selectionStart ?? 0;
-                        const digitIndex = caret <= 2 ? caret : caret - 1;
-                        digits = digits.slice(0, digitIndex) + event.key + digits.slice(digitIndex);
-                        digits = digits.slice(0, 4);
-                        render();
+        if (isDigit) {
+        event.preventDefault();
+        if (digits.length >= 4) return;
 
-                        const nextIndex = Math.min(digitIndex + 1, digits.length);
-                        const nextCaret = nextIndex < 2 ? nextIndex : nextIndex + 1;
-                        expirationInput.setSelectionRange(nextCaret, nextCaret);
-                        return;
-                    }
+        const caret = expirationInput.selectionStart ?? 0;
+        const digitIndex = caret <= 2 ? caret : caret - 1;
+        digits = digits.slice(0, digitIndex) + event.key + digits.slice(digitIndex);
+        digits = digits.slice(0, 4);
+        render();
 
-                    if (event.key === 'Backspace') {
-                        event.preventDefault();
-                        const caret = expirationInput.selectionStart ?? 0;
-                        const digitIndex = caret <= 2 ? caret : caret - 1;
-                        if (digitIndex <= 0) return;
+        const nextIndex = Math.min(digitIndex + 1, digits.length);
+        const nextCaret = nextIndex < 2 ? nextIndex : nextIndex + 1;
+        expirationInput.setSelectionRange(nextCaret, nextCaret);
+        return;
+        }
 
-                        digits = digits.slice(0, digitIndex - 1) + digits.slice(digitIndex);
-                        render();
+        if (event.key === 'Backspace') {
+        event.preventDefault();
+        const caret = expirationInput.selectionStart ?? 0;
+        const digitIndex = caret <= 2 ? caret : caret - 1;
+        if (digitIndex <= 0) return;
 
-                        const nextIndex = digitIndex - 1;
-                        const nextCaret = nextIndex < 2 ? nextIndex : nextIndex + 1;
-                        expirationInput.setSelectionRange(nextCaret, nextCaret);
-                        return;
-                    }
+        digits = digits.slice(0, digitIndex - 1) + digits.slice(digitIndex);
+        render();
 
-                    if (event.key === 'Delete') {
-                        event.preventDefault();
-                        const caret = expirationInput.selectionStart ?? 0;
-                        const digitIndex = caret <= 2 ? caret : caret - 1;
-                        if (digitIndex >= digits.length) return;
+        const nextIndex = digitIndex - 1;
+        const nextCaret = nextIndex < 2 ? nextIndex : nextIndex + 1;
+        expirationInput.setSelectionRange(nextCaret, nextCaret);
+        return;
+        }
 
-                        digits = digits.slice(0, digitIndex) + digits.slice(digitIndex + 1);
-                        render();
+        if (event.key === 'Delete') {
+        event.preventDefault();
+        const caret = expirationInput.selectionStart ?? 0;
+        const digitIndex = caret <= 2 ? caret : caret - 1;
+        if (digitIndex >= digits.length) return;
 
-                        const nextCaret = digitIndex < 2 ? digitIndex : digitIndex + 1;
-                        expirationInput.setSelectionRange(nextCaret, nextCaret);
-                        return;
-                    }
+        digits = digits.slice(0, digitIndex) + digits.slice(digitIndex + 1);
+        render();
 
-                    if ([ 'Tab', 'ArrowLeft', 'ArrowRight', 'Home', 'End' ].includes(event.key)) {
-                        return;
-                    }
+        const nextCaret = digitIndex < 2 ? digitIndex : digitIndex + 1;
+        expirationInput.setSelectionRange(nextCaret, nextCaret);
+        return;
+        }
 
-                    event.preventDefault();
-                });
+        if ([ 'Tab', 'ArrowLeft', 'ArrowRight', 'Home', 'End' ].includes(event.key)) {
+        return;
+        }
 
-                render();
-            });
+        event.preventDefault();
+        });
+
+        render();
+        });
     </script>
     @if (TempData["AuthSuccessMessage"] != null)
     {
         <script>
-                document.addEventListener('DOMContentLoaded', () => {
-                    const offcanvasElement = document.getElementById('loginOffcanvas');
-                    if (offcanvasElement) {
-                        bootstrap.Offcanvas.getOrCreateInstance(offcanvasElement).show();
-                    }
-                });
+            document.addEventListener('DOMContentLoaded', () => {
+            const offcanvasElement = document.getElementById('loginOffcanvas');
+            if (offcanvasElement) {
+            bootstrap.Offcanvas.getOrCreateInstance(offcanvasElement).show();
+            }
+            });
         </script>
     }
 
