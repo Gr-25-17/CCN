@@ -77,7 +77,7 @@ namespace NewsSite.Areas.Identity.Pages.Account.Manage
 
             var prefs = await _newsletterService.GetPreferencesAsync(user.Id);
             ContentPreferences.ReceiveNewsletter = prefs.ReceiveNewsletter;
-            ContentPreferences.Frequency = prefs.Frequency;
+            ContentPreferences.Frequency = "weekly";
             ContentPreferences.UnsubscribeToken = prefs.UnsubscribeToken;
             ContentPreferences.IsUnsubscribed = prefs.IsUnsubscribed;
 
@@ -139,7 +139,7 @@ namespace NewsSite.Areas.Identity.Pages.Account.Manage
             return Page(); 
         }
 
-        
+
 
         public async Task<IActionResult> OnPostAsync()
         {
@@ -173,6 +173,13 @@ namespace NewsSite.Areas.Identity.Pages.Account.Manage
 
             var existingPrefs = await _newsletterService.GetPreferencesAsync(user.Id);
 
+            var receiveNewsletter = Request.Form["ContentPreferences.ReceiveNewsletter"] == "true";
+
+            existingPrefs.ReceiveNewsletter = receiveNewsletter;
+            existingPrefs.Frequency = "Weekly";  
+            existingPrefs.IsUnsubscribed = false;  
+
+            
             var newCategoryIds = string.Join(",", ContentPreferences?.SelectedCategoryIdsTemp ?? new List<int>());
             var newAuthorIds = string.Join(",", ContentPreferences?.SelectedAuthorIdsTemp ?? new List<string>());
 
