@@ -44,13 +44,40 @@ namespace NewsSite.Services.Implementations
             var regThisMonth = 26;
             var regLastMonth = 15;
 
+            var latestUnsubscribeStatusByUser = await _context.UnsubscribeLogs
+                .Where(u => !internalUserIds.Contains(u.UserId))
+                .GroupBy(u => u.UserId)
+                .Select(g => new
+                {
+                    UserId = g.Key,
+                    IsDeactivated = !g.OrderByDescending(x => x.UnsubscribedAt)
+                        .Select(x => x.WasReactivated)
+                        .FirstOrDefault()
+                })
+                .ToListAsync();
+
+            var deactivatedUserIds = latestUnsubscribeStatusByUser
+                .Where(x => x.IsDeactivated)
+                .Select(x => x.UserId)
+                .ToHashSet();
+
+            var returningSubscribers = await (
+                from unsubscribe in _context.UnsubscribeLogs
+                where !internalUserIds.Contains(unsubscribe.UserId)
+                join subscription in _context.Subscriptions on unsubscribe.UserId equals subscription.UserId
+                where subscription.StartDate > unsubscribe.UnsubscribedAt
+                select unsubscribe.UserId
+            )
+            .Distinct()
+            .CountAsync();
+
             var activeSubs = await _context.Subscriptions
-                .Where(s => !internalUserIds.Contains(s.UserId))
+                .Where(s => !internalUserIds.Contains(s.UserId) && !deactivatedUserIds.Contains(s.UserId))
                 .CountAsync(s => s.StartDate <= now && s.EndDate > now);
 
             var inactiveSubs = await _context.Subscriptions
                 .Where(s => !internalUserIds.Contains(s.UserId))
-                .CountAsync(s => s.EndDate <= now);
+                .CountAsync(s => s.EndDate <= now || deactivatedUserIds.Contains(s.UserId));
 
             var newThisMonth = await _context.Subscriptions
                 .Where(s => !internalUserIds.Contains(s.UserId))
@@ -72,19 +99,33 @@ namespace NewsSite.Services.Implementations
                     u.UnsubscribedAt >= startOfLastMonth &&
                     u.UnsubscribedAt < startOfThisMonth);
 
-            var returningSubscribers = 7;
+
+            var startOfNextMonth = startOfThisMonth.AddMonths(1);
+            var activeSubsLastMonth = await _context.Subscriptions
+                .Where(s => !internalUserIds.Contains(s.UserId) && !deactivatedUserIds.Contains(s.UserId))
+                .CountAsync(s => s.StartDate < startOfThisMonth && s.EndDate >= startOfLastMonth);
+
+            var activeSubsThisMonth = await _context.Subscriptions
+                .Where(s => !internalUserIds.Contains(s.UserId) && !deactivatedUserIds.Contains(s.UserId))
+                .CountAsync(s => s.StartDate < startOfNextMonth && s.EndDate >= startOfThisMonth);
 
             var subscriberPercentage = totalUsers == 0
                 ? 0
                 : Math.Round((double)activeSubs / totalUsers * 100, 1);
 
-            var churnRate = activeSubs == 0
+            var growthRateSubscribers = CalculateGrowth(activeSubsLastMonth, activeSubsThisMonth);
+
+            var activeAtMonthStart = await _context.Subscriptions
+                .Where(s => !internalUserIds.Contains(s.UserId) && !deactivatedUserIds.Contains(s.UserId))
+                .CountAsync(s => s.StartDate < startOfThisMonth && s.EndDate >= startOfThisMonth);
+
+            var churnRate = activeAtMonthStart == 0
                 ? 0
-                : Math.Round((double)churnThisMonth / activeSubs * 100, 1);
+                : Math.Round((double)churnThisMonth / activeAtMonthStart * 100, 1);
 
-            var estimatedRevenue = activeSubs * 99;
+            var estimatedRevenue = Math.Round(activeSubs * 99m, 2);
 
-            var writerStats = await BuildWriterStatsAsync(startOfThisMonth);
+            var writerStats = await BuildWriterStatsAsync(startOfThisMonth, internalUserIds);
 
             return new SubscriptionStatsDto
             {
@@ -101,19 +142,21 @@ namespace NewsSite.Services.Implementations
 
                 ReturningSubscribers = returningSubscribers,
 
-                GrowthRateSubscribers = CalculateGrowth(newLastMonth, newThisMonth),
+                GrowthRateSubscribers = growthRateSubscribers,
                 GrowthRateRegistrations = CalculateGrowth(regLastMonth, regThisMonth),
 
                 SubscriberPercentage = subscriberPercentage,
                 ChurnRate = churnRate,
                 EstimatedMonthlyRevenue = estimatedRevenue,
 
+                TrendLabels = writerStats.TrendLabels,
+                TrendSubscriberCounts = writerStats.TrendSubscriberCounts,
                 WriterPerformances = writerStats.WriterPerformances,
                 WriterMonthlyTrends = writerStats.WriterMonthlyTrends
             };
         }
 
-        private async Task<(List<WriterPerformanceDto> WriterPerformances, List<WriterMonthlyTrendDto> WriterMonthlyTrends)> BuildWriterStatsAsync(DateTime startOfThisMonth)
+        private async Task<(List<WriterPerformanceDto> WriterPerformances, List<WriterMonthlyTrendDto> WriterMonthlyTrends, List<string> TrendLabels, List<int> TrendSubscriberCounts)> BuildWriterStatsAsync(DateTime startOfThisMonth, List<string> internalUserIds)
         {
             var authors = await (
                 from user in _context.Users
@@ -146,12 +189,13 @@ namespace NewsSite.Services.Implementations
                     var totalViews = articles.Sum(a => a.ViewsCount);
                     var totalEngagement = totalLikes + totalViews;
                     var avgEngagementPerArticle = totalArticles == 0 ? 0 : Math.Round((double)totalEngagement / totalArticles, 1);
-                    var revenueEstimate = Math.Round((decimal)totalViews * 0.05m, 2);
 
-                    const double articleWeight = 2.0;
-                    const double likesWeight = 1.5;
-                    const double viewsWeight = 0.02;
-                    var impactScore = Math.Round((articlesThisMonth * articleWeight) + (avgEngagementPerArticle * likesWeight) + (totalViews * viewsWeight), 1);
+                    const double viewPoints = 0.3;
+                    const double likePoints = 0.7;
+                    var impactScore = Math.Round((totalViews * viewPoints) + (totalLikes * likePoints), 1);
+
+                    const decimal revenuePerView = 0.05m;
+                    var revenueEstimate = Math.Round((decimal)totalViews * revenuePerView, 2);
 
                     var displayName = $"{author.FirstName} {author.LastName}".Trim();
                     if (string.IsNullOrWhiteSpace(displayName))
@@ -200,11 +244,50 @@ namespace NewsSite.Services.Implementations
                         Engagement = g.Sum(x => x.Likes.Count + x.ViewsCount)
                     };
                 })
-                .OrderBy(t => t.AuthorName)
+                 .OrderByDescending(t => t.Engagement)
                 .ThenBy(t => t.MonthLabel)
                 .ToList();
 
-            return (writerPerformances, writerMonthlyTrends);
+            var trendStartMonth = new DateTime(startOfThisMonth.Year, startOfThisMonth.Month, 1).AddMonths(-5);
+            var trendLabels = Enumerable.Range(0, 6)
+                .Select(offset => trendStartMonth.AddMonths(offset))
+                .Select(month => month.ToString("yyyy-MM"))
+                .ToList();
+
+            var trendSubscriberCounts = new List<int>();
+
+            foreach (var label in trendLabels)
+            {
+                var monthStart = DateTime.ParseExact(label + "-01", "yyyy-MM-dd", null);
+                var monthEnd = monthStart.AddMonths(1);
+
+                var monthDeactivatedUserIds = await _context.UnsubscribeLogs
+                    .Where(u => !internalUserIds.Contains(u.UserId) && u.UnsubscribedAt < monthEnd)
+                    .GroupBy(u => u.UserId)
+                    .Select(g => new
+                    {
+                        UserId = g.Key,
+                        IsDeactivated = !g.OrderByDescending(x => x.UnsubscribedAt)
+                            .Select(x => x.WasReactivated)
+                            .FirstOrDefault()
+                    })
+                    .Where(x => x.IsDeactivated)
+                    .Select(x => x.UserId)
+                    .ToListAsync();
+
+                var activeSubscriberCount = await _context.Subscriptions
+                    .Where(s => !internalUserIds.Contains(s.UserId)
+                        && s.StartDate < monthEnd
+                        && s.EndDate >= monthStart
+                        && !monthDeactivatedUserIds.Contains(s.UserId))
+                    .Select(s => s.UserId)
+                    .Distinct()
+                    .CountAsync();
+
+                trendSubscriberCounts.Add(activeSubscriberCount);
+            }
+
+            return (writerPerformances, writerMonthlyTrends, trendLabels, trendSubscriberCounts);
         }
 
         private double CalculateGrowth(int oldValue, int newValue)
