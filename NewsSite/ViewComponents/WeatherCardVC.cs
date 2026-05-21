@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NewsSite.Mapping;
 using NewsSite.Services.Interfaces;
-using NewsSite.Models.ViewModels
+using NewsSite.Models.ViewModels;
 
 namespace NewsSite.ViewComponents;
 
@@ -12,7 +12,7 @@ public class WeatherCardVC(IWeatherService weatherService) : ViewComponent
         var weather = await weatherService.GetWeatherAsync(city);
 
         return detailed
-            ? View("Detailed", weather.ToWeatherViewModel() ?? new WeatherViewModel())
-            : View("Default", weather.ToViewModel() ?? new WeatherBasicVM());
+            ? View("Detailed", weather?.ToWeatherViewModel() ?? new WeatherViewModel())
+            : View("Default", weather?.ToViewModel() ?? new WeatherBasicVM());
     }
 }
