@@ -12,12 +12,14 @@ public class CategoryControllerTests
     private readonly Mock<IArticleService> _articleServiceMock;
     private readonly Mock<ICategoryService> _categoryServiceMock;
     private readonly CategoryController _controller;
+    private readonly Mock<IWeatherService> _weatherServiceMock;
 
     public CategoryControllerTests()
     {
         _articleServiceMock = new Mock<IArticleService>();
         _categoryServiceMock = new Mock<ICategoryService>();
-        _controller = new CategoryController(_articleServiceMock.Object, _categoryServiceMock.Object);
+        _weatherServiceMock = new Mock<IWeatherService>();
+        _controller = new CategoryController(_articleServiceMock.Object, _categoryServiceMock.Object, _weatherServiceMock.Object);
     }
 
     [Fact]
