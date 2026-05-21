@@ -49,4 +49,8 @@
     <ProjectReference Include="..\GoldApIUpdater\GoldApIUpdater\GoldApIUpdater.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\Panchinko\" />
+  </ItemGroup>
+
 </Project>
