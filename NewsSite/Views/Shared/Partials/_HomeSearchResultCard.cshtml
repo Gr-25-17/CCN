@@ -11,7 +11,7 @@
         <div class="col-md-4">
             <a asp-controller="Articles" asp-action="Details" asp-route-slug="@Model.Slug" aria-label="Open @Model.Title">
                 <partial name="Partials/_ResponsiveImage"
-                         model='new ResponsiveImageViewModel { ImageUrl = Model.ImageUrl, Alt = Model.Title, Size = "med", CssClass = "card-img h-100 w-100", Style = "object-fit: cover;" }' />
+                         model='new NewsSite.Models.ViewModels.ResponsiveImageViewModel { ImageUrl = Model.ImageUrl, Alt = Model.Title, Size = "med", CssClass = "card-img h-100 w-100", Style = "object-fit: cover;" }' />
             </a>
         </div>
         <div class="col-md-8">

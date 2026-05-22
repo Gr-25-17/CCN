@@ -96,7 +96,7 @@ namespace NewsSite.Controllers
             }
 
             var latestArticles = await _articleService.GetLatestAsync(6);
-            var sidebarCollections = await GetSidebarCollectionsAsync();
+            var sidebarCollectionsMain = await GetSidebarCollectionsAsync();
 
             var prioritizedArticles = new List<ArticleSummaryViewModel>();
 
@@ -113,8 +113,8 @@ namespace NewsSite.Controllers
             var viewModel = new HomeViewModel
             {
                 LatestArticles = latestArticles,
-                MostPopularArticles = sidebarCollections.MostPopularArticles,
-                EditorChoiceArticles = sidebarCollections.EditorChoiceArticles,
+                MostPopularArticles = sidebarCollectionsMain.MostPopularArticles,
+                EditorChoiceArticles = sidebarCollectionsMain.EditorChoiceArticles,
                 PrioritizedArticles = prioritizedArticles,
                 Categories = await _categoryService.GetAllAsync(),
                 HasActiveSubscription = hasSubscription,
