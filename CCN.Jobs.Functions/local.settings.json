@@ -1,0 +1,13 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "DefaultEndpointsProtocol=https;AccountName=ccnstorage;AccountKey=BFpTXfEqkCmNdZX9W3KeUxnyv44VtjrJXe4ZoxTCT+k0p+f7qpSriJ+xPn78Sxcgo885k18v7vUb+AStUJbl0Q==;EndpointSuffix=core.windows.net",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+    "WEATHER_API_URL": "https://weatherapi.dreammaker-it.se/forecast",
+    "WEATHER_API_LANG": "Eng",
+    "StockApiUrl": "https://stockapinewsapp.azurewebsites.net/summary",
+    "NewsSiteBaseUrl": "https://ccnews-fhdvd8hqcdc0akgx.swedencentral-01.azurewebsites.net",
+    "NewsletterSettings:AppUrl": "ccnews-fhdvd8hqcdc0akgx.swedencentral-01.azurewebsites.net",
+    "NewsletterSettings:ApiKey": "CCNNewsSecretHandshakeKey123!"
+  }
+}
