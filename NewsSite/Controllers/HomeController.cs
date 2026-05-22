@@ -53,6 +53,8 @@ namespace NewsSite.Controllers
                     SearchResults = searchResults,
                     IsSearch = true,
                     SearchTerm = searchTerm,
+                    MostPopularArticles = await _articleService.GetMostPopularAsync(6),
+                    EditorChoiceArticles = await _articleService.GetEditorChoiceAsync(3),
                     Categories = await _categoryService.GetAllAsync(),
                     Weather = weather?.ToWeatherViewModel()
                 };

@@ -66,4 +66,40 @@ public class HomeControllerTests
         var viewResult = result.Should().BeOfType<ViewResult>().Subject;
         viewResult.Model.Should().BeOfType<HomeViewModel>();
     }
+    [Fact]
+    public async Task Index_WithSearchTerm_ShouldPopulateSidebarCollections()
+    {
+        var searchResults = new List<SearchArticleVM>
+        {
+            new() { Id = 1, Title = "Search hit", Slug = "search-hit" }
+        };
+
+        var editorChoice = new List<ArticleSummaryViewModel>
+        {
+            new() { Id = 2, Title = "Editor", Slug = "editor" }
+        };
+
+        var mostPopular = new List<ArticleSummaryViewModel>
+        {
+            new() { Id = 3, Title = "Popular", Slug = "popular" }
+        };
+
+        _articleServiceMock.Setup(s => s.SearchArticlesAsync("ai")).ReturnsAsync(searchResults);
+        _articleServiceMock.Setup(s => s.GetEditorChoiceAsync(3)).ReturnsAsync(editorChoice);
+        _articleServiceMock.Setup(s => s.GetMostPopularAsync(6)).ReturnsAsync(mostPopular);
+        _categoryServiceMock.Setup(s => s.GetAllAsync()).ReturnsAsync(new List<CategoryViewModel>());
+        _weatherServiceMock.Setup(s => s.GetWeatherAsync()).ReturnsAsync((NewsSite.Models.APIs.WeatherForecast?)null);
+
+        _controller.ControllerContext.HttpContext.Request.QueryString = new QueryString("?searchTerm=ai");
+
+        var result = await _controller.Index();
+
+        var viewResult = result.Should().BeOfType<ViewResult>().Subject;
+        var model = viewResult.Model.Should().BeOfType<HomeViewModel>().Subject;
+        model.IsSearch.Should().BeTrue();
+        model.SearchResults.Should().HaveCount(1);
+        model.EditorChoiceArticles.Should().HaveCount(1);
+        model.MostPopularArticles.Should().HaveCount(1);
+    }
+
 }
