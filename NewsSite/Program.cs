@@ -111,30 +111,6 @@ namespace NewsSite
 
             app.UseHttpsRedirection();
 
-            app.Use(async (context, next) =>
-            {
-                var path = context.Request.Path.Value;
-                if (!string.IsNullOrWhiteSpace(path) && path.StartsWith("/Panchinko/Build/", StringComparison.OrdinalIgnoreCase) && path.EndsWith(".br", StringComparison.OrdinalIgnoreCase))
-                {
-                    context.Response.Headers["Content-Encoding"] = "br";
-
-                    if (path.EndsWith(".wasm.br", StringComparison.OrdinalIgnoreCase))
-                    {
-                        context.Response.ContentType = "application/wasm";
-                    }
-                    else if (path.EndsWith(".js.br", StringComparison.OrdinalIgnoreCase))
-                    {
-                        context.Response.ContentType = "application/javascript";
-                    }
-                    else if (path.EndsWith(".data.br", StringComparison.OrdinalIgnoreCase))
-                    {
-                        context.Response.ContentType = "application/octet-stream";
-                    }
-                }
-
-                await next();
-            });
-
             app.UseRouting();
             app.UseAuthorization();
 
