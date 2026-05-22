@@ -21,11 +21,17 @@ namespace NewsSite
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
                 ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
             var lexiconConnection = builder.Configuration.GetConnectionString("LexiconConnection");
+            var activeDbConnection = !string.IsNullOrWhiteSpace(lexiconConnection)
+                ? lexiconConnection
+                : connectionString;
+            var useSqlServer = activeDbConnection.Contains("Server=", StringComparison.OrdinalIgnoreCase)
+                || activeDbConnection.Contains("Data Source=", StringComparison.OrdinalIgnoreCase)
+                && !activeDbConnection.Contains(".db", StringComparison.OrdinalIgnoreCase);
 
-            if (!string.IsNullOrWhiteSpace(lexiconConnection))
+            if (useSqlServer)
             {
                 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                    options.UseSqlServer(lexiconConnection));
+                    options.UseSqlServer(activeDbConnection));
             }
             else
             {
@@ -52,19 +58,20 @@ namespace NewsSite
             builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
             builder.Services.AddScoped<IUnsubscribeTokenService, UnsubscribeTokenService>();
 
-            builder.Services.AddSingleton(_ =>
+            var storageConnectionString =
+                builder.Configuration["AzureWebJobsStorage"]
+                ?? builder.Configuration.GetConnectionString("AzureWebJobsStorage")
+                ?? builder.Configuration.GetConnectionString("Storage");
+
+            if (!string.IsNullOrWhiteSpace(storageConnectionString))
             {
-                var storageConnectionString = builder.Configuration["AzureWebJobsStorage"];
-
-                if (string.IsNullOrWhiteSpace(storageConnectionString))
-                {
-                    throw new InvalidOperationException("Configuration value 'AzureWebJobsStorage' is missing.");
-                }
-
-                return new BlobServiceClient(storageConnectionString);
-            });
-
-            builder.Services.AddScoped<IBlobService, BlobService>();
+                builder.Services.AddSingleton(new BlobServiceClient(storageConnectionString));
+                builder.Services.AddScoped<IBlobService, BlobService>();
+            }
+            else
+            {
+                builder.Services.AddScoped<IBlobService, DisabledBlobService>();
+            }
             builder.Services.AddHttpClient();
             builder.Services.AddScoped<IImageOrchestrationService, ImageOrchestrationService>();
             builder.Services.AddControllers();
