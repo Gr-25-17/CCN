@@ -15,9 +15,54 @@ namespace NewsSite.Controllers
         ILogger<AdminController> logger) : Controller
     {
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? search, string? roleFilter, bool? isDeletedFilter, string? sortBy, string? sortDir)
         {
             var model = await userService.GetUsersForAdminAsync();
+
+            var query = model.Users.AsEnumerable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var normalizedSearch = search.Trim();
+                query = query.Where(user =>
+                    user.FullName.Contains(normalizedSearch, StringComparison.OrdinalIgnoreCase) ||
+                    user.Email.Contains(normalizedSearch, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!string.IsNullOrWhiteSpace(roleFilter))
+            {
+                query = query.Where(user => string.Equals(user.CurrentRole, roleFilter, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (isDeletedFilter is not null)
+            {
+                query = query.Where(user => user.IsDeleted == isDeletedFilter.Value);
+            }
+
+            var direction = string.Equals(sortDir, "asc", StringComparison.OrdinalIgnoreCase) ? "asc" : "desc";
+            query = (sortBy?.ToLowerInvariant(), direction) switch
+            {
+                ("name", "asc") => query.OrderBy(x => x.FullName),
+                ("name", _) => query.OrderByDescending(x => x.FullName),
+                ("dob", "asc") => query.OrderBy(x => x.DateOfBirth),
+                ("dob", _) => query.OrderByDescending(x => x.DateOfBirth),
+                ("email", "asc") => query.OrderBy(x => x.Email),
+                ("email", _) => query.OrderByDescending(x => x.Email),
+                ("role", "asc") => query.OrderBy(x => x.CurrentRole),
+                ("role", _) => query.OrderByDescending(x => x.CurrentRole),
+                ("status", "asc") => query.OrderBy(x => x.IsDeleted),
+                ("status", _) => query.OrderByDescending(x => x.IsDeleted),
+                _ => query.OrderBy(x => x.CurrentRole).ThenBy(x => x.FullName)
+            };
+
+            model.Users = query.ToList();
+            ViewBag.AvailableRoles = model.AvailableRoles;
+            ViewBag.SortBy = sortBy;
+            ViewBag.SortDir = direction;
+            model.Search = search;
+            model.RoleFilter = roleFilter;
+            model.IsDeletedFilter = isDeletedFilter;
+
             return View(model);
         }
 
@@ -26,7 +71,7 @@ namespace NewsSite.Controllers
         {
             if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(newRole))
             {
-                return RedirectToAction(nameof(Index));
+                return Request.Headers["X-Requested-With"] == "XMLHttpRequest" ? BadRequest() : RedirectToAction(nameof(Index));
             }
 
             var success = await userService.UpdateUserRoleAsync(userId, newRole);
@@ -34,6 +79,12 @@ namespace NewsSite.Controllers
             {
                 TempData["Error"] = "Gick inte att uppdatera rollen.";
             }
+
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return success ? Ok() : BadRequest();
+            }
+
             return RedirectToAction(nameof(Index));
         }
 
@@ -42,7 +93,7 @@ namespace NewsSite.Controllers
         {
             if (string.IsNullOrEmpty(userId))
             {
-                return RedirectToAction(nameof(Index));
+                return Request.Headers["X-Requested-With"] == "XMLHttpRequest" ? BadRequest() : RedirectToAction(nameof(Index));
             }
 
             var success = await userService.SoftDeleteUserAsync(userId);
@@ -52,26 +103,41 @@ namespace NewsSite.Controllers
                 TempData["Error"] = "Kunde inte radera användaren.";
             }
 
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return success ? Ok() : BadRequest();
+            }
+
             return RedirectToAction(nameof(Index));
         }
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Restore(string userId)
         {
-            if (string.IsNullOrEmpty(userId)) return RedirectToAction(nameof(Index));
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Request.Headers["X-Requested-With"] == "XMLHttpRequest" ? BadRequest() : RedirectToAction(nameof(Index));
+            }
 
             var success = await userService.RestoreUserAsync(userId);
             if (!success) TempData["Error"] = "Kunde inte återställa användaren.";
 
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return success ? Ok() : BadRequest();
+            }
+
             return RedirectToAction(nameof(Index));
         }
-        [HttpPost]
+        [HttpPost, ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> RunImageMigration()
         {
-            // Hämtar endast artiklar som behöver migreras (körs som SQL Query tack vare IQueryable)
             var articles = await _articleRepository.GetQueryable()
                 .Where(a => !string.IsNullOrEmpty(a.ImageUrl) && !a.ImageUrl.EndsWith(".webp") && !a.ImageUrl.EndsWith(".svg"))
                 .ToListAsync();
+
+            var migratedCount = 0;
+            var failedCount = 0;
 
             foreach (var article in articles)
             {
@@ -80,7 +146,6 @@ namespace NewsSite.Controllers
                     using var stream = await _imageOrchestrationService.FetchExternalImageAsync(article.ImageUrl!);
                     if (stream == null) continue;
 
-                    // Fix CS8130: Ta emot hela tupeln i en variabel istället för dekonstruktion
                     var result = await _imageOrchestrationService.HandleIncomingImageAsync(
                         stream, article.ImageUrl, "application/octet-stream");
 
@@ -88,16 +153,17 @@ namespace NewsSite.Controllers
                     {
                         article.ImageUrl = result.FileName;
                         await _articleRepository.UpdateAsync(article);
+                        migratedCount++;
                     }
                 }
                 catch (Exception ex)
                 {
-                    // Implementera ILogger här framöver för att fånga upp specifika artiklar som misslyckas 
-                    // _logger.LogWarning(ex, "Kunde inte migrera bild för artikel {Id}", article.Id);
+                    failedCount++;
+                    logger.LogWarning(ex, "Kunde inte migrera bild för artikel {ArticleId}", article.Id);
                 }
             }
 
-            return Ok("Migration slutförd. Azure Functions bearbetar bilderna asynkront.");
+            return Ok($"Migration slutförd. Migrerade: {migratedCount}. Misslyckade: {failedCount}.");
         }
 
         [HttpPost, ValidateAntiForgeryToken]

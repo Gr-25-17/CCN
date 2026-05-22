@@ -1,5 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using NewsSite.Data;
 using NewsSite.Models.Entities;
 using NewsSite.Repositories.Interfaces;
 
@@ -7,14 +8,22 @@ namespace NewsSite.Repositories.Implementations
 {
     public class UserRepository(
         UserManager<ApplicationUser> userManager,
-        RoleManager<IdentityRole> roleManager) : IUserRepository
+        RoleManager<IdentityRole> roleManager,
+        ApplicationDbContext context) : IUserRepository
     {
         public async Task<IEnumerable<ApplicationUser>> GetAllUsersAsync() => await userManager.Users.ToListAsync();
         public async Task<IEnumerable<IdentityRole>> GetAllRolesAsync() => await roleManager.Roles.ToListAsync();
         public async Task<IList<string>> GetUserRolesAsync(ApplicationUser user) => await userManager.GetRolesAsync(user);
 
         public async Task<ApplicationUser?> GetUserByIdAsync(string id) => await userManager.FindByIdAsync(id);
-        
+
+        public async Task<HashSet<string>> GetActiveSubscriberUserIdsAsync()
+            => await context.Subscriptions
+                .AsNoTracking()
+                .Where(s => s.PaymentComplete && s.EndDate >= DateTime.UtcNow)
+                .Select(s => s.UserId)
+                .Distinct()
+                .ToHashSetAsync();
 
         public async Task<bool> UpdateUserRoleAsync(string userId, string newRole)
         {

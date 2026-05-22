@@ -5,24 +5,14 @@ using NewsSite.Services.Interfaces;
 namespace NewsSite.Controllers
 {
     [Authorize(Roles = "Admin")]
-    public class SubscriptionAnalyticsController : Controller
+    public class SubscriptionAnalyticsController(ISubscriptionAnalyticsService subscriptionAnalyticsService) : Controller
     {
-        private readonly ISubscriptionAnalyticsService _subscriptionAnalyticsService;
-
-        public SubscriptionAnalyticsController(ISubscriptionAnalyticsService subscriptionAnalyticsService)
-        {
-            _subscriptionAnalyticsService = subscriptionAnalyticsService;
-        }
-
-        public IActionResult Index()
-        {
-            return View();
-        }
+        public IActionResult Index() => View();
 
         [HttpGet("api/admin/subscription-stats")]
         public async Task<IActionResult> GetSubscriptionStats()
         {
-            var stats = await _subscriptionAnalyticsService.GetDashboardStatsAsync();
+            var stats = await subscriptionAnalyticsService.GetDashboardStatsAsync();
             return Ok(stats);
         }
     }
