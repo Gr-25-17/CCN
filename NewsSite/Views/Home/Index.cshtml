@@ -149,6 +149,34 @@
         margin-bottom: 1.5rem;
     }
 
+    .sidebar-article-item {
+        position: relative;
+    }
+
+    .sidebar-article-title {
+        line-height: 1.35;
+    }
+
+    .sidebar-article-meta {
+        font-size: 0.78rem;
+        color: #6c757d;
+    }
+
+    .sidebar-article-stats {
+        display: flex;
+        gap: 0.65rem;
+        flex-wrap: wrap;
+        margin-top: 0.35rem;
+    }
+
+    .sidebar-article-stats .stat {
+        font-size: 0.76rem;
+        color: #6c757d;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.2rem;
+    }
+
     .category-btn {
         border-radius: 20px;
         transition: all 0.2s ease;
@@ -328,9 +356,28 @@
                     {
                         @foreach (var article in Model.EditorChoiceArticles)
                         {
-                            <div class="mb-3 pb-2 border-bottom">
-                                <h6 class="mb-1"><a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug" class="text-decoration-none text-dark fw-semibold">@article.Title</a></h6>
-                                <small class="text-muted"><i class="bi bi-folder"></i> @article.CategoryName</small>
+                            <div class="sidebar-article-item mb-3 pb-3 border-bottom">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <span class="badge bg-primary-subtle text-primary-emphasis border">@article.CategoryName</span>
+                                    @if (article.IsPremium)
+                                    {
+                                        <span class="badge bg-warning text-dark"><i class="bi bi-star-fill me-1"></i>Premium</span>
+                                    }
+                                </div>
+                                <h6 class="sidebar-article-title mb-1">
+                                    <a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug" class="text-decoration-none text-dark fw-semibold">
+                                        @article.Title
+                                    </a>
+                                </h6>
+                                <div class="sidebar-article-meta">
+                                    <span><i class="bi bi-person"></i> @article.AuthorName</span>
+                                    <span class="mx-1">•</span>
+                                    <span><i class="bi bi-calendar3"></i> @article.CreatedAt.ToString("MMM dd, yyyy")</span>
+                                </div>
+                                <div class="sidebar-article-stats">
+                                    <span class="stat"><i class="bi bi-eye"></i> @article.ViewsCount</span>
+                                    <span class="stat"><i class="bi bi-heart"></i> @article.LikesCount</span>
+                                </div>
                             </div>
                         }
                     }
@@ -351,10 +398,23 @@
                         <div class="list-group list-group-flush">
                             @foreach (var article in Model.MostPopularArticles.Take(5))
                             {
-                                <a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug" class="list-group-item list-group-item-action border-0 px-0 py-2">
-                                    <div class="flex-grow-1">
-                                        <h6 class="mb-1">@article.Title</h6>
-                                        <small class="text-muted">@article.CategoryName</small>
+                                <a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug" class="list-group-item list-group-item-action border-0 px-0 py-3 sidebar-article-item">
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <span class="badge bg-primary-subtle text-primary-emphasis border">@article.CategoryName</span>
+                                        @if (article.IsPremium)
+                                        {
+                                            <span class="badge bg-warning text-dark"><i class="bi bi-star-fill me-1"></i>Premium</span>
+                                        }
+                                    </div>
+                                    <h6 class="sidebar-article-title mb-1 text-dark">@article.Title</h6>
+                                    <div class="sidebar-article-meta">
+                                        <span><i class="bi bi-person"></i> @article.AuthorName</span>
+                                        <span class="mx-1">•</span>
+                                        <span><i class="bi bi-calendar3"></i> @article.CreatedAt.ToString("MMM dd, yyyy")</span>
+                                    </div>
+                                    <div class="sidebar-article-stats">
+                                        <span class="stat"><i class="bi bi-eye"></i> @article.ViewsCount</span>
+                                        <span class="stat"><i class="bi bi-heart"></i> @article.LikesCount</span>
                                     </div>
                                 </a>
                             }
