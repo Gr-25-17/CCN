@@ -54,11 +54,15 @@ namespace NewsSite
 
             builder.Services.AddSingleton(_ =>
             {
-                var storageConnectionString = builder.Configuration["AzureWebJobsStorage"];
+                var storageConnectionString =
+                    builder.Configuration["AzureWebJobsStorage"]
+                    ?? builder.Configuration.GetConnectionString("AzureWebJobsStorage")
+                    ?? builder.Configuration.GetConnectionString("Storage");
 
                 if (string.IsNullOrWhiteSpace(storageConnectionString))
                 {
-                    throw new InvalidOperationException("Configuration value 'AzureWebJobsStorage' is missing.");
+                    throw new InvalidOperationException(
+                        "Blob storage connection string is missing. Configure either 'AzureWebJobsStorage' app setting or 'ConnectionStrings:AzureWebJobsStorage'.");
                 }
 
                 return new BlobServiceClient(storageConnectionString);
