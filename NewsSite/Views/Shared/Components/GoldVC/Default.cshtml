@@ -1,11 +1,21 @@
-﻿@model List<NewsSite.Models.ViewModels.GoldViewModel>
+@model List<NewsSite.Models.ViewModels.GoldViewModel>
+@using System.Globalization
 @using System.Text.Json
 
 @{
     var latest = Model.FirstOrDefault();
-  
     var priceColor = latest != null && latest.IsUp ? "text-success" : "text-danger";
     var icon = latest != null && latest.IsUp ? "bi-arrow-up-right" : "bi-arrow-down-right";
+
+    string ShortDateLabel(string value)
+    {
+        return DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed)
+            ? parsed.ToString("MMM d", CultureInfo.InvariantCulture)
+            : value;
+    }
+
+    var shortLabels = Model.Select(x => ShortDateLabel(x.DateLabel)).Reverse().ToList();
+    var prices = Model.Select(x => x.Price).Reverse().ToList();
 }
 
 <div class="card bg-dark text-warning border-warning shadow-lg">
@@ -13,13 +23,14 @@
         <div class="d-flex justify-content-between align-items-start mb-3">
             <div>
                 <h6 class="text-uppercase text-muted small mb-0">Gold Price</h6>
+                <div class="small text-warning-emphasis mb-1">Gold (XAU/USD)</div>
                 <h2 class="fw-bold mb-0 text-white">@latest?.Price.ToString("C")</h2>
             </div>
             <div class="text-end">
                 <div class="@priceColor fw-bold h5 mb-0">
                     <i class="bi @icon"></i> @latest?.Change.ToString("N2")
                 </div>
-                <small class="text-muted">Last update: @latest?.DateLabel</small>
+                <small class="text-muted">Last update: @(latest != null ? ShortDateLabel(latest.DateLabel) : "-")</small>
             </div>
         </div>
 
@@ -33,37 +44,46 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-  
-    const labels = @Html.Raw(JsonSerializer.Serialize(Model.Select(x => x.DateLabel).Reverse()));
-    const prices = @Html.Raw(JsonSerializer.Serialize(Model.Select(x => x.Price).Reverse()));
-    const chartColor = '@(latest?.ChartColor ?? "#ffc107")';
+        const labels = @Html.Raw(JsonSerializer.Serialize(shortLabels));
+        const prices = @Html.Raw(JsonSerializer.Serialize(prices));
+        const chartColor = '@(latest?.ChartColor ?? "#ffc107")';
 
-    new Chart(document.getElementById('goldChart'), {
-    type: 'line',
-    data: {
-    labels: labels,
-    datasets: [{ label: 'Price',data: prices,borderColor: chartColor,
-    backgroundColor: chartColor + '33',  fill: true,borderWidth: 2,tension: 0.3,                 
-    pointRadius: 5,pointBackgroundColor: chartColor,pointBorderColor: '#fff',pointHoverRadius: 8
-    }]
-    },
-    options: {
-    maintainAspectRatio: false,
-    plugins: {
-    legend: { display: false }
-    },
-    scales: {
-    x: {
-    display: true,grid: { display: false },ticks: { color: '#888', maxRotation: 45, minRotation: 45 }
-    },
-
-    y: {
-    display: true,
-    grid: { color: '#333' },
-    ticks: { color: '#888' }
-    }
-    }
-    }
-    });
+        new Chart(document.getElementById('goldChart'), {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Gold (XAU/USD)',
+                    data: prices,
+                    borderColor: chartColor,
+                    backgroundColor: chartColor + '33',
+                    fill: true,
+                    borderWidth: 2,
+                    tension: 0.3,
+                    pointRadius: 5,
+                    pointBackgroundColor: chartColor,
+                    pointBorderColor: '#fff',
+                    pointHoverRadius: 8
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        display: true,
+                        grid: { display: false },
+                        ticks: { color: '#888', maxRotation: 0, minRotation: 0 }
+                    },
+                    y: {
+                        display: true,
+                        grid: { color: '#333' },
+                        ticks: { color: '#888' }
+                    }
+                }
+            }
+        });
     });
 </script>
