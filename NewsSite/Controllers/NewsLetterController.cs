@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using NewsSite.Repositories.Implementations;
 using NewsSite.Services.Interfaces;
 using System;
@@ -19,19 +20,22 @@ namespace NewsSite.Controllers
         private readonly IArticleService _articleService;
         private readonly IEmailSender _emailSender;
         private readonly EmailTemplateBuilder _templateBuilder;
+        private readonly ILogger<NewsLetterController> _logger;
 
         public NewsLetterController(
             IConfiguration configuration,
             INewsletterService newsletterService,
             IArticleService articleService,
             IEmailSender emailSender,
-            EmailTemplateBuilder templateBuilder)
+            EmailTemplateBuilder templateBuilder,
+            ILogger<NewsLetterController> logger)
         {
             _configuration = configuration;
             _newsletterService = newsletterService;
             _articleService = articleService;
             _emailSender = emailSender;
             _templateBuilder = templateBuilder;
+            _logger = logger;
         }
 
         [HttpPost("send-weekly")]
@@ -104,7 +108,8 @@ namespace NewsSite.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { error = ex.Message });
+                _logger.LogError(ex, "Weekly newsletter dispatch failed.");
+                return StatusCode(500, new { error = "Weekly newsletter dispatch failed.", detail = ex.Message });
             }
         }
     }
