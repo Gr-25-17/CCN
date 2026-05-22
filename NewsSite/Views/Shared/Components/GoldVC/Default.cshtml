@@ -22,15 +22,19 @@
     <div class="card-body">
         <div class="d-flex justify-content-between align-items-start mb-3">
             <div>
-                <h6 class="text-uppercase text-muted small mb-0">Gold Price</h6>
-                <div class="small text-warning-emphasis mb-1">Gold (XAU/USD)</div>
+              
+                <h6 class="text-uppercase text-white-50 small mb-0">Gold Price</h6>
+                
+          
+                <div class="small mb-1 fw-semibold" style="color: #FFD700; text-shadow: 0 0 4px rgba(255, 215, 0, 0.2);">Gold (XAU/USD)</div>
+                
                 <h2 class="fw-bold mb-0 text-white">@latest?.Price.ToString("C")</h2>
             </div>
             <div class="text-end">
                 <div class="@priceColor fw-bold h5 mb-0">
                     <i class="bi @icon"></i> @latest?.Change.ToString("N2")
                 </div>
-                <small class="text-muted">Last update: @(latest != null ? ShortDateLabel(latest.DateLabel) : "-")</small>
+                <small class="text-white-50">Last update: @(latest != null ? ShortDateLabel(latest.DateLabel) : "-")</small>
             </div>
         </div>
 
