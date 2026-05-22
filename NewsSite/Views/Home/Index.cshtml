@@ -234,32 +234,7 @@
                         @foreach (var article in Model.SearchResults)
                         {
                             <div class="col-12 mb-4">
-                                <div class="card latest-card position-relative">
-                                    @if (article.IsPremium)
-                                    {
-                                        <div class="position-absolute top-0 end-0 m-2" style="z-index: 10;">
-                                            <span class="badge bg-warning text-dark shadow-sm"><i class="bi bi-star-fill me-1"></i> PREMIUM</span>
-                                        </div>
-                                    }
-                                    <div class="row g-0">
-                                        <div class="col-md-4">
-                                            <a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug" aria-label="Open @article.Title">
-                                                <partial name="Partials/_ResponsiveImage"
-                                                         model='new ResponsiveImageViewModel { ImageUrl = article.ImageUrl, Alt = article.Title, Size = "med", CssClass = "card-img h-100 w-100", Style = "object-fit: cover;" }' />
-                                            </a>
-                                        </div>
-                                        <div class="col-md-8">
-                                            <div class="card-body position-relative">
-                                                <h5 class="card-title"><a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug" class="text-decoration-none text-dark stretched-link">@article.Title</a></h5>
-                                                <p class="card-text">@(article.Summary?.Length > 150 ? article.Summary.Substring(0, 150) + "..." : article.Summary)</p>
-                                                <div class="d-flex justify-content-between align-items-center">
-                                                    <small class="text-muted"><i class="bi bi-person"></i> @article.AuthorName | <i class="bi bi-folder"></i> @article.CategoryName | @article.CreatedAt.ToString("yyyy-MM-dd")</small>
-                                                    <small class="text-muted"><span class="me-2">👁️ @article.ViewsCount</span><span>❤️ @article.LikesCount</span></small>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                <partial name="Partials/_HomeSearchResultCard" model="article" />
                             </div>
                         }
                     </div>
@@ -298,35 +273,7 @@
                     {
                         @foreach (var article in Model.LatestArticles)
                         {
-                            <div class="card latest-card position-relative">
-                                @if (article.IsPremium)
-                                {
-                                    <div class="position-absolute top-0 end-0 m-2" style="z-index: 10;">
-                                        <span class="badge bg-warning text-dark shadow-sm"><i class="bi bi-star-fill me-1"></i> PREMIUM</span>
-                                    </div>
-                                }
-                                <div class="row g-0">
-                                    <div class="col-md-4">
-                                        <a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug" aria-label="Open @article.Title">
-                                            <partial name="Partials/_ResponsiveImage"
-                                                     model='new ResponsiveImageViewModel { ImageUrl = article.ImageUrl, Alt = article.Title, Size = "med", CssClass = "card-img h-100 w-100", Style = "object-fit: cover;" }' />
-                                        </a>
-                                    </div>
-                                    <div class="col-md-8">
-                                        <div class="card-body position-relative">
-                                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                                <span class="badge bg-primary rounded-pill">@article.CategoryName</span>
-                                            </div>
-                                            <h5 class="card-title"><a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug" class="text-decoration-none text-dark stretched-link">@article.Title</a></h5>
-                                            <p class="card-text">@(article.Summary?.Length > 150 ? article.Summary.Substring(0, 150) + "..." : article.Summary)</p>
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <small class="text-muted"><i class="bi bi-person"></i> @article.AuthorName | @article.CreatedAt.ToString("MMM dd, yyyy")</small>
-                                                <small class="text-muted"><span class="me-2">👁️ @article.ViewsCount</span><span>❤️ @article.LikesCount</span></small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <partial name="Partials/_HomeLatestArticleCard" model="article" />
                         }
                     }
                 </div>
