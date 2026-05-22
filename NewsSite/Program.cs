@@ -18,8 +18,8 @@ namespace NewsSite
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-                ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+            //var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+            //    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
             var lexiconConnection = builder.Configuration.GetConnectionString("LexiconConnection");
 
             if (!string.IsNullOrWhiteSpace(lexiconConnection))
@@ -27,11 +27,11 @@ namespace NewsSite
                 builder.Services.AddDbContext<ApplicationDbContext>(options =>
                     options.UseSqlServer(lexiconConnection));
             }
-            else
-            {
-                builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                    options.UseSqlite(connectionString));
-            }
+            //else
+            //{
+            //    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+            //        options.UseSqlite(connectionString));
+            //}
 
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
