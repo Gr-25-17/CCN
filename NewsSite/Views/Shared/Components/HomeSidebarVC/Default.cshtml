@@ -45,25 +45,25 @@
         }
         else
         {
-            <div class="list-group list-group-flush">
-                @foreach (var article in Model.MostPopularArticles.Take(5))
-                {
-                    <a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug" class="list-group-item list-group-item-action border-0 px-0 py-2">
-                        <div class="d-flex align-items-start justify-content-between gap-2 mb-1">
-                            <h6 class="mb-0 text-dark">@article.Title</h6>
-                            @if (article.IsPremium)
-                            {
-                                <span class="badge rounded-pill text-bg-warning text-dark flex-shrink-0"><i class="bi bi-gem me-1"></i>Premium</span>
-                            }
-                        </div>
-                        <div class="small text-muted d-flex flex-wrap gap-2">
-                            <span class="badge bg-primary rounded-pill">@article.CategoryName</span>
-                            <span><i class="bi bi-person me-1"></i>@article.AuthorName</span>
-                            <span><i class="bi bi-calendar3 me-1"></i>@article.CreatedAt.ToString("MMM d, yyyy")</span>
-                        </div>
-                    </a>
-                }
-            </div>
+            @foreach (var article in Model.MostPopularArticles.Take(5))
+            {
+                <article class="mb-3 pb-2 border-bottom">
+                    <div class="d-flex align-items-start justify-content-between gap-2 mb-1">
+                        <h6 class="mb-0 pe-2">
+                            <a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug" class="text-decoration-none text-dark fw-semibold">@article.Title</a>
+                        </h6>
+                        @if (article.IsPremium)
+                        {
+                            <span class="badge rounded-pill text-bg-warning text-dark flex-shrink-0"><i class="bi bi-gem me-1"></i>Premium</span>
+                        }
+                    </div>
+                    <div class="small text-muted d-flex flex-wrap gap-2">
+                        <span class="badge bg-primary rounded-pill">@article.CategoryName</span>
+                        <span><i class="bi bi-person me-1"></i>@article.AuthorName</span>
+                        <span><i class="bi bi-calendar3 me-1"></i>@article.CreatedAt.ToString("MMM d, yyyy")</span>
+                    </div>
+                </article>
+            }
         }
     </div>
 </div>
