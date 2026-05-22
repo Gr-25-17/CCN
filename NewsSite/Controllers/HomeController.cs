@@ -48,11 +48,15 @@ namespace NewsSite.Controllers
                 var searchResults = await _articleService.SearchArticlesAsync(searchTerm);
                 var weather = await _weatherService.GetWeatherAsync();
 
+                var sidebarCollections = await GetSidebarCollectionsAsync();
+
                 var searchVm = new HomeViewModel
                 {
                     SearchResults = searchResults,
                     IsSearch = true,
                     SearchTerm = searchTerm,
+                    MostPopularArticles = sidebarCollections.MostPopularArticles,
+                    EditorChoiceArticles = sidebarCollections.EditorChoiceArticles,
                     Categories = await _categoryService.GetAllAsync(),
                     Weather = weather?.ToWeatherViewModel()
                 };
@@ -92,8 +96,7 @@ namespace NewsSite.Controllers
             }
 
             var latestArticles = await _articleService.GetLatestAsync(6);
-            var mostPopularArticles = await _articleService.GetMostPopularAsync(6);
-            var editorChoiceArticles = await _articleService.GetEditorChoiceAsync(3);
+            var sidebarCollections = await GetSidebarCollectionsAsync();
 
             var prioritizedArticles = new List<ArticleSummaryViewModel>();
 
@@ -110,8 +113,8 @@ namespace NewsSite.Controllers
             var viewModel = new HomeViewModel
             {
                 LatestArticles = latestArticles,
-                MostPopularArticles = mostPopularArticles,
-                EditorChoiceArticles = editorChoiceArticles,
+                MostPopularArticles = sidebarCollections.MostPopularArticles,
+                EditorChoiceArticles = sidebarCollections.EditorChoiceArticles,
                 PrioritizedArticles = prioritizedArticles,
                 Categories = await _categoryService.GetAllAsync(),
                 HasActiveSubscription = hasSubscription,
@@ -119,6 +122,15 @@ namespace NewsSite.Controllers
             };
 
             return View(viewModel);
+        }
+
+
+        private async Task<(IEnumerable<ArticleSummaryViewModel> MostPopularArticles, IEnumerable<ArticleSummaryViewModel> EditorChoiceArticles)> GetSidebarCollectionsAsync()
+        {
+            var mostPopularArticles = await _articleService.GetMostPopularAsync(6);
+            var editorChoiceArticles = await _articleService.GetEditorChoiceAsync(3);
+
+            return (mostPopularArticles, editorChoiceArticles);
         }
 
         public IActionResult Privacy()
