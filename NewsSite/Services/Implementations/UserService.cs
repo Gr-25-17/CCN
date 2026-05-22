@@ -12,7 +12,7 @@ namespace NewsSite.Services.Implementations
         {
             var users = await userRepository.GetAllUsersAsync();
             var roles = await userRepository.GetAllRolesAsync();
-            var activeSubscriberUserIds = await userRepository.GetActiveSubscriberUserIdsAsync();
+            var activeSubscriberUserIds = await userRepository.GetActiveSubscriberUserIdsAsync() ?? [];
 
             var model = new UserAdminViewModel
             {
