@@ -11,10 +11,14 @@ public class GoldMarketTimer(
     StockMarketService stockService,
     IConfiguration configuration)
 {
+    private const string PartitionKey = "Gold";
+    private const string TimeBucketFormat = "yyyyMMddHH";
+    private const int MaxStoredPoints = 10;
+
     [Function(nameof(GoldMarketTimer))]
     public async Task Run([TimerTrigger("0 0 */6 * * *")] TimerInfo myTimer)
     {
-        logger.LogInformation("Gold Fetcher started at: {Time}", DateTime.Now);
+        logger.LogInformation("Gold Fetcher started at: {Time}", DateTime.UtcNow);
 
         var goldData = await stockService.GetGoldAsync();
         if (goldData is null)
@@ -29,36 +33,77 @@ public class GoldMarketTimer(
         var tableClient = new TableClient(connectionString, "GoldPrices");
         await tableClient.CreateIfNotExistsAsync();
 
+        var bucketTimeUtc = NormalizeToHourUtc(DateTime.UtcNow);
+        var rowKey = bucketTimeUtc.ToString(TimeBucketFormat);
+
         var entity = new GoldPrice
         {
-            PartitionKey = "Gold",
-            RowKey = (DateTime.MaxValue.Ticks - DateTime.UtcNow.Ticks).ToString("d19"),
+            PartitionKey = PartitionKey,
+            RowKey = rowKey,
             Close = goldData.Close,
             PrevClose = goldData.PrevClose,
-            PercentChange = goldData.PercentChange
+            PercentChange = goldData.PercentChange,
+            Name = goldData.Name,
+            Symbol = goldData.Symbol
         };
 
         await tableClient.UpsertEntityAsync(entity);
-        logger.LogInformation("Successfully saved new gold price: {Close}", entity.Close);
+        logger.LogInformation("Upserted gold price for bucket {Bucket}: {Close}", rowKey, entity.Close);
 
         var allGoldEntries = new List<GoldPrice>();
-        await foreach (var page in tableClient.QueryAsync<GoldPrice>(x => x.PartitionKey == "Gold").AsPages())
+        await foreach (var page in tableClient.QueryAsync<GoldPrice>(x => x.PartitionKey == PartitionKey).AsPages())
         {
             allGoldEntries.AddRange(page.Values);
         }
 
-        if (allGoldEntries.Count <= 10)
+        if (allGoldEntries.Count <= MaxStoredPoints)
         {
             return;
         }
 
-        var entitiesToDelete = allGoldEntries.OrderBy(x => x.RowKey).Skip(10).ToList();
+        var entitiesToDelete = allGoldEntries
+            .OrderByDescending(x => ParseSortableDateUtc(x.RowKey))
+            .Skip(MaxStoredPoints)
+            .ToList();
+
         var deleteTasks = entitiesToDelete.Select(oldPrice => tableClient.DeleteEntityAsync(oldPrice.PartitionKey, oldPrice.RowKey));
         await Task.WhenAll(deleteTasks);
 
         foreach (var oldPrice in entitiesToDelete)
         {
-            logger.LogInformation("Deleted old record: {RowKey}", oldPrice.RowKey);
+            logger.LogInformation("Deleted old gold record: {RowKey}", oldPrice.RowKey);
         }
+    }
+
+    private static DateTime NormalizeToHourUtc(DateTime utcNow) =>
+        new(utcNow.Year, utcNow.Month, utcNow.Day, utcNow.Hour, 0, 0, DateTimeKind.Utc);
+
+    private static DateTime ParseSortableDateUtc(string? rowKey)
+    {
+        if (string.IsNullOrWhiteSpace(rowKey))
+        {
+            return DateTime.MinValue;
+        }
+
+        if (DateTime.TryParseExact(
+                rowKey,
+                TimeBucketFormat,
+                System.Globalization.CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.AssumeUniversal | System.Globalization.DateTimeStyles.AdjustToUniversal,
+                out var bucketDate))
+        {
+            return bucketDate;
+        }
+
+        if (long.TryParse(rowKey, out var inverseTicks))
+        {
+            var ticks = DateTime.MaxValue.Ticks - inverseTicks;
+            if (ticks is >= 0 and <= DateTime.MaxValue.Ticks)
+            {
+                return new DateTime(ticks, DateTimeKind.Utc);
+            }
+        }
+
+        return DateTime.MinValue;
     }
 }
