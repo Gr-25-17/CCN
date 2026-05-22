@@ -1,0 +1,146 @@
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using NewsSite.Models.Entities;
+
+namespace NewsSite.Data;
+
+public static class SeedData
+{
+    public static async Task InitializeAsync(IServiceProvider serviceProvider)
+    {
+        using var scope = serviceProvider.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+        await context.Database.EnsureCreatedAsync();
+
+        if (context.Articles.Any())
+        {
+            return;
+        }
+
+        if (!context.Categories.Any())
+        {
+            var categories = new Category[]
+            {
+                new Category { Name = "Sweden" },
+                new Category { Name = "World" },
+                new Category { Name = "Sport" },
+                new Category { Name = "Economy" },
+                new Category { Name = "Weather" }
+            };
+            await context.Categories.AddRangeAsync(categories);
+            await context.SaveChangesAsync();
+        }
+
+        var sweden = await context.Categories.FirstOrDefaultAsync(c => c.Name == "Sweden");
+        var world = await context.Categories.FirstOrDefaultAsync(c => c.Name == "World");
+        var sport = await context.Categories.FirstOrDefaultAsync(c => c.Name == "Sport");
+        var economy = await context.Categories.FirstOrDefaultAsync(c => c.Name == "Economy");
+        var weather = await context.Categories.FirstOrDefaultAsync(c => c.Name == "Weather");
+
+        var anna = await userManager.FindByEmailAsync("anna.bergman@newsite.com");
+        var erik = await userManager.FindByEmailAsync("erik.lindgren@newsite.com");
+        var sara = await userManager.FindByEmailAsync("sara.wallin@newsite.com");
+        var mikael = await userManager.FindByEmailAsync("mikael.sundstrom@newsite.com");
+
+        var articles = new Article[]
+        {
+            new Article
+            {
+                Title = "Sweden's Economy Shows Strong Growth",
+                Summary = "The Swedish economy grew by 2.5% this quarter, exceeding expectations.",
+                Content = "Detailed article content about Sweden's economic growth...",
+                Slug = "sweden-economy-growth",
+                ImageUrl = "https://images.pexels.com/photos/6770775/pexels-photo-6770775.jpeg",
+                CreatedAt = DateTime.Now.AddDays(-1),
+                IsReadyForPublish = true,
+                IsArchived = false,
+                IsDeleted = false,
+                IsEditorsChoice = true,
+                CategoryId = sweden?.Id ?? 1,
+                AuthorId = anna?.Id, 
+                AuthorName = anna != null ? $"{anna.FirstName} {anna.LastName}" : "Unknown"
+            },
+            new Article
+            {
+                Title = "Global Climate Summit Reaches Historic Agreement",
+                Summary = "World leaders agree on new climate targets at the summit in Paris.",
+                Content = "Detailed article content about the climate summit...",
+                Slug = "global-climate-summit",
+                ImageUrl = "https://images.pexels.com/photos/2990653/pexels-photo-2990653.jpeg",
+                CreatedAt = DateTime.Now.AddDays(-2),
+                IsReadyForPublish = true,
+                IsArchived = false,
+                IsDeleted = false,
+                IsEditorsChoice = false,
+                CategoryId = world?.Id ?? 2,
+                AuthorId = erik?.Id, 
+            AuthorName = erik != null ? $"{erik.FirstName} {erik.LastName}" : "Unknown"
+            },
+            new Article
+            {
+                Title = "Local Football Team Wins Championship",
+                Summary = "A thrilling final match ends with a 3-2 victory for the home team.",
+                Content = "Detailed article content about the football match...Lorem ipsum dolor sit amet,  " +
+                " consectetur adipiscing elit. Nullam tristique, sapien ut malesuada tristique, " +
+                "ligula tellus facilisis ante, ut egestas purus dolor in quam. " +
+                "Vivamus elementum porttitor nulla, ac cursus nisi consectetur et. In non erat ac nunc bibendum lobortis." +
+                " Phasellus imperdiet erat in massa finibus, nec dapibus lacus pulvinar. Mauris purus erat, finibus ut lacinia vitae, convallis nec ipsum. " +
+                "Pellentesque lacinia fermentum quam volutpat finibus. Nam consectetur tellus ac fermentum rhoncus." +
+                " Aliquam luctus ac purus vel porta.\r\n\r\nPhasellus at pharetra ex. Sed rutrum vitae leo a viverra. " +
+                "Vivamus quis convallis justo. Aenean et tincidunt mi. Mauris tincidunt non enim non dapibus. Ut neque felis, tincidunt ac velit quis," +
+                " dictum blandit sapien. Nunc ac sollicitudin sapien. Nam interdum erat vel condimentum vehicula. Quisque eget posuere orci, id malesuada mauris. " +
+                "Integer lacus mi, iaculis a tincidunt ut, laoreet sollicitudin nulla. Maecenas consectetur, sem vitae pretium fringilla, quam ipsum egestas massa, " +
+                "ac condimentum odio mauris vitae diam. Suspendisse ac odio cursus augue viverra rutrum.",
+                Slug = "football-championship-win",
+                ImageUrl = "https://images.pexels.com/photos/36213442/pexels-photo-36213442.jpeg",
+                CreatedAt = DateTime.Now.AddDays(-3),
+                IsReadyForPublish = true,
+                IsPremium = true,
+                IsArchived = false,
+                IsDeleted = false,
+                IsEditorsChoice = false,
+                CategoryId = sport?.Id ?? 3,
+                AuthorId = sara?.Id,  
+            AuthorName = sara != null ? $"{sara.FirstName} {sara.LastName}" : "Unknown"
+            },
+            new Article
+            {
+                Title = "New Technology Trends for 2024",
+                Summary = "AI and sustainable tech lead the way in this year's innovations.",
+                Content = "Detailed article content about tech trends...",
+                Slug = "tech-trends-2024",
+                ImageUrl = "https://images.pexels.com/photos/7562023/pexels-photo-7562023.jpeg",
+                CreatedAt = DateTime.Now.AddDays(-4),
+                IsReadyForPublish = true,
+                IsArchived = false,
+                IsDeleted = false,
+                IsEditorsChoice = true,
+                CategoryId = world?.Id ?? 2,
+                AuthorId = mikael?.Id,
+            AuthorName = mikael != null ? $"{mikael.FirstName} {mikael.LastName}" : "Unknown"
+            },
+            new Article
+            {
+                Title = "Weather Warning: Storm Approaching West Coast",
+                Summary = "Residents advised to prepare for heavy winds and rain this weekend.",
+                Content = "Detailed article content about the weather warning...",
+                Slug = "storm-warning-west-coast",
+                ImageUrl = "https://images.pexels.com/photos/2260967/pexels-photo-2260967.jpeg",
+                CreatedAt = DateTime.Now.AddDays(-1),
+                IsReadyForPublish = true,
+                IsArchived = false,
+                IsDeleted = false,
+                IsEditorsChoice = false,
+                CategoryId = weather?.Id ?? 5,
+                AuthorId = anna?.Id,
+            AuthorName = anna != null ? $"{anna.FirstName} {anna.LastName}" : "Unknown"
+            }
+        };
+
+        await context.Articles.AddRangeAsync(articles);
+        await context.SaveChangesAsync();
+
+    }
+}

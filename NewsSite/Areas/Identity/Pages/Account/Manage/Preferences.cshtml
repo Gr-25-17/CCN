@@ -1,0 +1,35 @@
+﻿@* @page
+@model PreferencesModel
+@{
+    ViewData["Title"] = "Nyhetsbrevsinställningar";
+    ViewData["ActivePage"] = "Preferences";
+}
+
+<h3>@ViewData["Title"]</h3>
+<partial name="_StatusMessage" for="StatusMessage" />
+
+<div class="row">
+    <div class="col-md-6">
+        <form method="post">
+            <div class="form-group mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" asp-for="Input.ReceiveNewsletter" />
+                    <label class="form-check-label" asp-for="Input.ReceiveNewsletter">
+                        Jag vill ha nyhetsbrev
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Input.Frequency" class="form-label"></label>
+                <select asp-for="Input.Frequency" class="form-select">
+                    <option value="Daily">Dagligen</option>
+                    <option value="Weekly">Veckovis</option>
+                    <option value="Monthly">Månadsvis</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Spara inställningar</button>
+        </form>
+    </div>
+</div> *@

@@ -1,26 +1,82 @@
-﻿@using Microsoft.AspNetCore.Identity
-@inject SignInManager<IdentityUser> SignInManager
-@inject UserManager<IdentityUser> UserManager
+@using Microsoft.AspNetCore.Identity
+@using NewsSite.Models.Entities
+@using NewsSite.Services.Interfaces
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+@using Microsoft.AspNetCore.Authorization
+@inject IAuthorizationService AuthorizationService
+@inject IManagementNavigationService ManagementNavigationService
+
+@{
+    var managementNavigation = await ManagementNavigationService.BuildAsync(User, Context.Request.Path);
+}
 
 <ul class="navbar-nav">
-@if (SignInManager.IsSignedIn(User))
-{
-    <li class="nav-item">
-        <a  class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @User.Identity?.Name!</a>
-    </li>
-    <li class="nav-item">
-        <form  class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-            <button  type="submit" class="nav-link btn btn-link text-dark">Logout</button>
-        </form>
-    </li>
-}
-else
-{
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Register</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Login</a>
-    </li>
-}
+    @if (managementNavigation.ShowManagementDropdown)
+    {
+        <li class="nav-item dropdown d-none d-lg-block">
+            <a class="nav-link dropdown-toggle text-dark" href="#" id="managementMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Paneler
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="managementMenu">
+                @foreach (var item in managementNavigation.DesktopItems)
+                {
+                    <li>
+                        <a class="dropdown-item @(item.IsCurrent ? "active" : string.Empty)" asp-controller="@item.Controller" asp-action="@item.Action" aria-current="@(item.IsCurrent ? "page" : null)">@item.Label</a>
+                    </li>
+                }
+            </ul>
+        </li>
+        @foreach (var item in managementNavigation.MobileItems)
+        {
+            <li class="nav-item d-lg-none">
+                <a class="nav-link text-dark @(item.IsCurrent ? "fw-semibold" : string.Empty)" asp-controller="@item.Controller" asp-action="@item.Action" aria-current="@(item.IsCurrent ? "page" : null)">@item.Label</a>
+            </li>
+        }
+    }
+    else if (managementNavigation.DesktopItems.Count > 0)
+    {
+        var writerItem = managementNavigation.DesktopItems[0];
+        <li class="nav-item">
+            <a class="nav-link text-dark @(writerItem.IsCurrent ? "fw-semibold" : string.Empty)" asp-controller="@writerItem.Controller" asp-action="@writerItem.Action" aria-current="@(writerItem.IsCurrent ? "page" : null)">@writerItem.Label</a>
+        </li>
+    }
+
+    @if (SignInManager.IsSignedIn(User))
+    {
+        var hasSubscription = (await AuthorizationService.AuthorizeAsync(User, "PremiumContent")).Succeeded;
+
+        <li class="nav-item">
+            <a class="nav-link text-dark fw-bold" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">
+                Hello @((await UserManager.GetUserAsync(User))?.FirstName ?? User.Identity?.Name)
+                @if (hasSubscription)
+                {
+                    <text>💎</text>
+                }
+                else
+                {
+                    <text>⬜</text>
+                }
+            </a>
+        </li>
+        <li class="nav-item">
+            <form id="logoutForm"
+                  class="form-inline"
+                  asp-area="Identity"
+                  asp-page="/Account/Logout"
+                  data-ajax-logout="true">
+                @Html.AntiForgeryToken()
+                <button type="button" class="nav-link btn btn-link text-dark" data-logout-button="true">Logout</button>
+            </form>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <button type="button" class="nav-link btn btn-link text-dark border-0" data-bs-toggle="offcanvas" data-bs-target="#loginOffcanvas" data-auth-mode="register">Register</button>
+        </li>
+        <li class="nav-item">
+            <button type="button" class="nav-link btn btn-link text-dark border-0" data-bs-toggle="offcanvas" data-bs-target="#loginOffcanvas" data-auth-mode="login">Login</button>
+        </li>
+    }
 </ul>

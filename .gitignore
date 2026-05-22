@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/NewsSite/app.db
+/NewsSite/app.db-shm
+/NewsSite/app.db-wal
+/Tests/Services/NewsletterServiceTests.cs

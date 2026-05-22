@@ -1,0 +1,53 @@
+﻿@model IEnumerable<NewsSite.Models.ViewModels.ArticleSummaryViewModel>
+
+@{
+    var category = ViewBag.Category as NewsSite.Models.ViewModels.CategoryViewModel;
+    ViewData["Title"] = $"{category?.Name} News";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <h1 class="mb-4">@category?.Name</h1>
+
+            @if (!Model.Any())
+            {
+                <p>No articles found in this category.</p>
+            }
+            else
+            {
+                <div class="row">
+                    @foreach (var article in Model)
+                    {
+                        <div class="col-12 mb-4">
+                            <partial name="Partials/_ArticleCard" model="article" />
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <strong>About @category?.Name</strong>
+                </div>
+                <div class="card-body">
+                    <p>Stay updated with the latest news from @category?.Name.</p>
+                </div>
+            </div>
+            @if (category?.Name == "Economy")
+            {
+                <div class="mt-4">
+                    @await Component.InvokeAsync("GoldVC")
+                </div>
+            }
+            @if (category?.Name == "Weather")
+            {
+                <div class="mt-4" id="weatherCardContainer">
+                    <partial name="Partials/_WeatherCard" model="ViewBag.Weather as NewsSite.Models.ViewModels.WeatherViewModel" />
+                </div>
+            }
+        </div>
+    </div>
+</div>

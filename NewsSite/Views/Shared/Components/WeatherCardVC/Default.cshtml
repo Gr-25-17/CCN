@@ -1,0 +1,21 @@
+﻿@model NewsSite.Models.ViewModels.WeatherBasicVM
+
+@if (Model != null)
+{
+    string bgClass = Model.TemperatureC switch
+    {
+        < 0 => "bg-primary",
+        < 8 => "bg-secondary",
+        <= 22 => "bg-success",
+        _ => "bg-danger"
+    };
+
+    <div class="d-flex align-items-center @bgClass text-dark border border-white rounded px-2 py-1" style="font-size:0.85rem;">
+        <img src="@Model.UrlIcon" alt="Weather icon" class="me-2" style="width:30px; height:30px;" />
+        <span>@Model.TemperatureDisplay</span>
+    </div>
+}
+else
+{
+    <div class="text-muted small px-2">Weather unavailable</div>
+}
