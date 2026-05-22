@@ -33,13 +33,17 @@ public class WeeklyNewsletterFunction(
         using var client = httpClientFactory.CreateClient();
         var response = await client.SendAsync(request, cancellationToken);
 
+        var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+
         if (!response.IsSuccessStatusCode)
         {
-            logger.LogError("Newsletter API failed with status code {StatusCode}", response.StatusCode);
+            logger.LogError(
+                "Newsletter API failed with status code {StatusCode}. Response body: {ResponseBody}",
+                response.StatusCode,
+                responseBody);
             return;
         }
 
-        var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
         logger.LogInformation("Weekly newsletter completed successfully: {Response}", responseBody);
     }
 }
