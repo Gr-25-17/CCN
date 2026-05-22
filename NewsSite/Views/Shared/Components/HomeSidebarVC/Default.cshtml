@@ -1,0 +1,49 @@
+@model NewsSite.Models.ViewModels.HomeSidebarViewModel
+
+<div class="card side-card shadow-sm border-0">
+    <div class="card-header" style="background: linear-gradient(135deg, #ffc107, #ff9800);">
+        <strong><i class="bi bi-star-fill"></i> Editor's Choice</strong>
+    </div>
+    <div class="card-body">
+        @if (!Model.EditorChoiceArticles.Any())
+        {
+            <p class="text-muted text-center py-3">No featured articles yet.</p>
+        }
+        else
+        {
+            @foreach (var article in Model.EditorChoiceArticles)
+            {
+                <div class="mb-3 pb-2 border-bottom">
+                    <h6 class="mb-1"><a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug" class="text-decoration-none text-dark fw-semibold">@article.Title</a></h6>
+                    <small class="text-muted"><i class="bi bi-folder"></i> @article.CategoryName</small>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+<div class="card side-card shadow-sm border-0">
+    <div class="card-header" style="background: linear-gradient(135deg, #dc3545, #c82333); color: white;">
+        <strong><i class="bi bi-fire"></i> Most Popular</strong>
+    </div>
+    <div class="card-body">
+        @if (!Model.MostPopularArticles.Any())
+        {
+            <p class="text-muted text-center py-3">No popular articles yet.</p>
+        }
+        else
+        {
+            <div class="list-group list-group-flush">
+                @foreach (var article in Model.MostPopularArticles.Take(5))
+                {
+                    <a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug" class="list-group-item list-group-item-action border-0 px-0 py-2">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">@article.Title</h6>
+                            <small class="text-muted">@article.CategoryName</small>
+                        </div>
+                    </a>
+                }
+            </div>
+        }
+    </div>
+</div>
