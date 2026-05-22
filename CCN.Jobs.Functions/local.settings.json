@@ -1,0 +1,13 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
+    "WEATHER_API_URL": "",
+    "WEATHER_API_LANG": "sv",
+    "StockApiUrl": "",
+    "NewsSiteBaseUrl": "",
+    "NewsletterSettings:AppUrl": "",
+    "NewsletterSettings:ApiKey": ""
+  }
+}
