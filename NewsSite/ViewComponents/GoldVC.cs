@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NewsSite.Mapping;
+using NewsSite.Models.ViewModels;
 using NewsSite.Services.Interfaces;
-
 
 namespace NewsSite.ViewComponents
 {
@@ -16,10 +16,19 @@ namespace NewsSite.ViewComponents
 
         public async Task<IViewComponentResult> InvokeAsync()
         {
-            var rawData = await _goldService.GetLatestPricesAsync(7);
+            var symbols = new[] { "Gold", "Silver", "Platinum", "Palladium" };
+            var metalSeries = new Dictionary<string, List<GoldViewModel>>();
 
-            // Using your extension method to convert to ViewModel
-            var viewModel = rawData.Select(g => g.ToViewModel()).ToList();
+            foreach (var symbol in symbols)
+            {
+                var metalData = await _goldService.GetLatestPricesAsync(7, symbol);
+                metalSeries[symbol] = metalData.Select(m => m.ToViewModel()).ToList();
+            }
+
+            var viewModel = new MetalPricesPanelViewModel
+            {
+                MetalSeries = metalSeries
+            };
 
             return View(viewModel);
         }

@@ -1,30 +1,69 @@
-﻿@model List<NewsSite.Models.ViewModels.GoldViewModel>
+﻿@model NewsSite.Models.ViewModels.MetalPricesPanelViewModel
 @using System.Text.Json
 
 @{
-    var latest = Model.FirstOrDefault();
-  
-    var priceColor = latest != null && latest.IsUp ? "text-success" : "text-danger";
-    var icon = latest != null && latest.IsUp ? "bi-arrow-up-right" : "bi-arrow-down-right";
+    var displayOrder = new[] { "Gold", "Silver", "Platinum", "Palladium" };
+    var symbolMap = new Dictionary<string, string>
+    {
+        ["Gold"] = "XAU",
+        ["Silver"] = "XAG",
+        ["Platinum"] = "XPT",
+        ["Palladium"] = "XPD"
+    };
+    var colorMap = new Dictionary<string, string>
+    {
+        ["Gold"] = "#ffc107",
+        ["Silver"] = "#6c757d",
+        ["Platinum"] = "#0dcaf0",
+        ["Palladium"] = "#fd7e14"
+    };
+
+    var latestByMetal = displayOrder.ToDictionary(
+        metal => metal,
+        metal => Model.MetalSeries.TryGetValue(metal, out var series) ? series.FirstOrDefault() : null
+    );
+
+    var goldLatest = latestByMetal["Gold"];
+    var shortDate = goldLatest?.DateLabel is { Length: > 0 }
+        ? string.Join(" ", goldLatest.DateLabel.Split(' ').Take(2))
+        : "--";
 }
 
-<div class="card bg-dark text-warning border-warning shadow-lg">
+<div class="card bg-dark text-warning border-warning shadow-lg gold-price-card">
     <div class="card-body">
         <div class="d-flex justify-content-between align-items-start mb-3">
             <div>
-                <h6 class="text-uppercase text-muted small mb-0">Gold Price</h6>
-                <h2 class="fw-bold mb-0 text-white">@latest?.Price.ToString("C")</h2>
+                <span class="badge rounded-pill text-bg-warning text-dark fw-semibold mb-2">Gold (XAU)</span>
+                <h2 class="fw-bold mb-0 text-white">@goldLatest?.Price.ToString("C")</h2>
             </div>
             <div class="text-end">
-                <div class="@priceColor fw-bold h5 mb-0">
-                    <i class="bi @icon"></i> @latest?.Change.ToString("N2")
-                </div>
-                <small class="text-muted">Last update: @latest?.DateLabel</small>
+                <small class="text-muted">Market update: @shortDate</small>
             </div>
         </div>
 
+        <div class="bg-secondary bg-opacity-25 rounded p-2 mb-3">
+            @for (var i = 0; i < displayOrder.Length; i++)
+            {
+                var metalName = displayOrder[i];
+                var metal = latestByMetal[metalName];
+                var metalColor = metal != null && metal.IsUp ? "text-success" : "text-danger";
+                var metalIcon = metal != null && metal.IsUp ? "bi-arrow-up-right" : "bi-arrow-down-right";
+
+                <div class="d-flex justify-content-between align-items-center @(i == displayOrder.Length - 1 ? "" : "mb-2")">
+                    <div class="small text-light fw-semibold d-flex align-items-center gap-2">
+                        <span>@metalName (@symbolMap[metalName])</span>
+                        <span class="@metalColor"><i class="bi @metalIcon"></i></span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-white fw-bold">@metal?.Price.ToString("C")</span>
+                        <span class="@metalColor small fw-semibold">@metal?.Change.ToString("N2")</span>
+                    </div>
+                </div>
+            }
+        </div>
+
         <div class="ratio ratio-16x9">
-            <canvas id="goldChart"></canvas>
+            <canvas id="metalsChart"></canvas>
         </div>
     </div>
 </div>
@@ -33,37 +72,57 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-  
-    const labels = @Html.Raw(JsonSerializer.Serialize(Model.Select(x => x.DateLabel).Reverse()));
-    const prices = @Html.Raw(JsonSerializer.Serialize(Model.Select(x => x.Price).Reverse()));
-    const chartColor = '@(latest?.ChartColor ?? "#ffc107")';
+        const displayOrder = @Html.Raw(JsonSerializer.Serialize(displayOrder));
+        const colorMap = @Html.Raw(JsonSerializer.Serialize(colorMap));
+        const seriesByMetal = @Html.Raw(JsonSerializer.Serialize(Model.MetalSeries));
 
-    new Chart(document.getElementById('goldChart'), {
-    type: 'line',
-    data: {
-    labels: labels,
-    datasets: [{ label: 'Price',data: prices,borderColor: chartColor,
-    backgroundColor: chartColor + '33',  fill: true,borderWidth: 2,tension: 0.3,                 
-    pointRadius: 5,pointBackgroundColor: chartColor,pointBorderColor: '#fff',pointHoverRadius: 8
-    }]
-    },
-    options: {
-    maintainAspectRatio: false,
-    plugins: {
-    legend: { display: false }
-    },
-    scales: {
-    x: {
-    display: true,grid: { display: false },ticks: { color: '#888', maxRotation: 45, minRotation: 45 }
-    },
+        const firstSeries = displayOrder
+            .map(name => seriesByMetal[name] || [])
+            .find(series => series.length > 0) || [];
 
-    y: {
-    display: true,
-    grid: { color: '#333' },
-    ticks: { color: '#888' }
-    }
-    }
-    }
-    });
+        const labels = [...firstSeries].reverse().map(x => x.dateLabel);
+
+        const datasets = displayOrder.map(name => {
+            const rows = [...(seriesByMetal[name] || [])].reverse();
+            return {
+                label: `${name} price`,
+                data: rows.map(x => x.price),
+                borderColor: colorMap[name],
+                backgroundColor: colorMap[name] + "33",
+                fill: false,
+                borderWidth: 2,
+                tension: 0.3,
+                pointRadius: 4,
+                pointBackgroundColor: colorMap[name],
+                pointBorderColor: '#fff',
+                pointHoverRadius: 7
+            };
+        });
+
+        new Chart(document.getElementById('metalsChart'), {
+            type: 'line',
+            data: { labels, datasets },
+            options: {
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: { color: '#ddd', usePointStyle: true }
+                    }
+                },
+                scales: {
+                    x: {
+                        display: true,
+                        grid: { display: false },
+                        ticks: { color: '#888', maxRotation: 45, minRotation: 45 }
+                    },
+                    y: {
+                        display: true,
+                        grid: { color: '#333' },
+                        ticks: { color: '#888' }
+                    }
+                }
+            }
+        });
     });
 </script>
