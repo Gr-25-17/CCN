@@ -234,21 +234,7 @@
                         @foreach (var article in Model.SearchResults)
                         {
                             <div class="col-12 mb-4">
-                                <div class="card latest-card">
-                                    <div class="row g-0">
-                                        <div class="col-md-4">
-                                            <partial name="Partials/_ResponsiveImage"
-                                                     model='new ResponsiveImageViewModel { ImageUrl = article.ImageUrl, Alt = article.Title, Size = "med", CssClass = "card-img h-100 w-100", Style = "object-fit: cover;" }' />
-                                        </div>
-                                        <div class="col-md-8">
-                                            <div class="card-body">
-                                                <h5 class="card-title"><a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug" class="text-decoration-none text-dark">@article.Title</a></h5>
-                                                <p class="card-text">@(article.Summary?.Length > 150 ? article.Summary.Substring(0, 150) + "..." : article.Summary)</p>
-                                                <small class="text-muted"><i class="bi bi-person"></i> @article.AuthorName | <i class="bi bi-folder"></i> @article.CategoryName</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                <partial name="Partials/_HomeSearchResultCard" model="article" />
                             </div>
                         }
                     </div>
@@ -287,27 +273,7 @@
                     {
                         @foreach (var article in Model.LatestArticles)
                         {
-                            <div class="card latest-card">
-                                <div class="row g-0">
-                                    <div class="col-md-4">
-                                        <partial name="Partials/_ResponsiveImage"
-                                                 model='new ResponsiveImageViewModel { ImageUrl = article.ImageUrl, Alt = article.Title, Size = "med", CssClass = "card-img h-100 w-100", Style = "object-fit: cover;" }' />
-                                    </div>
-                                    <div class="col-md-8">
-                                        <div class="card-body">
-                                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                                <span class="badge bg-primary rounded-pill">@article.CategoryName</span>
-                                            </div>
-                                            <h5 class="card-title"><a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug" class="text-decoration-none text-dark">@article.Title</a></h5>
-                                            <p class="card-text">@(article.Summary?.Length > 150 ? article.Summary.Substring(0, 150) + "..." : article.Summary)</p>
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <small class="text-muted"><i class="bi bi-person"></i> @article.AuthorName</small>
-                                                <a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug" class="btn btn-sm btn-link text-decoration-none">Read full article →</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <partial name="Partials/_HomeLatestArticleCard" model="article" />
                         }
                     }
                 </div>
@@ -315,53 +281,7 @@
         </div>
 
         <div class="col-lg-4">
-            <div class="card side-card shadow-sm border-0">
-                <div class="card-header" style="background: linear-gradient(135deg, #ffc107, #ff9800);">
-                    <strong><i class="bi bi-star-fill"></i> Editor's Choice</strong>
-                </div>
-                <div class="card-body">
-                    @if (!Model.EditorChoiceArticles.Any())
-                    {
-                        <p class="text-muted text-center py-3">No featured articles yet.</p>
-                    }
-                    else
-                    {
-                        @foreach (var article in Model.EditorChoiceArticles)
-                        {
-                            <div class="mb-3 pb-2 border-bottom">
-                                <h6 class="mb-1"><a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug" class="text-decoration-none text-dark fw-semibold">@article.Title</a></h6>
-                                <small class="text-muted"><i class="bi bi-folder"></i> @article.CategoryName</small>
-                            </div>
-                        }
-                    }
-                </div>
-            </div>
-
-            <div class="card side-card shadow-sm border-0">
-                <div class="card-header" style="background: linear-gradient(135deg, #dc3545, #c82333); color: white;">
-                    <strong><i class="bi bi-fire"></i> Most Popular</strong>
-                </div>
-                <div class="card-body">
-                    @if (!Model.MostPopularArticles.Any())
-                    {
-                        <p class="text-muted text-center py-3">No popular articles yet.</p>
-                    }
-                    else
-                    {
-                        <div class="list-group list-group-flush">
-                            @foreach (var article in Model.MostPopularArticles.Take(5))
-                            {
-                                <a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug" class="list-group-item list-group-item-action border-0 px-0 py-2">
-                                    <div class="flex-grow-1">
-                                        <h6 class="mb-1">@article.Title</h6>
-                                        <small class="text-muted">@article.CategoryName</small>
-                                    </div>
-                                </a>
-                            }
-                        </div>
-                    }
-                </div>
-            </div>
+            <partial name="Partials/_HomeSidebar" model="Model" />
 
          @*    <div class="card side-card shadow-sm border-0">
                 <div class="card-header" style="background: linear-gradient(135deg, #0dcaf0, #0aa5c0); color: white;">
