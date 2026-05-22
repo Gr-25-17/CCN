@@ -1,5 +1,6 @@
-﻿using Azure;
+using Azure;
 using Azure.Data.Tables;
+using NewsSite.Models.APIs;
 using NewsSite.Services.Interfaces;
 
 namespace NewsSite.Services.Implementations;
