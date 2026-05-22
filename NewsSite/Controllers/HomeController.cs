@@ -45,83 +45,10 @@ namespace NewsSite.Controllers
             var searchTerm = HttpContext.Request.Query["searchTerm"].ToString();
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
-                var searchResults = await _articleService.SearchArticlesAsync(searchTerm);
-                var weather = await _weatherService.GetWeatherAsync();
-
-                var sidebarCollections = await GetSidebarCollectionsAsync();
-
-                var searchVm = new HomeViewModel
-                {
-                    SearchResults = searchResults,
-                    IsSearch = true,
-                    SearchTerm = searchTerm,
-                    MostPopularArticles = sidebarCollections.MostPopularArticles,
-                    EditorChoiceArticles = sidebarCollections.EditorChoiceArticles,
-                    Categories = await _categoryService.GetAllAsync(),
-                    Weather = weather?.ToWeatherViewModel()
-                };
-
-                return View(searchVm);
+                return View(await BuildSearchViewModelAsync(searchTerm));
             }
 
-            var hasSubscription = false;
-            List<int> preferredCategoryIds = new();
-            List<string> preferredAuthorIds = new();
-
-            if (User.Identity?.IsAuthenticated == true)
-            {
-                var userId = _userManager.GetUserId(User);
-
-                if (!string.IsNullOrEmpty(userId))
-                {
-                    hasSubscription = await _subscriptionService.HasActiveSubscriptionAsync(userId);
-
-                    var preferences = await _newsletterService.GetPreferencesAsync(userId);
-
-                    if (preferences != null && !string.IsNullOrEmpty(preferences.SelectedCategoryIds))
-                    {
-                        preferredCategoryIds = preferences.SelectedCategoryIds
-                            .Split(',')
-                            .Select(int.Parse)
-                            .ToList();
-                    }
-
-                    if (preferences != null && !string.IsNullOrEmpty(preferences.SelectedAuthorIds))
-                    {
-                        preferredAuthorIds = preferences.SelectedAuthorIds
-                            .Split(',')
-                            .ToList();
-                    }
-                }
-            }
-
-            var latestArticles = await _articleService.GetLatestAsync(6);
-            var sidebarCollectionsMain = await GetSidebarCollectionsAsync();
-
-            var prioritizedArticles = new List<ArticleSummaryViewModel>();
-
-            if (preferredCategoryIds.Any() || preferredAuthorIds.Any())
-            {
-                prioritizedArticles = (await _articleService.GetAllArticlesSortedByPreferencesAsync(
-                    preferredCategoryIds,
-                    preferredAuthorIds,
-                    4)).ToList();
-            }
-
-            var fullWeather = await _weatherService.GetWeatherAsync();
-
-            var viewModel = new HomeViewModel
-            {
-                LatestArticles = latestArticles,
-                MostPopularArticles = sidebarCollectionsMain.MostPopularArticles,
-                EditorChoiceArticles = sidebarCollectionsMain.EditorChoiceArticles,
-                PrioritizedArticles = prioritizedArticles,
-                Categories = await _categoryService.GetAllAsync(),
-                HasActiveSubscription = hasSubscription,
-                Weather = fullWeather?.ToWeatherViewModel()
-            };
-
-            return View(viewModel);
+            return View(await BuildDefaultViewModelAsync());
         }
 
 
@@ -131,6 +58,84 @@ namespace NewsSite.Controllers
             var editorChoiceArticles = await _articleService.GetEditorChoiceAsync(3);
 
             return (mostPopularArticles, editorChoiceArticles);
+        }
+
+        private async Task<HomeViewModel> BuildSearchViewModelAsync(string searchTerm)
+        {
+            var searchResults = await _articleService.SearchArticlesAsync(searchTerm);
+            var weather = await _weatherService.GetWeatherAsync();
+            var categories = await _categoryService.GetAllAsync();
+            var sidebarCollections = await GetSidebarCollectionsAsync();
+
+            return new HomeViewModel
+            {
+                SearchResults = searchResults,
+                IsSearch = true,
+                SearchTerm = searchTerm,
+                MostPopularArticles = sidebarCollections.MostPopularArticles,
+                EditorChoiceArticles = sidebarCollections.EditorChoiceArticles,
+                Categories = categories,
+                Weather = weather?.ToWeatherViewModel()
+            };
+        }
+
+        private async Task<HomeViewModel> BuildDefaultViewModelAsync()
+        {
+            var (hasSubscription, preferredCategoryIds, preferredAuthorIds) = await GetUserPreferencesAsync();
+            var latestArticles = await _articleService.GetLatestAsync(6);
+            var sidebarCollections = await GetSidebarCollectionsAsync();
+            var categories = await _categoryService.GetAllAsync();
+            var weather = await _weatherService.GetWeatherAsync();
+
+            IEnumerable<ArticleSummaryViewModel> prioritizedArticles = [];
+            if (preferredCategoryIds.Any() || preferredAuthorIds.Any())
+            {
+                prioritizedArticles = await _articleService.GetAllArticlesSortedByPreferencesAsync(
+                    preferredCategoryIds,
+                    preferredAuthorIds,
+                    4);
+            }
+
+            return new HomeViewModel
+            {
+                LatestArticles = latestArticles,
+                MostPopularArticles = sidebarCollections.MostPopularArticles,
+                EditorChoiceArticles = sidebarCollections.EditorChoiceArticles,
+                PrioritizedArticles = prioritizedArticles,
+                Categories = categories,
+                HasActiveSubscription = hasSubscription,
+                Weather = weather?.ToWeatherViewModel()
+            };
+        }
+
+        private async Task<(bool HasSubscription, List<int> CategoryIds, List<string> AuthorIds)> GetUserPreferencesAsync()
+        {
+            if (User.Identity?.IsAuthenticated != true)
+            {
+                return (false, [], []);
+            }
+
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return (false, [], []);
+            }
+
+            var hasSubscription = await _subscriptionService.HasActiveSubscriptionAsync(userId);
+            var preferences = await _newsletterService.GetPreferencesAsync(userId);
+            if (preferences == null)
+            {
+                return (hasSubscription, [], []);
+            }
+
+            var categoryIds = string.IsNullOrWhiteSpace(preferences.SelectedCategoryIds)
+                ? []
+                : preferences.SelectedCategoryIds.Split(',').Select(int.Parse).ToList();
+            var authorIds = string.IsNullOrWhiteSpace(preferences.SelectedAuthorIds)
+                ? []
+                : preferences.SelectedAuthorIds.Split(',').ToList();
+
+            return (hasSubscription, categoryIds, authorIds);
         }
 
         public IActionResult Privacy()

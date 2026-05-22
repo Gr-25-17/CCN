@@ -281,7 +281,8 @@
         </div>
 
         <div class="col-lg-4">
-            <partial name="Partials/_HomeSidebar" model="Model" />
+            <partial name="Partials/_HomeSidebar"
+                     model='new NewsSite.Models.ViewModels.HomeSidebarViewModel { EditorChoiceArticles = Model.EditorChoiceArticles, MostPopularArticles = Model.MostPopularArticles }' />
 
          @*    <div class="card side-card shadow-sm border-0">
                 <div class="card-header" style="background: linear-gradient(135deg, #0dcaf0, #0aa5c0); color: white;">
