@@ -1,4 +1,8 @@
 @model NewsSite.Models.ViewModels.SearchArticleVM
+@{
+    const int SummaryMaxLength = 150;
+    var summary = Model.Summary?.Length > SummaryMaxLength ? $"{Model.Summary.Substring(0, SummaryMaxLength)}..." : Model.Summary;
+}
 
 <div class="card latest-card position-relative">
     @if (Model.IsPremium)
@@ -17,7 +21,7 @@
         <div class="col-md-8">
             <div class="card-body position-relative">
                 <h5 class="card-title"><a asp-controller="Articles" asp-action="Details" asp-route-slug="@Model.Slug" class="text-decoration-none text-dark stretched-link">@Model.Title</a></h5>
-                <p class="card-text">@(Model.Summary?.Length > 150 ? Model.Summary.Substring(0, 150) + "..." : Model.Summary)</p>
+                <p class="card-text">@summary</p>
                 <div class="d-flex justify-content-between align-items-center">
                     <small class="text-muted"><i class="bi bi-person"></i> @Model.AuthorName | <i class="bi bi-folder"></i> @Model.CategoryName | @Model.CreatedAt.ToString("MMM dd, yyyy")</small>
                     <small class="text-muted"><span class="me-2">👁️ @Model.ViewsCount</span><span>❤️ @Model.LikesCount</span></small>

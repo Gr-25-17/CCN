@@ -13,6 +13,11 @@ namespace NewsSite.Controllers
 {
     public class HomeController : Controller
     {
+        private const int LatestArticlesCount = 6;
+        private const int MostPopularArticlesCount = 6;
+        private const int EditorChoiceArticlesCount = 3;
+        private const int PrioritizedArticlesCount = 4;
+
         private readonly IArticleService _articleService;
         private readonly ICategoryService _categoryService;
         private readonly ISubscriptionService _subscriptionService;
@@ -54,8 +59,8 @@ namespace NewsSite.Controllers
 
         private async Task<(IEnumerable<ArticleSummaryViewModel> MostPopularArticles, IEnumerable<ArticleSummaryViewModel> EditorChoiceArticles)> GetSidebarCollectionsAsync()
         {
-            var mostPopularArticles = await _articleService.GetMostPopularAsync(6);
-            var editorChoiceArticles = await _articleService.GetEditorChoiceAsync(3);
+            var mostPopularArticles = await _articleService.GetMostPopularAsync(MostPopularArticlesCount);
+            var editorChoiceArticles = await _articleService.GetEditorChoiceAsync(EditorChoiceArticlesCount);
 
             return (mostPopularArticles, editorChoiceArticles);
         }
@@ -82,7 +87,7 @@ namespace NewsSite.Controllers
         private async Task<HomeViewModel> BuildDefaultViewModelAsync()
         {
             var (hasSubscription, preferredCategoryIds, preferredAuthorIds) = await GetUserPreferencesAsync();
-            var latestArticles = await _articleService.GetLatestAsync(6);
+            var latestArticles = await _articleService.GetLatestAsync(LatestArticlesCount);
             var sidebarCollections = await GetSidebarCollectionsAsync();
             var categories = await _categoryService.GetAllAsync();
             var weather = await _weatherService.GetWeatherAsync();
@@ -93,7 +98,7 @@ namespace NewsSite.Controllers
                 prioritizedArticles = await _articleService.GetAllArticlesSortedByPreferencesAsync(
                     preferredCategoryIds,
                     preferredAuthorIds,
-                    4);
+                    PrioritizedArticlesCount);
             }
 
             return new HomeViewModel
