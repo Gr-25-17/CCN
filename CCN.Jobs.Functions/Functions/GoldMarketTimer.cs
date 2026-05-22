@@ -98,7 +98,7 @@ public class GoldMarketTimer(
         if (long.TryParse(rowKey, out var inverseTicks))
         {
             var ticks = DateTime.MaxValue.Ticks - inverseTicks;
-            if (ticks is >= 0 and <= DateTime.MaxValue.Ticks)
+            if (ticks >= 0 && ticks <= DateTime.MaxValue.Ticks)
             {
                 return new DateTime(ticks, DateTimeKind.Utc);
             }
