@@ -25,5 +25,7 @@ namespace NewsSite.Services.Interfaces
         Task<IEnumerable<SearchArticleVM>> SearchArticlesAsync(string searchTerm);
         Task<IEnumerable<ArticleSummaryViewModel>> GetAllArticlesSortedByPreferencesAsync(List<int> preferredCategoryIds, List<string> preferredAuthorIds, int count);
         Task<bool> DeleteDraftAsync(int articleId, string userId, bool canSeeAll);
+
+        Task<IEnumerable<ArticleSummaryViewModel>> GetPremiumByCategoryAsync(int categoryId, int count);
     }
 }
