@@ -27,6 +27,12 @@ public class GoldMarketTimer(
             return;
         }
 
+        if (goldData.Close <= 0)
+        {
+            logger.LogWarning("Invalid gold close value from API. Symbol: {Symbol}, Name: {Name}, Close: {Close}", goldData.Symbol, goldData.Name, goldData.Close);
+            return;
+        }
+
         var connectionString = configuration["AzureWebJobsStorage"]
             ?? throw new InvalidOperationException("Missing config: AzureWebJobsStorage");
 
