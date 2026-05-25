@@ -1,4 +1,6 @@
-﻿using NewsSite.Models.ViewModels;
+using System.Globalization;
+using NewsSite.Models.APIs;
+using NewsSite.Models.ViewModels;
 
 namespace NewsSite.Mapping
 {
