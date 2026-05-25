@@ -47,7 +47,7 @@ public class GoldService(IConfiguration config, ILogger<GoldService> logger) : I
             .GroupBy(x => x.Date)
             .OrderByDescending(group => group.Key)
             .Select(group => group.OrderByDescending(item => item.Item.Timestamp).First().Item)
-            .Take(count)
+            .Take(count > 0 ? count : int.MaxValue)
             .ToList();
     }
 

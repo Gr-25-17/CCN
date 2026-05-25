@@ -16,7 +16,7 @@ namespace NewsSite.ViewComponents
 
         public async Task<IViewComponentResult> InvokeAsync()
         {
-            var rawData = await _goldService.GetLatestPricesAsync(7);
+            var rawData = await _goldService.GetLatestPricesAsync(0);
 
             // Using your extension method to convert to ViewModel
             var viewModel = rawData.Select(g => g.ToViewModel()).ToList();
