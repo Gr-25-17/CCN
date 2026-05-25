@@ -1,6 +1,7 @@
 using Azure.Storage.Blobs;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using NewsSite.Data;
 using NewsSite.Models.Entities;
@@ -9,6 +10,7 @@ using NewsSite.Repositories.Interfaces;
 using NewsSite.Services.Implementations;
 using NewsSite.Services.Interfaces;
 using Polly;
+using Microsoft.Net.Http.Headers;
 
 namespace NewsSite
 {
@@ -92,6 +94,41 @@ namespace NewsSite
 
             var app = builder.Build();
 
+            var provider = new FileExtensionContentTypeProvider();
+       
+            provider.Mappings[".br"] = "application/octet-stream";
+            provider.Mappings[".wasm"] = "application/wasm";
+            provider.Mappings[".data"] = "application/octet-stream";
+            provider.Mappings[".js"] = "application/javascript";
+
+            var staticFileOptions = new StaticFileOptions
+            {
+                ContentTypeProvider = provider,
+                OnPrepareResponse = ctx =>
+                {
+                    var path = ctx.Context.Request.Path.Value ?? "";
+
+                    // Check if the actual file requested is a Brotli file
+                    if (path.EndsWith(".br", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Crucial: Tell the browser it needs to decompress this via Brotli first
+                        ctx.Context.Response.Headers[HeaderNames.ContentEncoding] = "br";
+
+                        // If it's your framework file (e.g., Panchinko.framework.js.br)
+                        if (path.Contains(".js.br", StringComparison.OrdinalIgnoreCase) ||
+                            path.Contains(".framework", StringComparison.OrdinalIgnoreCase))
+                        {
+                            ctx.Context.Response.Headers[HeaderNames.ContentType] = "application/javascript";
+                        }
+                        // If it's your data block (e.g., Panchinko.data.br)
+                        else if (path.Contains(".data.br", StringComparison.OrdinalIgnoreCase))
+                        {
+                            ctx.Context.Response.Headers[HeaderNames.ContentType] = "application/octet-stream";
+                        }
+                    }
+                }
+            };
+
             if (args.Contains("--migrate-local-to-lexicon", StringComparer.OrdinalIgnoreCase))
             {
                 using var migrationScope = app.Services.CreateScope();
@@ -112,6 +149,7 @@ namespace NewsSite
             }
 
             app.UseHttpsRedirection();
+            app.UseStaticFiles(staticFileOptions);
             app.UseRouting();
             app.UseAuthorization();
 
@@ -140,6 +178,9 @@ namespace NewsSite
                 await DbInitializer.SeedRolesAndAdminAsync(services);
                 await SeedData.InitializeAsync(services);
             }
+            app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
             await app.RunAsync();
         }

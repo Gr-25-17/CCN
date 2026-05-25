@@ -89,6 +89,42 @@ namespace NewsSite.Services.Implementations
             await _signInManager.RefreshSignInAsync(user);
         }
 
+        public async Task<int> GetRemainingSubscriptionDaysAsync(string userId)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(userId);
+
+            var subscription = await _subscriptionRepository.GetActiveSubscriptionAsync(userId);
+            if (subscription is null)
+            {
+                return 0;
+            }
+
+            return Math.Max(0, (int)Math.Ceiling((subscription.EndDate - DateTime.UtcNow).TotalDays));
+        }
+
+        public async Task<(bool Success, string Message, int RemainingDays)> SpendSubscriptionDayForGameAsync(string userId)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(userId);
+
+            var subscription = await _subscriptionRepository.GetActiveSubscriptionAsync(userId);
+            if (subscription is null)
+            {
+                return (false, "No active subscription found.", 0);
+            }
+
+            var remainingDays = Math.Max(0, (int)Math.Ceiling((subscription.EndDate - DateTime.UtcNow).TotalDays));
+            if (remainingDays <= 1)
+            {
+                return (false, "Sorry can't use the last day to pay", remainingDays);
+            }
+
+            subscription.EndDate = subscription.EndDate.AddDays(-1);
+            await _subscriptionRepository.SaveAsync(subscription);
+
+            var updatedDays = Math.Max(0, (int)Math.Ceiling((subscription.EndDate - DateTime.UtcNow).TotalDays));
+            return (true, "1 subscription day used to buy balls.", updatedDays);
+        }
+
         public async Task CancelSubscriptionAsync(string userId)
         {
             var subscription = await _subscriptionRepository.GetActiveSubscriptionAsync(userId);
