@@ -52,8 +52,9 @@ public class StockMarketService(HttpClient httpClient, IConfiguration configurat
 
                 if (close <= 0 && prevClose > 0)
                 {
-                    logger.LogWarning("Gold close was non-positive from API, falling back to prevClose. Symbol: {Symbol}, Name: {Name}, Close: {Close}, PrevClose: {PrevClose}", symbol, name, close, prevClose);
+                    logger.LogWarning("Gold close was non-positive from API, falling back to prevClose and neutral percent change. Symbol: {Symbol}, Name: {Name}, Close: {Close}, PrevClose: {PrevClose}", symbol, name, close, prevClose);
                     close = prevClose;
+                    percentChange = 0;
                 }
 
                 return new Top10
