@@ -40,13 +40,16 @@ public class StockMarketService(HttpClient httpClient, IConfiguration configurat
                 var symbol = GetString(item, "symbol");
                 var name = GetString(item, "name");
 
-                if (!string.Equals(symbol, "GC=F", StringComparison.OrdinalIgnoreCase)
-                    && !string.Equals(name, "Gold", StringComparison.OrdinalIgnoreCase))
+                if (!IsGoldInstrument(symbol, name))
                 {
                     continue;
                 }
 
-                var close = GetDouble(item, "close") ?? GetDouble(item, "price") ?? 0;
+                var close = GetDouble(item, "close")
+                    ?? GetDouble(item, "price")
+                    ?? GetDouble(item, "last")
+                    ?? GetDouble(item, "lastPrice")
+                    ?? 0;
                 var prevClose = GetDouble(item, "prevClose") ?? 0;
                 var percentChange = GetDouble(item, "percentChange") ?? 0;
 
@@ -75,6 +78,27 @@ public class StockMarketService(HttpClient httpClient, IConfiguration configurat
             logger.LogError(ex, "Failed to fetch stock summary from external API.");
             return null;
         }
+    }
+
+
+    private static bool IsGoldInstrument(string? symbol, string? name)
+    {
+        if (!string.IsNullOrWhiteSpace(symbol))
+        {
+            var normalizedSymbol = symbol.Trim().ToUpperInvariant();
+            if (normalizedSymbol == "GC=F" || normalizedSymbol.Contains("XAU") || normalizedSymbol.Contains("GOLD"))
+            {
+                return true;
+            }
+        }
+
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return false;
+        }
+
+        var normalizedName = name.Trim();
+        return normalizedName.Contains("Gold", StringComparison.OrdinalIgnoreCase);
     }
 
     private static string? GetString(JsonElement element, string propertyName) =>
