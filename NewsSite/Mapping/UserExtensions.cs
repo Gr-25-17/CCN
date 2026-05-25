@@ -1,4 +1,4 @@
-﻿using NewsSite.Models.Entities;
+using NewsSite.Models.Entities;
 using NewsSite.Models.ViewModels;
 
 namespace NewsSite.Mapping
@@ -6,8 +6,7 @@ namespace NewsSite.Mapping
     public static class UserExtensions
     {
         public static UserDisplayInfo ToDisplayInfo(this ApplicationUser user, string? currentRole, bool hasActiveSubscription)
-        {
-            return new UserDisplayInfo
+            => new()
             {
                 Id = user.Id,
                 Email = user.Email ?? string.Empty,
@@ -17,6 +16,5 @@ namespace NewsSite.Mapping
                 IsDeleted = user.IsDeleted,
                 HasActiveSubscription = hasActiveSubscription
             };
-        }
     }
 }

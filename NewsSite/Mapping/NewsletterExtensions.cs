@@ -1,40 +1,37 @@
-﻿using NewsSite.Models.Entities;
+using NewsSite.Models.Entities;
 using NewsSite.Models.ViewModels;
 
 namespace NewsSite.Mapping
 {
     public static class NewsletterExtensions
     {
+        private const string DefaultFrequency = "Weekly";
+
         public static NewsletterPreferencesViewModel ToNewsletterPreferencesViewModel(this NewsletterPreference? prefs, List<CategoryViewModel> availableCategories)
-        {
-            if (prefs == null)
-            {
-                return new NewsletterPreferencesViewModel
+            => prefs is null
+                ? new NewsletterPreferencesViewModel
                 {
                     ReceiveNewsletter = false,
-                    Frequency = "Weekly",
+                    Frequency = DefaultFrequency,
                     SelectedCategoryIds = null,
                     AvailableCategories = availableCategories,
-                    UnsubscribeToken = null,     
-                    IsUnsubscribed = false,       
-                    UnsubscribedAt = null         
+                    UnsubscribeToken = null,
+                    IsUnsubscribed = false,
+                    UnsubscribedAt = null
+                }
+                : new NewsletterPreferencesViewModel
+                {
+                    ReceiveNewsletter = prefs.ReceiveNewsletter,
+                    Frequency = prefs.Frequency,
+                    SelectedCategoryIds = prefs.SelectedCategoryIds,
+                    AvailableCategories = availableCategories,
+                    UnsubscribeToken = prefs.UnsubscribeToken,
+                    IsUnsubscribed = prefs.IsUnsubscribed,
+                    UnsubscribedAt = prefs.UnsubscribedAt
                 };
-            }
 
-            return new NewsletterPreferencesViewModel
-            {
-                ReceiveNewsletter = prefs.ReceiveNewsletter,
-                Frequency = prefs.Frequency,
-                SelectedCategoryIds = prefs.SelectedCategoryIds,
-                AvailableCategories = availableCategories,
-                UnsubscribeToken = prefs.UnsubscribeToken,     
-                IsUnsubscribed = prefs.IsUnsubscribed,         
-                UnsubscribedAt = prefs.UnsubscribedAt          
-            };
-        }
         public static NewsletterPreference ToNewsletterPreferenceEntity(this NewsletterPreferencesViewModel prefs, string userId, string? existingToken = null)
-        {
-            return new NewsletterPreference
+            => new()
             {
                 UserId = userId,
                 ReceiveNewsletter = prefs.ReceiveNewsletter,
@@ -42,19 +39,13 @@ namespace NewsSite.Mapping
                 SelectedCategoryIds = prefs.SelectedCategoryIds,
                 SelectedAuthIds = prefs.SelectedAuthorIds,
                 UpdatedAt = DateTime.UtcNow,
-
-                UnsubscribeToken = !string.IsNullOrEmpty(existingToken)
-                    ? existingToken
-                    : GenerateToken()
+                UnsubscribeToken = string.IsNullOrWhiteSpace(existingToken) ? GenerateToken() : existingToken
             };
-        }
 
         private static string GenerateToken()
-        {
-            return Convert.ToBase64String(Guid.NewGuid().ToByteArray())
+            => Convert.ToBase64String(Guid.NewGuid().ToByteArray())
                 .Replace('+', '-')
                 .Replace('/', '_')
                 .TrimEnd('=');
-        }
     }
 }
