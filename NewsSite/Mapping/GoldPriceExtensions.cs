@@ -4,7 +4,7 @@ using NewsSite.Models.ViewModels;
 
 namespace NewsSite.Mapping
 {
-    public static class GoldPriceExstensions
+    public static class GoldPriceExtensions
     {
         private const string TimeBucketFormat = "yyyyMMddHH";
 

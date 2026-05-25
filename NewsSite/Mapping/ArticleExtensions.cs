@@ -1,10 +1,13 @@
-﻿using NewsSite.Models.Entities;
+using NewsSite.Models.Entities;
 using NewsSite.Models.ViewModels;
 
 namespace NewsSite.Mapping
 {
     public static class ArticleExtensions
     {
+        private const string UnknownAuthor = "Okänd skribent";
+        private const string PlaceholderImagePath = "/images/placeholder.jpg";
+        private const string DefaultImageSize = "med";
         public static ArticleViewModel MapToArticleViewModel(this Article a)
         {
             return new ArticleViewModel
@@ -13,9 +16,7 @@ namespace NewsSite.Mapping
                 Title = a.Title,
                 CategoryId = a.CategoryId,
                 CategoryName = a.Category?.Name,
-                AuthorName = !string.IsNullOrWhiteSpace(a.AuthorName)
-                    ? a.AuthorName
-                    : (a.Author != null ? $"{a.Author.FirstName} {a.Author.LastName}" : "Okänd skribent"),
+                AuthorName = a.ResolveAuthorName(),
                 IsReadyForPublish = a.IsReadyForPublish,
                 ViewsCount = a.ViewsCount,
                 LikesCount = a.LikesCount,
@@ -42,9 +43,7 @@ namespace NewsSite.Mapping
                 ImageUrl = a.ImageUrl,
                 CreatedAt = a.CreatedAt,
                 CategoryName = a.Category?.Name ?? string.Empty,
-                AuthorName = !string.IsNullOrWhiteSpace(a.AuthorName)
-                    ? a.AuthorName
-                    : (a.Author != null ? $"{a.Author.FirstName} {a.Author.LastName}" : "Okänd skribent"),
+                AuthorName = a.ResolveAuthorName(),
                 IsPremium = a.IsPremium,
                 ViewsCount = a.ViewsCount,
                 LikesCount = a.LikesCount
@@ -94,7 +93,7 @@ namespace NewsSite.Mapping
                 Slug = article.Slug,
                 ImageUrl = article.ImageUrl,
                 CategoryName = article.Category?.Name ?? "Allmänt",
-                AuthorName = article.AuthorName,
+                AuthorName = article.ResolveAuthorName(),
                 CreatedAt = article.CreatedAt,
                 IsPremium = article.IsPremium,
                 IsArchived = article.IsArchived,
@@ -102,15 +101,50 @@ namespace NewsSite.Mapping
                 LikesCount = article.LikesCount
             };
         }
+        private static string ResolveAuthorName(this Article article)
+        {
+            if (!string.IsNullOrWhiteSpace(article.AuthorName))
+            {
+                return article.AuthorName;
+            }
+
+            return article.Author is null
+                ? UnknownAuthor
+                : $"{article.Author.FirstName} {article.Author.LastName}";
+        }
+
+
+        private static string NormalizeImageSize(string? size)
+        {
+            var normalizedSize = size?.Trim().ToLowerInvariant();
+
+            return normalizedSize switch
+            {
+                "min" or "med" or "full" => normalizedSize,
+                _ => DefaultImageSize
+            };
+        }
+
         public static string ResolveImageUrl(this string? imageUrl, string size, IConfiguration config)
         {
-            if (string.IsNullOrEmpty(imageUrl)) return "/images/placeholder.jpg";
+            if (string.IsNullOrWhiteSpace(imageUrl)) return PlaceholderImagePath;
             if (imageUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase)) return imageUrl;
 
-            var baseUrl = config["StorageSettings:BaseUrl"]; // Ska vara https://ccnstorage.blob.core.windows.net/
-            var container = imageUrl.EndsWith(".svg", StringComparison.OrdinalIgnoreCase) ? "articles-full" : $"articles-{size}";
+            var normalizedImageUrl = imageUrl.TrimStart('/');
+            var normalizedSize = NormalizeImageSize(size);
 
-            return $"{baseUrl}{container}/{imageUrl}"; // Bygger ihop den kompletta länken[cite: 15]
+            var baseUrl = config["StorageSettings:BaseUrl"];
+            if (string.IsNullOrWhiteSpace(baseUrl))
+            {
+                return $"/images/{normalizedImageUrl}";
+            }
+
+            var normalizedBaseUrl = baseUrl.EndsWith("/", StringComparison.Ordinal) ? baseUrl : $"{baseUrl}/";
+            var container = normalizedImageUrl.EndsWith(".svg", StringComparison.OrdinalIgnoreCase)
+                ? "articles-full"
+                : $"articles-{normalizedSize}";
+
+            return $"{normalizedBaseUrl}{container}/{normalizedImageUrl}";
         }
     }
 }
