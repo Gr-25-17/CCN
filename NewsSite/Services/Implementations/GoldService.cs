@@ -1,11 +1,16 @@
-﻿using Azure;
+using System.Globalization;
+using Azure;
 using Azure.Data.Tables;
+using NewsSite.Models.APIs;
 using NewsSite.Services.Interfaces;
 
 namespace NewsSite.Services.Implementations;
 
 public class GoldService(IConfiguration config, ILogger<GoldService> logger) : IGoldService
 {
+    private const string PartitionKey = "Gold";
+    private const string TimeBucketFormat = "yyyyMMddHH";
+
     private readonly TableClient _tableClient = new(
         config.GetConnectionString("AzureWebJobsStorage") ?? config["AzureWebJobsStorage"],
         "GoldPrices");
@@ -17,9 +22,8 @@ public class GoldService(IConfiguration config, ILogger<GoldService> logger) : I
         try
         {
             var results = _tableClient.QueryAsync<GoldPrice>(
-                filter: "PartitionKey eq 'Gold'",
-                maxPerPage: count
-            ).Take(count);
+                filter: $"PartitionKey eq '{PartitionKey}'"
+            );
 
             await foreach (var entity in results)
             {
@@ -29,12 +33,41 @@ public class GoldService(IConfiguration config, ILogger<GoldService> logger) : I
         catch (RequestFailedException ex)
         {
             logger.LogError(ex, "Azure Table Storage error fetching gold prices.");
+            return [];
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "General error fetching gold prices. Check internet connection.");
+            return [];
         }
 
-        return list;
+        return list
+            .Select(item => new { Item = item, Date = ParseSortableDateUtc(item.RowKey) })
+            .Where(x => x.Date != DateTime.MinValue && x.Item.Close > 0)
+            .GroupBy(x => x.Date)
+            .OrderByDescending(group => group.Key)
+            .Select(group => group.OrderByDescending(item => item.Item.Timestamp).First().Item)
+            .Take(count)
+            .ToList();
+    }
+
+    private static DateTime ParseSortableDateUtc(string? rowKey)
+    {
+        if (string.IsNullOrWhiteSpace(rowKey))
+        {
+            return DateTime.MinValue;
+        }
+
+        if (DateTime.TryParseExact(
+                rowKey,
+                TimeBucketFormat,
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
+                out var bucketDate))
+        {
+            return bucketDate;
+        }
+
+        return DateTime.MinValue;
     }
 }
