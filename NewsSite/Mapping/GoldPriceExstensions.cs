@@ -54,7 +54,7 @@ namespace NewsSite.Mapping
             }
 
             var ticks = DateTime.MaxValue.Ticks - inverseTicks;
-            return ticks is >= 0 and <= DateTime.MaxValue.Ticks
+            return ticks >= 0 && ticks <= DateTime.MaxValue.Ticks
                 ? new DateTime(ticks, DateTimeKind.Utc)
                 : DateTime.MinValue;
         }
