@@ -13,11 +13,11 @@
 
 <div class="card">
     <div class="card-body">
-        <h5 class="card-title">Subscription powered purchases</h5>
+        <h5 class="card-title">Subscription powered purchases(Coming soon)</h5>
         <p class="mb-2">Days left: <strong id="daysLeft">@Model.RemainingSubscriptionDays</strong></p>
-        <p class="text-muted small">Use 1 subscription day to buy new balls in the game.</p>
+        <p class="text-muted small">Use 1 subscription day to buy 10 new balls.</p>
 
-        <form id="buyBallsForm" asp-controller="Game" asp-action="BuyBallsWithSubscriptionDay" method="post">
+      @*   <form id="buyBallsForm" asp-controller="Game" asp-action="BuyBallsWithSubscriptionDay" method="post">
             @Html.AntiForgeryToken()
             <button id="buyBallsButton" type="submit" class="btn btn-primary">Buy balls (cost: 1 day)</button>
         </form>
@@ -25,11 +25,11 @@
         <div id="lastDayWarning" class="alert alert-warning mt-3 d-none" role="alert">
             Sorry can't use the last day to pay
         </div>
-        <div id="purchaseStatus" class="small mt-2 text-muted"></div>
+        <div id="purchaseStatus" class="small mt-2 text-muted"></div> *@
     </div>
 </div>
 
-<script>
+@* <script>
     const frame = document.getElementById('panchinkoFrame');
     const buyForm = document.getElementById('buyBallsForm');
     const daysLeftEl = document.getElementById('daysLeft');
@@ -78,4 +78,4 @@
             await performPurchase(event.origin);
         }
     });
-</script>
+</script> *@
