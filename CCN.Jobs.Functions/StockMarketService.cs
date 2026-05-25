@@ -40,21 +40,28 @@ public class StockMarketService(HttpClient httpClient, IConfiguration configurat
                 var symbol = GetString(item, "symbol");
                 var name = GetString(item, "name");
 
-                if (!string.Equals(symbol, "GC=F", StringComparison.OrdinalIgnoreCase)
-                    && !string.Equals(name, "Gold", StringComparison.OrdinalIgnoreCase))
+                if (!IsGoldInstrument(symbol, name))
                 {
                     continue;
                 }
 
-                var close = GetDouble(item, "close") ?? GetDouble(item, "price") ?? 0;
+                var close = GetDouble(item, "close")
+                    ?? GetDouble(item, "price")
+                    ?? GetDouble(item, "last")
+                    ?? GetDouble(item, "lastPrice")
+                    ?? 0;
                 var prevClose = GetDouble(item, "prevClose") ?? 0;
                 var percentChange = GetDouble(item, "percentChange") ?? 0;
 
                 if (close <= 0 && prevClose > 0)
                 {
-                    logger.LogWarning("Gold close was non-positive from API, falling back to prevClose and neutral percent change. Symbol: {Symbol}, Name: {Name}, Close: {Close}, PrevClose: {PrevClose}", symbol, name, close, prevClose);
+                    logger.LogWarning("Gold close was non-positive from API, falling back to prevClose. Symbol: {Symbol}, Name: {Name}, Close: {Close}, PrevClose: {PrevClose}", symbol, name, close, prevClose);
                     close = prevClose;
-                    percentChange = 0;
+                }
+
+                if (prevClose > 0)
+                {
+                    percentChange = ((close - prevClose) / prevClose) * 100;
                 }
 
                 return new Top10
@@ -75,6 +82,27 @@ public class StockMarketService(HttpClient httpClient, IConfiguration configurat
             logger.LogError(ex, "Failed to fetch stock summary from external API.");
             return null;
         }
+    }
+
+
+    private static bool IsGoldInstrument(string? symbol, string? name)
+    {
+        if (!string.IsNullOrWhiteSpace(symbol))
+        {
+            var normalizedSymbol = symbol.Trim().ToUpperInvariant();
+            if (normalizedSymbol == "GC=F" || normalizedSymbol.Contains("XAU") || normalizedSymbol.Contains("GOLD"))
+            {
+                return true;
+            }
+        }
+
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return false;
+        }
+
+        var normalizedName = name.Trim();
+        return normalizedName.Contains("Gold", StringComparison.OrdinalIgnoreCase);
     }
 
     private static string? GetString(JsonElement element, string propertyName) =>
