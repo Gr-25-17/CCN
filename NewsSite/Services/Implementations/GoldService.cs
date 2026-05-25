@@ -52,9 +52,11 @@ public class GoldService(IConfiguration config, ILogger<GoldService> logger) : I
         for (var i = 0; i < ordered.Count - 1; i++)
         {
             var current = ordered[i];
-            var previous = ordered[i + 1];
+            var previous = ordered
+                .Skip(i + 1)
+                .FirstOrDefault(x => x.Close > 0 && Math.Abs(x.Close - current.Close) > 0.0001d);
 
-            if (previous.Close > 0)
+            if (previous is not null)
             {
                 current.PercentChange = ((current.Close - previous.Close) / previous.Close) * 100;
             }
