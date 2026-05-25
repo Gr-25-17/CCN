@@ -42,9 +42,11 @@ public class GoldService(IConfiguration config, ILogger<GoldService> logger) : I
         }
 
         return list
-            .GroupBy(x => ParseSortableDateUtc(x.RowKey))
+            .Select(item => new { Item = item, Date = ParseSortableDateUtc(item.RowKey) })
+            .Where(x => x.Date != DateTime.MinValue && x.Item.Close > 0)
+            .GroupBy(x => x.Date)
             .OrderByDescending(group => group.Key)
-            .Select(group => group.OrderByDescending(item => item.Timestamp).First())
+            .Select(group => group.OrderByDescending(item => item.Item.Timestamp).First().Item)
             .Take(count)
             .ToList();
     }
@@ -64,15 +66,6 @@ public class GoldService(IConfiguration config, ILogger<GoldService> logger) : I
                 out var bucketDate))
         {
             return bucketDate;
-        }
-
-        if (long.TryParse(rowKey, out var inverseTicks))
-        {
-            var ticks = DateTime.MaxValue.Ticks - inverseTicks;
-            if (ticks is >= 0 and <= DateTime.MaxValue.Ticks)
-            {
-                return new DateTime(ticks, DateTimeKind.Utc);
-            }
         }
 
         return DateTime.MinValue;
