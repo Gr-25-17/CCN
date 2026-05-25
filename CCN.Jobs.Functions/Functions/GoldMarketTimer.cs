@@ -42,6 +42,24 @@ public class GoldMarketTimer(
         var bucketTimeUtc = NormalizeToHourUtc(DateTime.UtcNow);
         var rowKey = bucketTimeUtc.ToString(TimeBucketFormat);
 
+        var allGoldEntries = new List<GoldPrice>();
+        await foreach (var page in tableClient.QueryAsync<GoldPrice>(x => x.PartitionKey == PartitionKey).AsPages())
+        {
+            allGoldEntries.AddRange(page.Values);
+        }
+
+        var latestStoredPoint = allGoldEntries
+            .OrderByDescending(x => ParseSortableDateUtc(x.RowKey))
+            .ThenByDescending(x => x.Timestamp)
+            .FirstOrDefault();
+
+        if (latestStoredPoint is not null
+            && HasSameValues(latestStoredPoint, goldData))
+        {
+            logger.LogInformation("Gold price unchanged from latest stored point. Skipping insert. Close: {Close}", goldData.Close);
+            return;
+        }
+
         var entity = new GoldPrice
         {
             PartitionKey = PartitionKey,
@@ -56,11 +74,7 @@ public class GoldMarketTimer(
         await tableClient.UpsertEntityAsync(entity);
         logger.LogInformation("Upserted gold price for bucket {Bucket}: {Close}", rowKey, entity.Close);
 
-        var allGoldEntries = new List<GoldPrice>();
-        await foreach (var page in tableClient.QueryAsync<GoldPrice>(x => x.PartitionKey == PartitionKey).AsPages())
-        {
-            allGoldEntries.AddRange(page.Values);
-        }
+        allGoldEntries.Add(entity);
 
         if (allGoldEntries.Count <= MaxStoredPoints)
         {
@@ -80,6 +94,12 @@ public class GoldMarketTimer(
             logger.LogInformation("Deleted old gold record: {RowKey}", oldPrice.RowKey);
         }
     }
+
+
+    private static bool HasSameValues(GoldPrice stored, Top10 latest) =>
+        stored.Close == latest.Close
+        && stored.PrevClose == latest.PrevClose
+        && stored.PercentChange == latest.PercentChange;
 
     private static DateTime NormalizeToHourUtc(DateTime utcNow) =>
         new(utcNow.Year, utcNow.Month, utcNow.Day, utcNow.Hour, 0, 0, DateTimeKind.Utc);
