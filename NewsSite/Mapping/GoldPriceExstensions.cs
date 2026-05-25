@@ -1,7 +1,6 @@
 ﻿using NewsSite.Models.ViewModels;
-using NewsSite.Models;
 using NewsSite.Models.APIs;
-using NewsSite.Models.Entities;
+
 
 namespace NewsSite.Mapping
 {
