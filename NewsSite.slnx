@@ -1,14 +1,5 @@
 <Solution>
-  <Project Path="API_Weather/Weather.csproj" Id="5e1e081f-74c8-4fee-ba6e-cd53a1ef5605">
-    <Build Solution="Debug|*" Project="false" />
-  </Project>
   <Project Path="CCN.Jobs.Functions/CCN.Jobs.Functions.csproj">
-    <Build Solution="Debug|*" Project="false" />
-  </Project>
-  <Project Path="CCNLetter/CCNLetter/CCNLetter.csproj">
-    <Build Solution="Debug|*" Project="false" />
-  </Project>
-  <Project Path="GoldApIUpdater/GoldApIUpdater/GoldApIUpdater.csproj">
     <Build Solution="Debug|*" Project="false" />
   </Project>
   <Project Path="ImageProcessor/ImageProcessor.csproj" Id="e559db9b-05d1-46b1-9d47-14993580bce7">
