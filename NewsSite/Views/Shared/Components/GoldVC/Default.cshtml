@@ -12,8 +12,7 @@
     
     // Fallback if change percentage isn't calculated in the viewmodel
     // (Assuming a standard percentage calculation if your model doesn't have it)
-    var previousPrice = Model.Count > 1 ? Model[1].Price : latest?.Price ?? 1;
-    var percentChange = latest != null ? ((latest.Price - previousPrice) / previousPrice) * 100 : 0;
+    var percentChange = latest?.Change ?? 0;
 }
 
 <div class="card bg-dark text-white border-secondary shadow-lg overflow-hidden" style="max-width: 450px; border-radius: 12px;">
@@ -31,7 +30,7 @@
             <div class="text-end">
                 <span class="badge @badgeBg px-2 py-1 fs-6 d-inline-flex align-items-center gap-1">
                     <i class="bi @icon"></i>
-                    @(percentChange >= 0 ? "+" : "")@percentChange.ToString("F2")%
+                    @(percentChange >= 0 ? "+" : "")@percentChange.ToString("F3")%
                 </span>
                 <div class="small text-muted mt-1" style="font-size: 0.75rem;">
                     @latest?.DateLabel

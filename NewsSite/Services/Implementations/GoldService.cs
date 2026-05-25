@@ -41,14 +41,28 @@ public class GoldService(IConfiguration config, ILogger<GoldService> logger) : I
             return [];
         }
 
-        return list
+        var ordered = list
             .Select(item => new { Item = item, Date = ParseSortableDateUtc(item.RowKey) })
-            .Where(x => x.Date != DateTime.MinValue && x.Item.Close > 0)
-            .GroupBy(x => x.Date)
-            .OrderByDescending(group => group.Key)
-            .Select(group => group.OrderByDescending(item => item.Item.Timestamp).First().Item)
+            .OrderByDescending(x => x.Date)
+            .ThenByDescending(x => x.Item.Timestamp)
+            .Select(x => x.Item)
             .Take(count)
             .ToList();
+
+        for (var i = 0; i < ordered.Count - 1; i++)
+        {
+            var current = ordered[i];
+            var previous = ordered
+                .Skip(i + 1)
+                .FirstOrDefault(x => x.Close > 0 && Math.Abs(x.Close - current.Close) > 0.0001d);
+
+            if (previous is not null)
+            {
+                current.PercentChange = ((current.Close - previous.Close) / previous.Close) * 100;
+            }
+        }
+
+        return ordered;
     }
 
     private static DateTime ParseSortableDateUtc(string? rowKey)
@@ -66,6 +80,15 @@ public class GoldService(IConfiguration config, ILogger<GoldService> logger) : I
                 out var bucketDate))
         {
             return bucketDate;
+        }
+
+        if (long.TryParse(rowKey, out var inverseTicks))
+        {
+            var ticks = DateTime.MaxValue.Ticks - inverseTicks;
+            if (ticks >= 0 && ticks <= DateTime.MaxValue.Ticks)
+            {
+                return new DateTime(ticks, DateTimeKind.Utc);
+            }
         }
 
         return DateTime.MinValue;
