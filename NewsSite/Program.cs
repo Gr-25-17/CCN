@@ -80,6 +80,7 @@ namespace NewsSite
             builder.Services.AddScoped<INewsletterPreferenceRepository, NewsletterPreferenceRepository>();
             builder.Services.AddScoped<ILocalToSqlServerMigrationService, LocalToSqlServerMigrationService>();
             builder.Services.AddScoped<ISubscriptionAnalyticsService, SubscriptionAnalyticsService>();
+            builder.Services.AddScoped<IManagementNavigationService, ManagementNavigationService>();
 
             builder.Services.AddAuthorization(options =>
             {

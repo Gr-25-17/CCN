@@ -12,6 +12,7 @@ namespace NewsSite.Services.Implementations
         {
             var users = await userRepository.GetAllUsersAsync();
             var roles = await userRepository.GetAllRolesAsync();
+            var activeSubscriberUserIds = await userRepository.GetActiveSubscriberUserIdsAsync() ?? [];
 
             var model = new UserAdminViewModel
             {
@@ -21,7 +22,8 @@ namespace NewsSite.Services.Implementations
             foreach (var user in users)
             {
                 var userRoles = await userRepository.GetUserRolesAsync(user);
-                model.Users.Add(user.ToDisplayInfo(userRoles.FirstOrDefault()));
+                var hasActiveSubscription = activeSubscriberUserIds.Contains(user.Id);
+                model.Users.Add(user.ToDisplayInfo(userRoles.FirstOrDefault(), hasActiveSubscription));
             }
 
             return model;

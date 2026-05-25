@@ -1,0 +1,60 @@
+@using Microsoft.AspNetCore.Mvc.Rendering
+@model IEnumerable<NewsSite.Models.ViewModels.UserDisplayInfo>
+@{ var tableId = ViewData["TableId"] as string ?? "admin-table"; }
+
+<div class="table-responsive">
+    <table class="table table-hover align-middle mb-0 admin-sortable-table" data-table-id="@tableId">
+        <thead class="table-light">
+            <tr>
+                <th><button type="button" class="btn btn-link p-0 text-decoration-none admin-sort" data-sort="name">Namn</button></th>
+                <th class="d-none d-lg-table-cell"><button type="button" class="btn btn-link p-0 text-decoration-none admin-sort" data-sort="dob">Födelsedatum</button></th>
+                <th class="d-none d-md-table-cell"><button type="button" class="btn btn-link p-0 text-decoration-none admin-sort" data-sort="email">E-post</button></th>
+                <th><button type="button" class="btn btn-link p-0 text-decoration-none admin-sort" data-sort="role">Roll</button></th>
+                <th class="text-end">Åtgärder</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model)
+            {
+                <tr data-user-id="@user.Id" class="@(user.IsDeleted ? "table-light text-muted" : "")"
+                    data-name="@user.FullName"
+                    data-dob="@user.DateOfBirth.Ticks"
+                    data-email="@user.Email"
+                    data-role="@user.CurrentRole"
+                    data-status="@(user.IsDeleted ? 1 : 0)">
+                    <td><div class="fw-bold">@user.FullName</div><div class="d-md-none text-muted small">@user.Email</div></td>
+                    <td class="d-none d-lg-table-cell">@user.DateOfBirth.ToShortDateString()</td>
+                    <td class="d-none d-md-table-cell">@user.Email</td>
+                    <td>
+                        <form asp-action="UpdateRole" method="post" class="d-flex gap-2">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="userId" value="@user.Id" />
+                            <div class="input-group input-group-sm" style="min-width: 140px;">
+                                <select name="newRole" class="form-select" disabled="@user.IsDeleted">
+                                    @foreach (var role in ViewBag.AvailableRoles as List<SelectListItem> ?? new())
+                                    {
+                                        <option value="@role.Value" selected="@(role.Value == user.CurrentRole)">@role.Text</option>
+                                    }
+                                </select>
+                                <button type="submit" class="btn btn-primary" disabled="@user.IsDeleted"><i class="bi bi-check-lg"></i></button>
+                            </div>
+                        </form>
+                    </td>
+                    <td class="text-end px-3">
+                        @if (user.IsDeleted)
+                        {
+                            @if (!user.Email.Contains("@anonymized.com"))
+                            {
+                                <form asp-action="Restore" method="post" class="d-inline js-user-state-form" data-user-action="restore">@Html.AntiForgeryToken()<input type="hidden" name="userId" value="@user.Id" /><button type="submit" class="btn btn-sm btn-success">Återställ</button></form>
+                            }
+                        }
+                        else
+                        {
+                            <form asp-action="SoftDelete" method="post" class="d-inline js-user-state-form" data-user-action="softdelete">@Html.AntiForgeryToken()<input type="hidden" name="userId" value="@user.Id" /><button type="submit" class="btn btn-sm btn-outline-danger">Inaktivera</button></form>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

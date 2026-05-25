@@ -12,7 +12,6 @@ public static class SeedData
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
-
         await context.Database.EnsureCreatedAsync();
 
         if (context.Articles.Any())

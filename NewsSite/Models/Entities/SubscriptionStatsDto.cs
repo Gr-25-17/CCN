@@ -24,6 +24,7 @@ namespace NewsSite.Models.Entities
 
         public List<string> TrendLabels { get; set; } = [];
         public List<int> TrendSubscriberCounts { get; set; } = [];
+        public List<int> TrendUserCounts { get; set; } = [];
 
         public List<WriterPerformanceDto> WriterPerformances { get; set; } = [];
         public List<WriterMonthlyTrendDto> WriterMonthlyTrends { get; set; } = [];

@@ -1,26 +1,25 @@
-﻿using NewsSite.Models.ViewModels;
+using System.Globalization;
+using NewsSite.Models.APIs;
+using NewsSite.Models.ViewModels;
 
 namespace NewsSite.Mapping
 {
     public static class GoldPriceExstensions
     {
-
+        private const string TimeBucketFormat = "yyyyMMddHH";
 
         public static GoldViewModel ToViewModel(this GoldPrice entity)
         {
-       
-            long ticks = long.Parse(entity.RowKey);
-            DateTime date = new DateTime(DateTime.MaxValue.Ticks - ticks);
+            var date = ParseDateUtc(entity.RowKey);
 
             return new GoldViewModel
             {
-                DateLabel = date.ToString("MMM dd HH:mm"), 
+                DateLabel = date == DateTime.MinValue ? "Unknown" : date.ToString("MMM dd HH:mm", CultureInfo.InvariantCulture),
                 Price = entity.Close,
                 Change = entity.PercentChange
             };
         }
 
-   
         public static GoldPrice ToEntity(this GoldViewModel vm)
         {
             return new GoldPrice
@@ -30,6 +29,26 @@ namespace NewsSite.Mapping
                 PercentChange = vm.Change,
                 PartitionKey = "Gold"
             };
+        }
+
+        private static DateTime ParseDateUtc(string? rowKey)
+        {
+            if (string.IsNullOrWhiteSpace(rowKey))
+            {
+                return DateTime.MinValue;
+            }
+
+            if (DateTime.TryParseExact(
+                    rowKey,
+                    TimeBucketFormat,
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
+                    out var bucketDate))
+            {
+                return bucketDate;
+            }
+
+            return DateTime.MinValue;
         }
     }
 }
