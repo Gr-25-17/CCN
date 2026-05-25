@@ -41,13 +41,26 @@ public class GoldService(IConfiguration config, ILogger<GoldService> logger) : I
             return [];
         }
 
-        return list
+        var ordered = list
             .Select(item => new { Item = item, Date = ParseSortableDateUtc(item.RowKey) })
             .OrderByDescending(x => x.Date)
             .ThenByDescending(x => x.Item.Timestamp)
             .Select(x => x.Item)
             .Take(count)
             .ToList();
+
+        for (var i = 0; i < ordered.Count - 1; i++)
+        {
+            var current = ordered[i];
+            var previous = ordered[i + 1];
+
+            if (previous.Close > 0)
+            {
+                current.PercentChange = ((current.Close - previous.Close) / previous.Close) * 100;
+            }
+        }
+
+        return ordered;
     }
 
     private static DateTime ParseSortableDateUtc(string? rowKey)
