@@ -35,7 +35,13 @@
                         @* <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy" aria-current="@(isPrivacyPage ? "page" : null)">Privacy</a>
                         </li> *@
-                        @if (User.Identity?.IsAuthenticated == true && !(await AuthorizationService.AuthorizeAsync(User, "PremiumContent")).Succeeded)
+                        @if ((await AuthorizationService.AuthorizeAsync(User, "PremiumContent")).Succeeded)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Game" asp-action="Index">Panchinko</a>
+                            </li>
+                        }
+                        else
                         {
                             <li class="nav-item">
                                 <a href="#" class="nav-link text-dark" data-bs-toggle="offcanvas" data-bs-target="#loginOffcanvas" data-auth-mode="subscribe">Subscribe</a>
@@ -100,12 +106,20 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            fetch(`/Weather/Widget?detailed=${isDetailed}&city=${encodeURIComponent(currentCity)}`)
+        fetch(`/Weather/Widget?detailed=${isDetailed}&city=${encodeURIComponent(currentCity)}`)
+            .then(r => r.text())
+            .then(html => document.getElementById('weatherWidget').innerHTML = html);
+
+        const card = document.getElementById('weatherCardContainer');
+        if (card) {
+            fetch(`/Weather/Card?city=${encodeURIComponent(currentCity)}`)
                 .then(r => r.text())
-                .then(html => document.getElementById('weatherWidget').innerHTML = html);
+                .then(html => card.innerHTML = html);
+        }
 
         const expirationInput = document.querySelector('#subscriptionExpirationDate');
-        if (!expirationInput) return;
+            if (!expirationInput) return;
+        
 
         const placeholder = 'MM/YY';
         let digits = '';

@@ -9,7 +9,8 @@ namespace NewsSite.Services.Implementations;
 public class WeeklyNewsletterService(
     ApplicationDbContext dbContext,
     IArticleService articleService,
-    IEmailSender emailSender) : IWeeklyNewsletterService
+    IEmailSender emailSender,
+    ILogger<WeeklyNewsletterService> logger) : IWeeklyNewsletterService
 {
     public async Task<int> SendWeeklyNewsletterAsync()
     {
@@ -39,19 +40,28 @@ public class WeeklyNewsletterService(
 
             if (articles.Count == 0)
             {
+                logger.LogInformation("No matching articles found for newsletter recipient {Email}.", user.Email);
                 continue;
             }
 
             var body = BuildHtmlBody(articles.Select(a => a.Title));
 
-            await emailSender.SendEmailAsync(
-                user.Email,
-                "Your weekly newsletter",
-                body);
+            try
+            {
+                await emailSender.SendEmailAsync(
+                    user.Email,
+                    "Your weekly newsletter",
+                    body);
 
-            sentCount++;
+                sentCount++;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to send weekly newsletter to {Email}.", user.Email);
+            }
         }
 
+        logger.LogInformation("Weekly newsletter run completed. Sent {SentCount} emails out of {TotalRecipients} recipients.", sentCount, preferences.Count);
         return sentCount;
     }
 

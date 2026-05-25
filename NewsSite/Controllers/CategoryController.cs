@@ -37,6 +37,9 @@ namespace NewsSite.Controllers
 
             ViewBag.Category = category;
 
+            var premiumArticles = await _articleService.GetPremiumByCategoryAsync(category.Id, 5);
+            ViewBag.PremiumArticles = premiumArticles;
+
             return View(articles);
         }
     }

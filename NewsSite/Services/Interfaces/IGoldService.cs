@@ -1,4 +1,6 @@
-﻿namespace NewsSite.Services.Interfaces
+using NewsSite.Models.APIs;
+
+namespace NewsSite.Services.Interfaces
 {
     public interface IGoldService
     {
