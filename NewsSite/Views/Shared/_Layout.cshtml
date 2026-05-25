@@ -100,12 +100,20 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            fetch(`/Weather/Widget?detailed=${isDetailed}&city=${encodeURIComponent(currentCity)}`)
+        fetch(`/Weather/Widget?detailed=${isDetailed}&city=${encodeURIComponent(currentCity)}`)
+            .then(r => r.text())
+            .then(html => document.getElementById('weatherWidget').innerHTML = html);
+
+        const card = document.getElementById('weatherCardContainer');
+        if (card) {
+            fetch(`/Weather/Card?city=${encodeURIComponent(currentCity)}`)
                 .then(r => r.text())
-                .then(html => document.getElementById('weatherWidget').innerHTML = html);
+                .then(html => card.innerHTML = html);
+        }
 
         const expirationInput = document.querySelector('#subscriptionExpirationDate');
-        if (!expirationInput) return;
+            if (!expirationInput) return;
+        
 
         const placeholder = 'MM/YY';
         let digits = '';

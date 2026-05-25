@@ -250,5 +250,13 @@ namespace NewsSite.Repositories.Implementations
             context.Articles.Update(article);
             await context.SaveChangesAsync();
         }
+
+        public async Task<IEnumerable<Article>> GetPremiumByCategoryAsync(int categoryId, int count) => await context.Articles
+                .Where(a => a.CategoryId == categoryId && a.IsPremium && a.IsReadyForPublish && !a.IsArchived && !a.IsDeleted)
+                .Include(a => a.Category)
+                .Include(a => a.Author)
+                .Include(a => a.Likes)
+                .OrderByDescending(a => a.CreatedAt)
+                .Take(count).ToListAsync();
     }
 }

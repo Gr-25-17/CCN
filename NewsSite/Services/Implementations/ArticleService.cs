@@ -46,6 +46,9 @@ namespace NewsSite.Services.Implementations
         public async Task<IEnumerable<ArticleSummaryViewModel>> GetByCategoryAsync(int categoryId, int page, int pageSize)
             => (await _articleRepository.GetByCategoryAsync(categoryId, page, pageSize)).Select(a=>a.MapToSummaryViewModel());
 
+        public async Task<IEnumerable<ArticleSummaryViewModel>> GetPremiumByCategoryAsync(int categoryId, int count)
+            => (await _articleRepository.GetPremiumByCategoryAsync(categoryId, count)).Select(a => a.MapToSummaryViewModel());
+
 
         public async Task<IEnumerable<ArticleSummaryViewModel>> GetLatestByCategoryIdsAsync(List<int> categoryIds, int count)
             => (await _articleRepository.GetLatestByCategoryIdsAsync(categoryIds, count)).Select(a => a.MapToSummaryViewModel());
