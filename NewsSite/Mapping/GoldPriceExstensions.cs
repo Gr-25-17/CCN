@@ -48,6 +48,15 @@ namespace NewsSite.Mapping
                 return bucketDate;
             }
 
+            if (long.TryParse(rowKey, out var inverseTicks))
+            {
+                var ticks = DateTime.MaxValue.Ticks - inverseTicks;
+                if (ticks is >= 0 and <= DateTime.MaxValue.Ticks)
+                {
+                    return new DateTime(ticks, DateTimeKind.Utc);
+                }
+            }
+
             return DateTime.MinValue;
         }
     }
