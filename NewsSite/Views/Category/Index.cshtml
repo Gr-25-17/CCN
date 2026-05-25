@@ -30,10 +30,26 @@
         <div class="col-md-4">
             <div class="card shadow-sm">
                 <div class="card-header bg-info text-white">
-                    <strong>About @category?.Name</strong>
+                    <strong>Hottest News About @category?.Name</strong>
                 </div>
-                <div class="card-body">
-                    <p>Stay updated with the latest news from @category?.Name.</p>
+                <div class="card-body p-0">
+                    @if (ViewBag.PremiumArticles is IEnumerable<NewsSite.Models.ViewModels.ArticleSummaryViewModel> premiumArticles && premiumArticles.Any())
+                    {
+                        @foreach (var article in premiumArticles)
+                        {
+                            <a asp-controller="Articles" asp-action="Details" asp-route-slug="@article.Slug"
+                               class="d-block px-3 py-2 border-bottom text-decoration-none text-dark">
+                                <span class="badge bg-warning text-dark shadow-sm me-2">
+                                    <i class="bi bi-star-fill me-1"></i> PREMIUM
+                                </span>
+                                <small>@article.Title</small>
+                            </a>
+                        }
+                    }
+                    else
+                    {
+                        <p class="p-3 mb-0 text-muted">No premium articles available.</p>
+                    }
                 </div>
             </div>
             @if (category?.Name == "Economy")
